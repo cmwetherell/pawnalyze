@@ -2,6 +2,8 @@
 
 This repository contains the source code for the Pawnalyze website, a chess analytics platform designed to offer insights into chess tournaments and the complexity of chess positions. Built with Next.js and styled using Tailwind CSS, this project showcases the intersection of chess enthusiasm and data science expertise.
 
+Check it out: https://www.pawnalyze.com
+
 ## Features
 
 - Chess tournament simulations
