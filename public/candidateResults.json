@@ -1,0 +1,283 @@
+[
+    {
+        "id": "Nak|Fir",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Firouzja, Alireza"
+        
+    },
+    {
+        "id": "Fir|Nak",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Car",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Nak",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Nep",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Nak",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Pra",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Nak",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Guk",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Nak",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Vid",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Nak",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Nak|Aba",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Nak",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Nakamura, Hikaru"
+    },
+    {
+        "id": "Fir|Car",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Fir",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Fir|Nep",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Fir",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Fir|Pra",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Fir",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Fir|Guk",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Fir",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Fir|Vid",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Fir",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Fir|Aba",
+        "whitePlayer": "Firouzja, Alireza",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Fir",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Firouzja, Alireza"
+    },
+    {
+        "id": "Car|Nep",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Car",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Pra",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Car",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Guk",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Car",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Vid",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Car",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Car|Aba",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Car",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Caruana, Fabiano"
+    },
+    {
+        "id": "Nep|Pra",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Nep",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Guk",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Nep",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Vid",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Nep",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Nep|Aba",
+        "whitePlayer": "Nepomniachtchi, Ian",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Nep",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Nepomniachtchi, Ian"
+    },
+    {
+        "id": "Pra|Guk",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Pra",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Vid",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Pra",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Pra|Aba",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Pra",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Praggnanandhaa R"
+    },
+    {
+        "id": "Guk|Vid",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    },
+    {
+        "id": "Vid|Guk",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Guk|Aba",
+        "whitePlayer": "Gukesh D",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Guk",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Gukesh D"
+    },
+    {
+        "id": "Vid|Aba",
+        "whitePlayer": "Vidit, Santosh Gujrathi",
+        "blackPlayer": "Abasov, Nijat"
+    },
+    {
+        "id": "Aba|Vid",
+        "whitePlayer": "Abasov, Nijat",
+        "blackPlayer": "Vidit, Santosh Gujrathi"
+    }
+]
