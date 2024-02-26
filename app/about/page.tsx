@@ -23,7 +23,6 @@ const About = () => {
         <main className="flex-1 flex flex-col mt-3">
         {/* <div className="flex-1 flex flex-col bg-white p-8 justify-center"> */}
           <h1 className="text-6xl font-bold text-center text-black mb-2 mt-4">About</h1>
-          <p className="text-2xl text-center text-black">I&apos;m Caleb Wetherell.</p>
           <Image
             src="/img/selfie.jpeg"
             alt="Caleb Wetherell"
