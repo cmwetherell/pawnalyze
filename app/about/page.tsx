@@ -1,10 +1,10 @@
-&apos;use client&apos;;
+'use client';
 
 import Image from "next/image";
 import Link from "next/link";
 //multiline tsx text string
 
-import styled from &apos;styled-components&apos;;
+import styled from 'styled-components';
 
 // bold text
 //hex code for neon green: #39ff14
