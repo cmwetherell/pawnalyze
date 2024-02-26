@@ -7,6 +7,7 @@ import localFont from "next/font/local"
 import { siteConfig } from "@/config/site"
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
+import { Analytics } from "@vercel/analytics/react"
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -88,6 +89,7 @@ export default function RootLayout({
           fontSans.variable,
           fontHeading.variable
         )}>
+          <Analytics/>
           <Navbar />
           <div className="flex flex-col bg-white min-h-screen container mx-auto">
           {children}
