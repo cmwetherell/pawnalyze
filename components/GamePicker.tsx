@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface GamePickerProps {
   whitePlayer: string;
@@ -9,6 +9,26 @@ interface GamePickerProps {
 
 const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange }: GamePickerProps) => {
   const [selectedOutcome, setSelectedOutcome] = useState<'white' | 'draw' | 'black' | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Function to update state based on screen width
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768); // 768px is a common breakpoint for mobile devices
+    };
+
+    // Set initial state based on current screen width
+    handleResize();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup event listener on component unmount
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Function to truncate player name to 4 characters for mobile screens
+  const getDisplayName = (name: string) => isMobile ? name.substring(0, 7) : name;
 
   // Adjusted for responsive design and max-width constraints
   const baseClassName = "border-2 border-black text-black font-bold rounded transition duration-300 ease-in-out text-center"; // Common base styles
@@ -34,7 +54,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange }: GamePickerPro
         className={getButtonClassName('white')}
         onClick={() => handleOutcomeSelect('white')}
       >
-        {whitePlayer}
+        {getDisplayName(whitePlayer)}
       </button>
       <button style={{ overflowX: "hidden"}}
         className={getButtonClassName('draw')}
@@ -46,7 +66,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange }: GamePickerPro
         className={getButtonClassName('black')}
         onClick={() => handleOutcomeSelect('black')}
       >
-        {blackPlayer}
+        {getDisplayName(blackPlayer)}
       </button>
     </div>
   );
