@@ -18,7 +18,7 @@ export default function Home() {
         <div className="flex-1 mt-4 mb-12">
           <div style={{ display: "block", margin: "0 auto", maxWidth: "200px"}}>
             <ChessButton
-                text="1. a3??"
+                text="Candidates Predictions"
                 link="/simulations"
             />
         </div>
