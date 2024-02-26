@@ -15,7 +15,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange }: GamePickerPro
   const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`; // Max width for player buttons
   const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`; // Max width for draw button
   const selectedClassName = "bg-black text-white";
-  const defaultClassName = "bg-primary hover:bg-black hover:text-white";
+  const defaultClassName = "bg-primary";
 
   const getButtonClassName = (outcome: 'white' | 'draw' | 'black') => {
     let specificClassName = outcome === 'draw' ? drawButtonClassName : playerButtonClassName;
