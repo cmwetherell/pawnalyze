@@ -9,7 +9,7 @@ import { Game } from '@/types';
 
 
 const SimulationResults: React.FC = () => {
-  const [nsims, setNsims] = useState<number>(1000); // Default to 100 simulations
+  const [nsims, setNsims] = useState<number>(10000); // Default to 100 simulations
   const [gameFilters, setGameFilters] = useState<Game[]>([]); // Initialize with no filters
   const [updateTrigger, setUpdateTrigger] = useState(0); // Initialize update trigger
 
@@ -43,7 +43,7 @@ const SimulationResults: React.FC = () => {
       <br></br>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="mb-4">
-        <label htmlFor="nsims" className="text-md font-medium text-gray-700">
+        {/* <label htmlFor="nsims" className="text-md font-medium text-gray-700">
           Max Number of Simulations:
         </label>
         <input
@@ -52,7 +52,7 @@ const SimulationResults: React.FC = () => {
           value={nsims}
           onChange={handleNsimsChange}
           className="text-center mt-1 block p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        />
+        /> */}
         <ChessButton
           text="Update Simulations"
           onClick={handleSubmit}

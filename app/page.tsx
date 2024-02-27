@@ -26,7 +26,7 @@ export default function Home() {
         <p className="mt-6 text-8 font-bold text-center text-black">Current Predictions for 2024 Candidates Tournament</p>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <GetPredictions
-            nsims={100}
+            nsims={10000}
             gameFilters = {[]} // no filters
             />
         </div>
