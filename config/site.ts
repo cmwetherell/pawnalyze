@@ -1,9 +1,10 @@
 import { SiteConfig } from "@/types"
 
+const description = `Advanced chess analytics with tournament predictions, interactive scenario explorer, and in-depth analysis. Discover, analyze, and predict with Pawnalyze.`;
+
 export const siteConfig: SiteConfig = {
-  name: "Pawnalyze",
-  description:
-    "Chess analytics for tournaments, games, and positions.",
+  name: "Pawnalyze | Chess Analytics",
+  description: description,
   url: "https://www.pawnalyze.com",
   ogImage: "https://www.pawnalyze.com/img/chess-complexity-ai.png",
   links: {

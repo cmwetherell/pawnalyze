@@ -32,7 +32,7 @@ export const viewport: Viewport = {
   ],
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     default: siteConfig.name,
     template: `%s | ${siteConfig.name}`,
@@ -74,6 +74,7 @@ export const metadata = {
     // apple: "/apple-touch-icon.png",
   },
   manifest: `${siteConfig.url}/site.webmanifest`,
+  metadataBase: new URL(siteConfig.metadataBase),
 }
 
 
