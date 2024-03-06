@@ -9,6 +9,7 @@ import { Viewport } from "next";
 import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/react"
 import { GoogleAnalytics } from '@next/third-parties/google'
+import Footer from "@/components/Footer";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -97,6 +98,7 @@ export default function RootLayout({
           <div className="flex flex-col bg-white min-h-screen container mx-auto">
           {children}
           </div>
+          <Footer />
       </body>
       {/* <Footer /> */}
     </html>

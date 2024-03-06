@@ -17,3 +17,18 @@ export type Game = {
     blackPlayer: string;
     outcome?: 'white' | 'draw' | 'black' | null; // Add outcome to the game object 
   };
+
+export type PercentageData = {
+    name: string;
+    value: number;
+  };
+
+export type PlayerColorsMap = {
+    [key: string]: string;
+  };
+
+export type CurrentPredictionsProps = {
+    nsims: number;
+    gameFilters?: Game[];
+    updateTrigger?: number; // Add an optional updateTrigger prop
+  };

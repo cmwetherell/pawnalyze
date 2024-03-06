@@ -29,7 +29,7 @@ const SimulationResults: React.FC = () => {
   return (
     <div className="bg-white shadow-md rounded-lg p-4 relative">
   
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <div className="mb-8" style={{ display: 'flex', justifyContent: 'center' }}>
         <div style={{ display: 'block', maxWidth: '800px', width: '100%' }}>
           <h2 className="text-2xl font-bold mb-2 text-center">Simulation Results</h2>
           <GetPredictions
@@ -39,8 +39,6 @@ const SimulationResults: React.FC = () => {
           />
         </div>
       </div>
-      <br></br>
-      <br></br>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="mb-4">
         {/* <label htmlFor="nsims" className="text-md font-medium text-gray-700">
