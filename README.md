@@ -30,3 +30,10 @@ Distributed under the MIT License. See LICENSE for more information.
 # Contact
 Caleb Wetherell - @pawnalyze on Twitter
 Project Link: https://github.com/cmwetherell/pawnalyze
+
+## TODO
+
+- Make game updating dynamic so completed games arent filtered on latest round simulations, implement drawing of lots that occurred for game filtering and sorting
+- fix site manifest
+- better logo
+- add womens tournament

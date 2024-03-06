@@ -56,6 +56,7 @@ export async function POST(req: NextRequest) {
         }
     
         const convertedGameFilters = gameFilters.map(convertGame);
+
         const db = createKysely<Database>();
 
         let queryRounds = db.selectFrom('candidates_2024').select('Round').distinct();
@@ -68,7 +69,13 @@ export async function POST(req: NextRequest) {
 
         limitSims *= countOfRounds;
 
-        let query = db.selectFrom('candidates_2024').select(({ fn, val, ref }) => [
+        let subquery = db
+            .selectFrom('candidates_2024')
+            .selectAll()
+            .limit(limitSims)
+            .as('sub');
+
+        let query = db.selectFrom(subquery).select(({ fn, val, ref }) => [
             'winner',
             'Round',
             fn.count<number>('winner').as('win_count'),
@@ -86,17 +93,17 @@ export async function POST(req: NextRequest) {
 
         //  write code for if len gameFilters > 0
         if (convertedGameFilters.length > 0) {
-            query = db.selectFrom('candidates_2024').select(({ fn, val, ref }) => [
+            let querySim = db.selectFrom('candidates_2024').select(({ fn, val, ref }) => [
                 'winner',
                 val("Simulated").as('Round'),
                 fn.count<number>('winner').as('win_count'),
             ]);
             convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
-                query = query.where(filter.gameKey, '=', filter.outcome)
+                querySim = querySim.where(filter.gameKey, '=', filter.outcome)
             });
-            query = query.where('Round', '=', highestRoundString);
-            query = query.groupBy(['winner', 'Round']);
-            const simulated = await query.execute();
+            querySim = querySim.where('Round', '=', highestRoundString);
+            querySim = querySim.groupBy(['winner', 'Round']);
+            const simulated = await querySim.execute();
 
             console.log(simulated);
 
@@ -109,7 +116,7 @@ export async function POST(req: NextRequest) {
         }
 
         console.log(predictions);
-        
+
         const endTime = Date.now(); // Capture end time
         console.log(`Request to response time: ${endTime - startTime} ms`); // Log the time difference
 
