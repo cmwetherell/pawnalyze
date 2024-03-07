@@ -56,7 +56,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger }: CurrentPrediction
               roundData.winnerPercentages
             ).map(([name, value]) => ({
               name,
-              value: value as number / roundData.totalGames * 100,
+              value: Math.floor(10 * (value as number / roundData.totalGames * 100)) / 10,
             }));
 
             chartData[round] = percentagesArray;
@@ -152,7 +152,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger }: CurrentPrediction
             size: 14,
           },
           min: 0,
-          max: 100,
+          suggestedMax: 100,
         },
         stacked: true, // Enable stacked bar chart
       },
