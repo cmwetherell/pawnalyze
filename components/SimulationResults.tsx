@@ -8,7 +8,7 @@ import { Game, eventTableProps } from '@/types';
 
 
 
-const SimulationResults = ({ eventTable }: eventTableProps ) => {
+const SimulationResults = ({ eventTable }: { eventTable: string }) => {
   const [nsims, setNsims] = useState<number>(10000); // Default to 100 simulations
   const [gameFilters, setGameFilters] = useState<Game[]>([]); // Initialize with no filters
   const [updateTrigger, setUpdateTrigger] = useState(0); // Initialize update trigger
@@ -59,7 +59,10 @@ const SimulationResults = ({ eventTable }: eventTableProps ) => {
       </div>
 
       </div>
-      <GameHouse onGameFilterChange={handleGameFilterChange} />
+      <GameHouse 
+        onGameFilterChange={handleGameFilterChange}
+        eventTable = {eventTable}
+      />
   
     </div>
   );

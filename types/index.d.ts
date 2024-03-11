@@ -34,6 +34,6 @@ export type CurrentPredictionsProps = {
     eventTable: string;
   };
 
-export type eventTableProps = {
-  eventTable: string;
-}
+  export type eventTableProps = {
+    eventTable: string;
+  };
