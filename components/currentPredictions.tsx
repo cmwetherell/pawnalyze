@@ -4,18 +4,31 @@ import React, { useEffect, useState } from "react";
 import { Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto'; // Import to register the controllers.
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
+import { Game } from "@/types";
 
-const GetPredictions = ({ nsims, gameFilters, updateTrigger }: CurrentPredictionsProps) => {
+import candResByRound from '@/public/candResByRound.json';
+import womensCandByRound from '@/public/womensCandByRound.json';
+
+
+const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: CurrentPredictionsProps) => {
   const [isClient, setIsClient] = useState(false); // Add a state to track client-side rendering
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
 
+  let initialGames: { round: number; games: Game[] }[] = [];
+
+  try {
+    initialGames = eventTable === 'candidates_2024' ? candResByRound : womensCandByRound;
+  } catch (e) {
+    console.log(e);
+  }
   useEffect(() => {
     setIsClient(true); // Update the state to indicate client-side rendering
     const fetchData = async () => {
       const requestBody = {
         gameFilters: gameFilters,
         limitSims: nsims, // Adjust this to fetch 1000 random samples
+        eventTable: eventTable,
       };
 
       try {
@@ -86,16 +99,16 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger }: CurrentPrediction
   const COLORS_PALETTE_2 = ['#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
 
   // Player names - Ensure the order matches your COLORS_PALETTE
-  const playerNames = [
-    "Nakamura, Hikaru",
-    "Caruana, Fabiano",
-    "Firouzja, Alireza",
-    "Nepomniachtchi, Ian",
-    "Praggnanandhaa R",
-    "Gukesh D",
-    "Vidit, Santosh Gujrathi",
-    "Abasov, Nijat"
-  ];
+  let playerNames: string[] = Array.from(
+    new Set(
+      initialGames.reduce((players: string[], round) => {
+        round.games.forEach((game) => {
+          players.push(game.whitePlayer, game.blackPlayer);
+        });
+        return players;
+      }, [])
+    )
+  );
 
   // Map player names to colors from the chosen palette
   const playerColorsMap = playerNames.reduce((acc: PlayerColorsMap, playerName, index) => {

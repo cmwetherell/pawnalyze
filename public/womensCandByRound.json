@@ -1,0 +1,352 @@
+[
+    {
+      "round": 1,
+      "games": [
+        {
+          "id": "Gor|Lag",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Muz|Sal",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Salimova, Nurgyul"
+        },
+        {
+          "id": "Lei|Tan",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Tan, Zhongyi"
+        },
+        {
+          "id": "Ram|Kon",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Koneru, Humpy"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "games": [
+        {
+          "id": "Lag|Kon",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Koneru, Humpy"
+        },
+        {
+          "id": "Tan|Ram",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        },
+        {
+          "id": "Sal|Lei",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Lei, Tingjie"
+        },
+        {
+          "id": "Gor|Muz",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Muzychuk, Anna"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "games": [
+        {
+          "id": "Muz|Lag",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Lei|Gor",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        },
+        {
+          "id": "Ram|Sal",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Salimova, Nurgyul"
+        },
+        {
+          "id": "Kon|Tan",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Tan, Zhongyi"
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "games": [
+        {
+          "id": "Lag|Tan",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Tan, Zhongyi"
+        },
+        {
+          "id": "Sal|Kon",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Koneru, Humpy"
+        },
+        {
+          "id": "Gor|Ram",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        },
+        {
+          "id": "Muz|Lei",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Lei, Tingjie"
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "games": [
+        {
+          "id": "Lei|Lag",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Ram|Muz",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Muzychuk, Anna"
+        },
+        {
+          "id": "Kon|Gor",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        },
+        {
+          "id": "Tan|Sal",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Salimova, Nurgyul"
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "games": [
+        {
+          "id": "Ram|Lag",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Kon|Lei",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Lei, Tingjie"
+        },
+        {
+          "id": "Tan|Muz",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Muzychuk, Anna"
+        },
+        {
+          "id": "Sal|Gor",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "games": [
+        {
+          "id": "Lag|Sal",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Salimova, Nurgyul"
+        },
+        {
+          "id": "Gor|Tan",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Tan, Zhongyi"
+        },
+        {
+          "id": "Muz|Kon",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Koneru, Humpy"
+        },
+        {
+          "id": "Lei|Ram",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "games": [
+        {
+          "id": "Lag|Gor",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        },
+        {
+          "id": "Sal|Muz",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Muzychuk, Anna"
+        },
+        {
+          "id": "Tan|Lei",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Lei, Tingjie"
+        },
+        {
+          "id": "Kon|Ram",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "games": [
+        {
+          "id": "Kon|Lag",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Ram|Tan",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Tan, Zhongyi"
+        },
+        {
+          "id": "Lei|Sal",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Salimova, Nurgyul"
+        },
+        {
+          "id": "Muz|Gor",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "games": [
+        {
+          "id": "Lag|Muz",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Muzychuk, Anna"
+        },
+        {
+          "id": "Gor|Lei",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Lei, Tingjie"
+        },
+        {
+          "id": "Sal|Ram",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        },
+        {
+          "id": "Tan|Kon",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Koneru, Humpy"
+        }
+      ]
+    },
+    {
+      "round": 11,
+      "games": [
+        {
+          "id": "Tan|Lag",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Kon|Sal",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Salimova, Nurgyul"
+        },
+        {
+          "id": "Ram|Gor",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        },
+        {
+          "id": "Lei|Muz",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Muzychuk, Anna"
+        }
+      ]
+    },
+    {
+      "round": 12,
+      "games": [
+        {
+          "id": "Lag|Lei",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Lei, Tingjie"
+        },
+        {
+          "id": "Muz|Ram",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        },
+        {
+          "id": "Gor|Kon",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Koneru, Humpy"
+        },
+        {
+          "id": "Sal|Tan",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Tan, Zhongyi"
+        }
+      ]
+    },
+    {
+      "round": 13,
+      "games": [
+        {
+          "id": "Sal|Lag",
+          "whitePlayer": "Salimova, Nurgyul",
+          "blackPlayer": "Lagno, Kateryna"
+        },
+        {
+          "id": "Tan|Gor",
+          "whitePlayer": "Tan, Zhongyi",
+          "blackPlayer": "Goryachkina, Aleksandra"
+        },
+        {
+          "id": "Kon|Muz",
+          "whitePlayer": "Koneru, Humpy",
+          "blackPlayer": "Muzychuk, Anna"
+        },
+        {
+          "id": "Ram|Lei",
+          "whitePlayer": "Rameshbabu, Vaishali",
+          "blackPlayer": "Lei, Tingjie"
+        }
+      ]
+    },
+    {
+      "round": 14,
+      "games": [
+        {
+          "id": "Lag|Ram",
+          "whitePlayer": "Lagno, Kateryna",
+          "blackPlayer": "Rameshbabu, Vaishali"
+        },
+        {
+          "id": "Lei|Kon",
+          "whitePlayer": "Lei, Tingjie",
+          "blackPlayer": "Koneru, Humpy"
+        },
+        {
+          "id": "Muz|Tan",
+          "whitePlayer": "Muzychuk, Anna",
+          "blackPlayer": "Tan, Zhongyi"
+        },
+        {
+          "id": "Gor|Sal",
+          "whitePlayer": "Goryachkina, Aleksandra",
+          "blackPlayer": "Salimova, Nurgyul"
+        }
+      ]
+    }
+  ]

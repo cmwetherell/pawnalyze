@@ -49,7 +49,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange }: GamePickerPro
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
+    <div className="bg-white p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
       <button style={{ overflowX: "hidden"}}
         className={getButtonClassName('white')}
         onClick={() => handleOutcomeSelect('white')}

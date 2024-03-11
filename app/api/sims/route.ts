@@ -13,6 +13,7 @@ interface Sim {
     Round: string; // Added to include the "Round" field from the database
 }
 
+
 export async function POST(req: NextRequest) {
     const startTime = Date.now();
     try {
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        let { gameFilters, limitSims } = body;
+        let { gameFilters, limitSims, eventTable } = body;
     
         if (limitSims > 10000) {
             limitSims = 10000;
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
 
         const db = createKysely<Database>();
 
-        let queryRounds = db.selectFrom('candidates_2024').select('Round').distinct();
+        let queryRounds = db.selectFrom(eventTable).select('Round').distinct();
         
         const RoundsUnique = await queryRounds.execute();
         const highestRound = Math.max(...RoundsUnique.map(({ Round }) => Round.match(/\d+/)?.[0] || 0).map(Number));
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
         limitSims *= countOfRounds;
 
         let subquery = db
-            .selectFrom('candidates_2024')
+            .selectFrom(eventTable)
             .selectAll()
             .limit(limitSims)
             .as('sub');
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest) {
 
         //  write code for if len gameFilters > 0
         if (convertedGameFilters.length > 0) {
-            let querySim = db.selectFrom('candidates_2024').select(({ fn, val, ref }) => [
+            let querySim = db.selectFrom(eventTable).select(({ fn, val, ref }) => [
                 'winner',
                 val("Simulated").as('Round'),
                 fn.count<number>('winner').as('win_count'),

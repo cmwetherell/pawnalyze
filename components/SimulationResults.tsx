@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import GetPredictions from "@/components/currentPredictions" // Adjust the path as necessary
 import GameHouse from '@/components/GameHouse' // Adjust the path as necessary
 import ChessButton from './Button';
-import { Game } from '@/types';
+import { Game, eventTableProps } from '@/types';
 
 
 
-const SimulationResults: React.FC = () => {
+const SimulationResults = ({ eventTable }: eventTableProps ) => {
   const [nsims, setNsims] = useState<number>(10000); // Default to 100 simulations
   const [gameFilters, setGameFilters] = useState<Game[]>([]); // Initialize with no filters
   const [updateTrigger, setUpdateTrigger] = useState(0); // Initialize update trigger
@@ -33,9 +33,10 @@ const SimulationResults: React.FC = () => {
         <div style={{ display: 'block', maxWidth: '800px', width: '100%' }}>
           <h2 className="text-2xl font-bold mb-2 text-center">Simulation Results</h2>
           <GetPredictions
-            nsims={nsims}
-            gameFilters={gameFilters}
-            updateTrigger={updateTrigger} // Pass the update trigger as a prop
+            nsims = {nsims}
+            gameFilters = {gameFilters}
+            updateTrigger = {updateTrigger} // Pass the update trigger as a prop
+            eventTable = {eventTable}
           />
         </div>
       </div>

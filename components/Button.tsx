@@ -1,16 +1,22 @@
 import Link from "next/link"
 
-const busttonClassName = "w-48 bg-primary border-2 border-black text-black font-bold py-2 px-4 rounded hover:bg-black hover:text-white transition duration-300 ease-in-out"
+
 
 type chessButtonProps = {
     text: string,
     link?: string,
     onClick?: () => void
     disabled?: boolean
+    width?: string
     
 }
 
-const ChessButton = ({text, link, onClick, disabled}: chessButtonProps) => {
+const ChessButton = ({text, link, onClick, disabled, width}: chessButtonProps) => {
+    // if width is set, width, else w-48
+
+    const buttonWidth = width ? width : "w-48"
+
+    const busttonClassName = `${buttonWidth} bg-primary border-2 border-black text-black font-bold py-2 px-4 rounded hover:bg-black hover:text-white transition duration-300 ease-in-out`
     // Conditionally render Link or button based on props
     if (onClick) {
         // If onClick is provided, render a button with the onClick handler

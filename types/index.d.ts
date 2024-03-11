@@ -31,4 +31,9 @@ export type CurrentPredictionsProps = {
     nsims: number;
     gameFilters?: Game[];
     updateTrigger?: number; // Add an optional updateTrigger prop
+    eventTable: string;
   };
+
+export type eventTableProps = {
+  eventTable: string;
+}
