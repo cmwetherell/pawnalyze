@@ -28,12 +28,17 @@ Contributions are what make the open-source community such an amazing place to l
 Distributed under the MIT License. See LICENSE for more information.
 
 # Contact
-Caleb Wetherell - @pawnalyze on Twitter
+Caleb Wetherell - [@pawnalyze](https://www.twitter.com/pawnalyze) on X / Twitter
+
 Project Link: https://github.com/cmwetherell/pawnalyze
 
 ## TODO
 
-- Make game updating dynamic so completed games arent filtered on latest round simulations, implement drawing of lots that occurred for game filtering and sorting
+- make connection with Lichess broadcasts. Save new torunaments to DB and stream their results, including save each round complexity analysis to DB.
 - fix site manifest
 - better logo
-- add womens tournament
+- improve process for adding new simulations and deleting stale ones
+
+db sturcture for connecting Lichess Broadcasts and Elocator
+
+slug broadcasts/[broadcastID]/[roundID]/[gamID]
