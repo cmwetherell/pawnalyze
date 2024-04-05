@@ -55,8 +55,13 @@ export async function POST(req: NextRequest) {
                 outcome: outcome,
             };
         }
+
+        // some ntoes to myself: if the converted game filters length is more than 4 * n-1 rounds (exclude pre), then do simulation stuff, otherwise, sample 10k records from each roubnd and concatenate?
     
         const convertedGameFilters = gameFilters.map(convertGame);
+
+        // print len of convertedGameFilters
+        console.log(convertedGameFilters.length, "converted game filters");
 
         const db = createKysely<Database>();
 
@@ -64,7 +69,6 @@ export async function POST(req: NextRequest) {
         
         const RoundsUnique = await queryRounds.execute();
         const highestRound = Math.max(...RoundsUnique.map(({ Round }) => Round.match(/\d+/)?.[0] || 0).map(Number));
-        // if 0 Pre else Round 1 etc
         const highestRoundString = highestRound === 0 ? 'Pre' : `Round ${highestRound}`;
         const countOfRounds = RoundsUnique.length;
 
@@ -73,7 +77,7 @@ export async function POST(req: NextRequest) {
         let subquery = db
             .selectFrom(eventTable)
             .selectAll()
-            .limit(limitSims)
+            // .limit(limitSims)
             .as('sub');
 
         let query = db.selectFrom(subquery).select(({ fn, val, ref }) => [
@@ -90,6 +94,8 @@ export async function POST(req: NextRequest) {
 
         const history = await query.execute();
 
+        console.log("This is the history: ", history);
+
         let predictions = []
 
         //  write code for if len gameFilters > 0
@@ -102,11 +108,11 @@ export async function POST(req: NextRequest) {
             convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
                 querySim = querySim.where(filter.gameKey, '=', filter.outcome)
             });
-            querySim = querySim.where('Round', '=', highestRoundString);
+            querySim = querySim.where('Round', '=', highestRound);
             querySim = querySim.groupBy(['winner', 'Round']);
             const simulated = await querySim.execute();
 
-            console.log(simulated);
+            console.log("sim results", simulated);
 
             // concatenate history and simulated into new object called "predictions"
 
@@ -116,7 +122,7 @@ export async function POST(req: NextRequest) {
             predictions = history;
         }
 
-        console.log(predictions);
+        // console.log(predictions);
 
         const endTime = Date.now(); // Capture end time
         console.log(`Request to response time: ${endTime - startTime} ms`); // Log the time difference

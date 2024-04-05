@@ -9,6 +9,7 @@ import { Game } from "@/types";
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
 
+let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
 const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: CurrentPredictionsProps) => {
   const [isClient, setIsClient] = useState(false); // Add a state to track client-side rendering
@@ -22,6 +23,15 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   } catch (e) {
     console.log(e);
   }
+
+  // // Create a new array with filtered games without the round element
+  // const filteredGames = initialGames.flatMap(roundData =>
+  //   roundData.games.filter(game => game.outcome === 'win' || game.outcome === 'draw' || game.outcome === 'loss')
+  // );
+
+  // // combine the filtered games with the gameFilters
+  // const combinedGames = [...filteredGames, ...gameFilters];
+
   useEffect(() => {
     setIsClient(true); // Update the state to indicate client-side rendering
     const fetchData = async () => {
@@ -42,7 +52,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
+          // console.log(data);
 
           // Transform the data into the expected object format
           const transformedData = data.reduce((acc: Record<string, any>, curr: any) => {
@@ -62,8 +72,11 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
           // Transform the data into a format suitable for the stacked bar chart
           const chartData: Record<string, PercentageData[]> = {};
-
+          customOrder = []
           for (const round in transformedData) {
+            // add round to customOrder
+            customOrder.push(round);
+            
             const roundData = transformedData[round];
             const percentagesArray: PercentageData[] = Object.entries(
               roundData.winnerPercentages
@@ -75,7 +88,38 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
             chartData[round] = percentagesArray;
           }
 
+          const roundOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
+
+          customOrder.sort((a, b) => {
+            const indexA = roundOrder.indexOf(a);
+            const indexB = roundOrder.indexOf(b);
+
+            if (indexA === -1 && indexB === -1) {
+              // If both elements are not found in the roundOrder array, compare them as strings
+              return a.localeCompare(b);
+            } else if (indexA === -1) {
+              // If a is not found in the roundOrder array, it should come after b
+              return 1;
+            } else if (indexB === -1) {
+              // If b is not found in the roundOrder array, it should come after a
+              return -1;
+            } else {
+              // Compare the indices of a and b in the roundOrder array
+              return indexA - indexB;
+            }
+          });
+
+          // // sort chart data by custom order
+          // const sortedChartData: Record<string, PercentageData[]> = {};
+          // customOrder.forEach(round => {
+          //   if (chartData[round]) {
+          //     sortedChartData[round] = chartData[round];
+          //   }
+          // });
+
           setPlayerWinPercentagesByRound(chartData);
+
+          // console.log("player win percentages by round", playerWinPercentagesByRound);  
 
           // Set totalGames to be the sum of win_count for rounds where Round is "Simulated"
           const simulatedRound = transformedData["Simulated"];
@@ -117,19 +161,24 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   }, {});
 
   // Prepare data for Chart.js, mapping each player to their color
-  const data = {
-    labels: Object.keys(playerWinPercentagesByRound),
-    datasets: playerNames.map((name, index) => ({
-      label: name,
-      data: Object.values(playerWinPercentagesByRound).map(roundData =>
-        roundData.find(entry => entry.name === name)?.value || 0
-      ),
-      backgroundColor: playerColorsMap[name],
-      hoverOffset: 4,
-      stack: 'Stack 0', // Add this line to stack the bars
-      maxBarThickness: 100,
-    })),
-  };
+// make customOrder list only contain rounds that have been played
+// filter out rounds that do not have any data
+
+// customOrder = customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label));
+
+const data = {
+  labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
+  datasets: playerNames.map((name, index) => ({
+    label: name,
+    data: customOrder.map(label =>
+      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+    ),
+    backgroundColor: playerColorsMap[name],
+    hoverOffset: 4,
+    stack: 'Stack 0',
+    maxBarThickness: 100,
+  })),
+};
 
   // Options for the chart
   const options = {

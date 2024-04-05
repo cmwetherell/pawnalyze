@@ -11,13 +11,12 @@ export type SiteConfig = {
   }
 
   // Example game data type
-export type Game = {
+  export type Game = {
     id: string;
     whitePlayer: string;
     blackPlayer: string;
-    outcome?: 'white' | 'draw' | 'black' | null; // Add outcome to the game object 
+    outcome?: null | string;
   };
-
 export type PercentageData = {
     name: string;
     value: number;
@@ -29,7 +28,7 @@ export type PlayerColorsMap = {
 
 export type CurrentPredictionsProps = {
     nsims: number;
-    gameFilters?: Game[];
+    gameFilters: Game[];
     updateTrigger?: number; // Add an optional updateTrigger prop
     eventTable: string;
   };
