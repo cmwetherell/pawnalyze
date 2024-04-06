@@ -9,6 +9,7 @@ import { Game } from "@/types";
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
 import ChessButton from "./Button";
+import { reverse } from "dns";
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
@@ -203,6 +204,8 @@ const options = {
   plugins: {
     legend: {
       display: true,
+      position: 'right',
+      reverse: true,
       labels: {
         color: 'black',
       },
