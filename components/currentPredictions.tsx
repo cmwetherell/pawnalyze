@@ -8,6 +8,7 @@ import { Game } from "@/types";
 
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
+import ChessButton from "./Button";
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
@@ -15,6 +16,30 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   const [isClient, setIsClient] = useState(false); // Add a state to track client-side rendering
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
+  const [selectedPlayer, setSelectedPlayer] = useState('');
+
+  const PlayerDropdown = () => {
+    return (
+      <div>
+        <label htmlFor="player-select" className="text-lg font-bold mb-2 text-center">
+          Select Player:
+        </label>
+        <select
+          id="player-select"
+          value={selectedPlayer}
+          onChange={(e) => setSelectedPlayer(e.target.value)}
+          className="ml-2 p-1 text-md mb-2 max-w-36"
+        >
+          <option value="">All Players</option>
+          {playerNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  };
 
   let initialGames: { round: number; games: Game[] }[] = [];
 
@@ -109,17 +134,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
             }
           });
 
-          // // sort chart data by custom order
-          // const sortedChartData: Record<string, PercentageData[]> = {};
-          // customOrder.forEach(round => {
-          //   if (chartData[round]) {
-          //     sortedChartData[round] = chartData[round];
-          //   }
-          // });
-
           setPlayerWinPercentagesByRound(chartData);
-
-          // console.log("player win percentages by round", playerWinPercentagesByRound);  
 
           // Set totalGames to be the sum of win_count for rounds where Round is "Simulated"
           const simulatedRound = transformedData["Simulated"];
@@ -168,66 +183,71 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
 const data = {
   labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
-  datasets: playerNames.map((name, index) => ({
-    label: name,
-    data: customOrder.map(label =>
-      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
-    ),
-    backgroundColor: playerColorsMap[name],
-    hoverOffset: 4,
-    stack: 'Stack 0',
-    maxBarThickness: 100,
-  })),
+  datasets: playerNames
+    .filter((name) => selectedPlayer === '' || name === selectedPlayer)
+    .map((name, index) => ({
+      label: name,
+      data: customOrder.map(label =>
+        playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+      ),
+      backgroundColor: playerColorsMap[name],
+      borderColor: playerColorsMap[name],
+      fill: true,
+      hoverOffset: 4,
+      stack: 'Stack 0',
+      pointRadius: 0,
+    })),
 };
 
-  // Options for the chart
-  const options = {
-    plugins: {
-      legend: {
-        display: true, // Show the legend
-        labels: {
-          color: 'black' // Set the legend text color to black
-        },
-      },
-      tooltip: {
-        enabled: true, // Enable tooltips
-      }
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Round',
-          color: 'black',
-          font: {
-            size: 14,
-          },
-        },
-        
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Win % by Player',
-          color: 'black',
-          font: {
-            size: 14,
-          },
-          min: 0,
-          suggestedMax: 100,
-        },
-        stacked: true, // Enable stacked bar chart
+const options = {
+  plugins: {
+    legend: {
+      display: true,
+      labels: {
+        color: 'black',
       },
     },
-    maintainAspectRatio: false, // Important for responsive design
-  };
+    tooltip: {
+      enabled: true,
+    },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Round',
+        color: 'black',
+        font: {
+          size: 14,
+        },
+      },
+    },
+    y: {
+      title: {
+        display: true,
+        text: 'Win % by Player',
+        color: 'black',
+        font: {
+          size: 14,
+        },
+        min: 0,
+        suggestedMax: 100,
+      },
+      stacked: true,
+      min: 0,
+      max: 100,
+    },
+  },
+  maintainAspectRatio: false,
+};
 
   return (
     <div>
+      <PlayerDropdown />
       <div style={{ height: '500px' }}> {/* Container must have a height */}
         {isClient && (
           <>
-            <Bar data={data} options={options} />
+            <Line data={data} options={options} />
             {totalGames > 0 && (
               <>
               <p className="text-md text-center font-bold mb-2 mt-4 text-black">Based on {totalGames} simulations</p>
