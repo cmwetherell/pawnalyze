@@ -200,11 +200,11 @@ const data = {
     })),
 };
 
-const options = {
+const options: any = {
   plugins: {
     legend: {
       display: true,
-      position: 'right',
+      position: "right",
       reverse: true,
       labels: {
         color: 'black',
