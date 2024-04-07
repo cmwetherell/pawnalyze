@@ -28,14 +28,14 @@ export default function Home() {
           />
         </div>
           {/* test: current predictions for 2024 Candidates Tournament */}
-        <p className="mt-6 text-8 font-bold text-center text-black">Current Predictions for 2024 Candidates Tournament</p>
+        <p className="mt-6 text-8 font-bold text-center text-black">Current Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <GetPredictions
             nsims={10000}
             gameFilters = {[]} // no filters
             eventTable="candidates_2024"
             />
-        <p className="mt-6 text-8 font-bold text-center text-black">Current Predictions for 2024 Womens Candidates Tournament</p>
+        <p className="mt-6 text-8 font-bold text-center text-black">Current Predictions for 2024 Womens Candidates Tournament | Pawnalyze.com</p>
           <GetPredictions
             nsims={10000}
             gameFilters = {[]} // no filters

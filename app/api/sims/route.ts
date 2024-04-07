@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
         const convertedGameFilters = gameFilters.map(convertGame);
 
         // print len of convertedGameFilters
-        console.log(convertedGameFilters.length, "converted game filters");
+        console.log("filters: ", convertedGameFilters)
 
         const db = createKysely<Database>();
 
@@ -94,8 +94,6 @@ export async function POST(req: NextRequest) {
 
         const history = await query.execute();
 
-        console.log("This is the history: ", history);
-
         let predictions = []
 
         //  write code for if len gameFilters > 0
@@ -112,8 +110,6 @@ export async function POST(req: NextRequest) {
             querySim = querySim.groupBy(['winner', 'Round']);
             const simulated = await querySim.execute();
 
-            console.log("sim results", simulated);
-
             // concatenate history and simulated into new object called "predictions"
 
             predictions = history.concat(simulated);
@@ -125,7 +121,7 @@ export async function POST(req: NextRequest) {
         // console.log(predictions);
 
         const endTime = Date.now(); // Capture end time
-        console.log(`Request to response time: ${endTime - startTime} ms`); // Log the time difference
+        // console.log(`Request to response time: ${endTime - startTime} ms`); // Log the time difference
 
         return new NextResponse(JSON.stringify(predictions), {
             status: 200,

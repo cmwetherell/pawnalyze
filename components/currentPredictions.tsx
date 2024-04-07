@@ -6,10 +6,15 @@ import 'chart.js/auto'; // Import to register the controllers.
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
 import { Game } from "@/types";
 
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { Chart } from 'chart.js';
+Chart.register(ChartDataLabels);
+
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
 import ChessButton from "./Button";
 import { reverse } from "dns";
+import { off } from "process";
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
@@ -210,8 +215,41 @@ const options: any = {
         color: 'black',
       },
     },
+    
     tooltip: {
       enabled: true,
+    },
+    datalabels: {
+      display: function(context: any) {
+        const dataset = context.dataset;
+        const datasetIndex = context.datasetIndex;
+        const dataIndex = context.dataIndex;
+        return dataIndex === dataset.data.length - 1 && dataset.data[dataIndex] !== 0;
+      },
+      align: 'left',
+      offset: 10,
+      padding: {
+        left: 4,
+        right: 4,
+        top: 1,
+        bottom: 1,
+      },
+      // anchor: 'end',
+      // offset: -50,
+      backgroundColor: 'white',
+      borderRadius: 4,
+      color: 'black',
+      font: {
+        size: 12,
+        weight: 'bold',
+      },
+      formatter: function(value: any, context: any) {
+        const playerName = context.dataset.label;
+        const truncatedName = playerName;
+        const percentage = value.toFixed(1);
+        return `${truncatedName}: ${percentage}%`;
+      },
+      clip: false,
     },
   },
   scales: {
@@ -246,7 +284,7 @@ const options: any = {
 
   return (
     <div>
-      <PlayerDropdown />
+      {/* <PlayerDropdown /> */}
       <div style={{ height: '500px' }}> {/* Container must have a height */}
         {isClient && (
           <>
