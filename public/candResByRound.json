@@ -121,22 +121,26 @@
         {
           "id": "Fir|Nak",
           "whitePlayer": "Firouzja, Alireza",
-          "blackPlayer": "Nakamura, Hikaru"
+          "blackPlayer": "Nakamura, Hikaru",
+          "outcome": "black"
         },
         {
           "id": "Guk|Aba", 
           "whitePlayer": "Gukesh D",
-          "blackPlayer": "Abasov, Nijat"
+          "blackPlayer": "Abasov, Nijat",
+          "outcome": "white"
         },
         {
           "id": "Vid|Car",
           "whitePlayer": "Vidit, Santosh Gujrathi", 
-          "blackPlayer": "Caruana, Fabiano"
+          "blackPlayer": "Caruana, Fabiano",
+          "outcome": "draw"
         },
         {
           "id": "Pra|Nep",
           "whitePlayer": "Praggnanandhaa R",
-          "blackPlayer": "Nepomniachtchi, Ian"  
+          "blackPlayer": "Nepomniachtchi, Ian",
+          "outcome": "draw" 
         }
       ]
     },

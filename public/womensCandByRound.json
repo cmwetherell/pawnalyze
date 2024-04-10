@@ -121,22 +121,27 @@
         {
           "id": "Lei|Lag",
           "whitePlayer": "Lei, Tingjie",
-          "blackPlayer": "Lagno, Kateryna"
+          "blackPlayer": "Lagno, Kateryna",
+          "outcome": "draw"
+          
         },
         {
           "id": "Ram|Muz",
           "whitePlayer": "Rameshbabu, Vaishali",
-          "blackPlayer": "Muzychuk, Anna"
+          "blackPlayer": "Muzychuk, Anna",
+          "outcome": "draw"
         },
         {
           "id": "Kon|Gor",
           "whitePlayer": "Koneru, Humpy",
-          "blackPlayer": "Goryachkina, Aleksandra"
+          "blackPlayer": "Goryachkina, Aleksandra",
+          "outcome": "draw"
         },
         {
           "id": "Tan|Sal",
           "whitePlayer": "Tan, Zhongyi",
-          "blackPlayer": "Salimova, Nurgyul"
+          "blackPlayer": "Salimova, Nurgyul",
+          "outcome": "draw"
         }
       ]
     },
