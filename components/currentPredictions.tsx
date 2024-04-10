@@ -6,9 +6,9 @@ import 'chart.js/auto'; // Import to register the controllers.
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
 import { Game } from "@/types";
 
-import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { Chart } from 'chart.js';
-Chart.register(ChartDataLabels);
+// import ChartDataLabels from 'chartjs-plugin-datalabels';
+// import { Chart } from 'chart.js';
+// Chart.register(ChartDataLabels);
 
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
@@ -187,24 +187,29 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
 // customOrder = customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label));
 
-const data = {
-  labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
-  datasets: playerNames
-    .filter((name) => selectedPlayer === '' || name === selectedPlayer)
-    .map((name, index) => ({
-      label: name,
-      data: customOrder.map(label =>
-        playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
-      ),
-      backgroundColor: playerColorsMap[name],
-      borderColor: playerColorsMap[name],
-      fill: true,
-      hoverOffset: 4,
-      stack: 'Stack 0',
-      pointRadius: 0,
-    })),
-};
+  // Prepare data for Chart.js, mapping each player to their color
+  const data = {
+    labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
+    datasets: playerNames
+      .filter((name) => selectedPlayer === '' || name === selectedPlayer)
+      .map((name, index) => {
+        const playerData = customOrder.map(label =>
+          playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+        );
+        const latestWinPercentage = playerData[playerData.length - 1].toFixed(1);
 
+        return {
+          label: `(${latestWinPercentage}%) ${name}`,
+          data: playerData,
+          backgroundColor: playerColorsMap[name],
+          borderColor: playerColorsMap[name],
+          fill: true,
+          hoverOffset: 4,
+          stack: 'Stack 0',
+          pointRadius: 0,
+        };
+      }),
+  };
 const options: any = {
   plugins: {
     legend: {
@@ -218,39 +223,48 @@ const options: any = {
     
     tooltip: {
       enabled: true,
+      callbacks: {
+        label: function(context: any) {
+          const dataset = context.dataset;
+          const dataIndex = context.dataIndex;
+          const value = dataset.data[dataIndex];
+          const playerName = dataset.label.replace(/\(.*?\)/, '').trim();
+          return `${playerName}: ${value}%`;
+        },
+      },
     },
-    datalabels: {
-      display: function(context: any) {
-        const dataset = context.dataset;
-        const datasetIndex = context.datasetIndex;
-        const dataIndex = context.dataIndex;
-        return dataIndex === dataset.data.length - 1 && dataset.data[dataIndex] !== 0;
-      },
-      align: 'left',
-      offset: 10,
-      padding: {
-        left: 4,
-        right: 4,
-        top: 1,
-        bottom: 1,
-      },
-      // anchor: 'end',
-      // offset: -50,
-      backgroundColor: 'white',
-      borderRadius: 4,
-      color: 'black',
-      font: {
-        size: 12,
-        weight: 'bold',
-      },
-      formatter: function(value: any, context: any) {
-        const playerName = context.dataset.label;
-        const truncatedName = playerName;
-        const percentage = value.toFixed(1);
-        return `${truncatedName}: ${percentage}%`;
-      },
-      clip: false,
-    },
+    // datalabels: {
+    //   display: function(context: any) {
+    //     const dataset = context.dataset;
+    //     const datasetIndex = context.datasetIndex;
+    //     const dataIndex = context.dataIndex;
+    //     return dataIndex === dataset.data.length - 1 && dataset.data[dataIndex] !== 0;
+    //   },
+    //   align: 'left',
+    //   offset: 10,
+    //   padding: {
+    //     left: 4,
+    //     right: 4,
+    //     top: 1,
+    //     bottom: 1,
+    //   },
+    //   // anchor: 'end',
+    //   // offset: -50,
+    //   backgroundColor: 'white',
+    //   borderRadius: 4,
+    //   color: 'black',
+    //   font: {
+    //     size: 12,
+    //     weight: 'bold',
+    //   },
+    //   formatter: function(value: any, context: any) {
+    //     const playerName = context.dataset.label;
+    //     const truncatedName = playerName;
+    //     const percentage = value.toFixed(1);
+    //     return `${truncatedName}: ${percentage}%`;
+    //   },
+    //   clip: false,
+    // },
   },
   scales: {
     x: {
