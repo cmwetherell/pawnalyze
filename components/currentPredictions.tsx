@@ -161,7 +161,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   const COLORS_PALETTE_1 = ['#6A4C93', '#F9A1BC', '#FFD166', '#06D6A0', '#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
 
   // Palette 2: Bold and Bright
-  const COLORS_PALETTE_2 = ['#E63946', '#F1FAEE', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+  const COLORS_PALETTE_2 = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
 
   // Player names - Ensure the order matches your COLORS_PALETTE
   let playerNames: string[] = Array.from(
@@ -188,28 +188,35 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 // customOrder = customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label));
 
   // Prepare data for Chart.js, mapping each player to their color
-  const data = {
-    labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
-    datasets: playerNames
-      .filter((name) => selectedPlayer === '' || name === selectedPlayer)
-      .map((name, index) => {
-        const playerData = customOrder.map(label =>
-          playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
-        );
-        const latestWinPercentage = playerData[playerData.length - 1].toFixed(1);
+  const playerPercentages = playerNames
+  .filter((name) => selectedPlayer === '' || name === selectedPlayer)
+  .map((name) => {
+    const playerData = customOrder.map(label =>
+      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+    );
+    const latestWinPercentage = playerData[playerData.length - 1];
+    return { name, percentage: latestWinPercentage };
+  });
 
-        return {
-          label: `(${latestWinPercentage}%) ${name}`,
-          data: playerData,
-          backgroundColor: playerColorsMap[name],
-          borderColor: playerColorsMap[name],
-          fill: true,
-          hoverOffset: 4,
-          stack: 'Stack 0',
-          pointRadius: 0,
-        };
-      }),
-  };
+  playerPercentages.sort((a, b) => a.percentage - b.percentage);
+
+const data = {
+  labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
+  datasets: playerPercentages.map(({ name, percentage }) => {
+    const playerData = customOrder.map(label =>
+      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+    );
+    return {
+      label: `(${percentage.toFixed(1)}%) ${name}`,
+      data: playerData,
+      backgroundColor: playerColorsMap[name],
+      borderColor: playerColorsMap[name],
+      fill: false,
+      hoverOffset: 4,
+      pointRadius: 0,
+    };
+  }),
+};
 const options: any = {
   plugins: {
     legend: {
@@ -288,9 +295,9 @@ const options: any = {
         min: 0,
         suggestedMax: 100,
       },
-      stacked: true,
+      stacked: false,
       min: 0,
-      max: 100,
+      max: 50,
     },
   },
   maintainAspectRatio: false,
