@@ -297,7 +297,7 @@ const options: any = {
       },
       stacked: false,
       min: 0,
-      max: 50,
+      max: 100,
     },
   },
   maintainAspectRatio: false,
