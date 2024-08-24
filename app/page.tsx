@@ -18,17 +18,16 @@ export default function Home() {
         <div className="flex-1 mt-4 mb-12">
         <div className="flex justify-center mx-auto space-x-4" style={{ maxWidth: "200px" }}>
           <ChessButton
-            text="Candidates"
-            link="/simulations/candidates-2024"
+            text="Simulations"
+            link="/simulations/"
           />
           <ChessButton
-            text="Women's Candidates"
-            link="/simulations/womens-candidates-2024"
-            width="w-60"
+            text="Elocator"
+            link="/elocator/"
           />
         </div>
           {/* test: current predictions for 2024 Candidates Tournament */}
-        <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
+        {/* <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <GetPredictions
             nsims={10000}
@@ -41,7 +40,7 @@ export default function Home() {
             gameFilters = {[]} // no filters
             eventTable="womens_candidates_2024"
             />
-        </div>
+        </div> */}
       </div>
     </main>
   );
