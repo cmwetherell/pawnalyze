@@ -9,6 +9,9 @@ export default function SimPage(): JSX.Element {
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Active Tournaments</p>
     </div>
     <div>
+        <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Past Tournaments</p>
+    </div>
+    <div>
         <TournamentInfo
             name="2024 Candidates Tournament"
             internalLink="/simulations/candidates-2024"
