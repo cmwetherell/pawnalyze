@@ -13,10 +13,10 @@ export default function SimPage(): JSX.Element {
                 name="Chess Olympiad Budapest 2024"
                 internalLink="/simulations/chess-olympiad-budapest-2024"
                 website="https://chessolympiad2024.fide.com/"
-                description="Country's battle it out 4v4 to find the best chess nation."
+                description="Countrys battle it out 4v4 to find the best chess nation."
                 format="11 rounds of 4v4 team battles"
             />
-        <p className = "text-xl font-bold text-center text-black mb-2 mt-12">Women's coming soon...</p>
+        <p className = "text-xl font-bold text-center text-black mb-2 mt-12">Womens coming soon...</p>
     </div>
     <div>
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Past Tournaments</p>
