@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 const OlympiadSims = () => {
   const [isClient, setIsClient] = useState(false); // State to track client-side rendering
   const [medalData, setMedalData] = useState<any>(null); // State to store fetched data
+  const [nSims, setNSims] = useState<number>(0); // State to store number of simulations
   const [sortColumn, setSortColumn] = useState<string>('gold'); // State to store current sorting column
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // State to store current sorting order
 
@@ -23,6 +24,7 @@ const OlympiadSims = () => {
         if (response.ok) {
           const data = await response.json();
           setMedalData(data); // Store fetched data in state
+          setNSims(data.nSims); // Store total number of simulations
         } else {
           console.error("Server responded with an error:", response.status);
         }
@@ -117,6 +119,7 @@ const OlympiadSims = () => {
       {isClient && (
         <div className="p-4">
           <h2 className="text-lg font-bold text-center mb-4">Medal Chances by Country</h2>
+          <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
           {renderTable()}
         </div>
       )}

@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
         country,
         percentage: ((count / totalSimulations) * 100).toFixed(2),
       })),
+      nSims: totalSimulations,
     };
 
     return new NextResponse(JSON.stringify(response), {
