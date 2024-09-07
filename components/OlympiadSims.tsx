@@ -1,6 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
+import olympiadTeamMap from '@/public/olympiadTeamMap.json';
+
+// Define the types for olympiadTeamMap
+type OlympiadTeamMap = {
+  [key: string]: string;
+}
 
 const OlympiadSims = () => {
   const [isClient, setIsClient] = useState(false); // State to track client-side rendering
@@ -71,29 +77,37 @@ const OlympiadSims = () => {
     });
   };
 
-  // Render the table with country names and their chances of winning each medal
+  // Function to map country names to their respective flags
+  const mapCountryToFlag = (country: string) => {
+    const teamMap: OlympiadTeamMap = olympiadTeamMap;
+    const teamCode = teamMap[country];
+    return <div className={`tn_${teamCode}`}></div>;
+  };
+
+  // Render the table with country names, their flags, and their chances of winning each medal
   const renderTable = () => {
     const sortedData = getSortedData();
 
     return (
-      <table className="table-auto border-collapse border border-gray-300 w-full">
+      <table className="table-auto border-collapse border border-gray-300 min-w-[80%] align-middle justify-center mx-auto">
         <thead>
-          <tr>
-            <th className="border border-gray-300 px-4 py-2">Country</th>
+          <tr className="bg-gray-800 text-white">
+            <th className="border border-gray-300 px-4 py-2 min-w-[25px] text-center">Flag</th>
+            <th className="border border-gray-300 px-4 py-2 min-w-[75px] text-center">Country</th>
             <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer"
+              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
               onClick={() => handleSort('gold')}
             >
               Gold (%) {sortColumn === 'gold' && (sortOrder === 'asc' ? '▲' : '▼')}
             </th>
             <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer"
+              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
               onClick={() => handleSort('silver')}
             >
               Silver (%) {sortColumn === 'silver' && (sortOrder === 'asc' ? '▲' : '▼')}
             </th>
             <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer"
+              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
               onClick={() => handleSort('bronze')}
             >
               Bronze (%) {sortColumn === 'bronze' && (sortOrder === 'asc' ? '▲' : '▼')}
@@ -102,11 +116,14 @@ const OlympiadSims = () => {
         </thead>
         <tbody>
           {sortedData.map((row: any, index: any) => (
-            <tr key={index}>
-              <td className="border border-gray-300 px-4 py-2">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.gold.toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.silver.toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2">{row.bronze.toFixed(1)}</td>
+            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
+              <td className="border border-gray-300 px-4 py-2 text-center align-middle">
+                <div className="inline-block">{mapCountryToFlag(row.country)}</div>
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{row.gold.toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{row.silver.toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{row.bronze.toFixed(1)}</td>
             </tr>
           ))}
         </tbody>

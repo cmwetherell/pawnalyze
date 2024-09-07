@@ -16,8 +16,6 @@ const Sims: any = () => {
             <p className = "text-xl font-bold text-center text-black mb-2 mt-12">This page is in beta. Do not trust the simulations yet.</p>
             <OlympiadSims />
         </div>
-        <div className='tn_USA'>
-            </div>
         </main>
     );
     }
