@@ -12,6 +12,7 @@ const OlympiadSims = () => {
   const [isClient, setIsClient] = useState(false); // State to track client-side rendering
   const [medalData, setMedalData] = useState<any>(null); // State to store fetched data
   const [nSims, setNSims] = useState<number>(0); // State to store number of simulations
+  const [maxRound, setMaxRound] = useState<number>(0); // State to store the maximum round number
   const [sortColumn, setSortColumn] = useState<string>('gold'); // State to store current sorting column
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // State to store current sorting order
 
@@ -31,6 +32,7 @@ const OlympiadSims = () => {
           const data = await response.json();
           setMedalData(data); // Store fetched data in state
           setNSims(data.nSims); // Store total number of simulations
+          setMaxRound(data.highestRound); // Store the maximum round number
         } else {
           console.error("Server responded with an error:", response.status);
         }
@@ -58,12 +60,32 @@ const OlympiadSims = () => {
   const getSortedData = () => {
     if (!medalData) return [];
 
-    const combinedData = medalData.gold.map((gold: any, index: number) => ({
-      country: gold.country,
-      gold: parseFloat(gold.percentage),
-      silver: parseFloat(medalData.silver[index]?.percentage || '0.0'),
-      bronze: parseFloat(medalData.bronze[index]?.percentage || '0.0'),
-    }));
+    //make list of any country that gets a gold silver OR bronze
+    const countryMedalList: string[] = []
+    medalData.rounds.forEach((round: any) => {
+        round.gold.forEach((gold: any) => {
+            if (!countryMedalList.includes(gold.country)) {
+                countryMedalList.push(gold.country)
+            }
+        })
+        round.silver.forEach((silver: any) => {
+            if (!countryMedalList.includes(silver.country)) {
+                countryMedalList.push(silver.country)
+            }
+        })
+        round.bronze.forEach((bronze: any) => {
+            if (!countryMedalList.includes(bronze.country)) {
+                countryMedalList.push(bronze.country)
+            }
+        })
+    })
+
+    const combinedData = countryMedalList.map((country: string) => ({
+        country,
+        gold: medalData.rounds[maxRound].gold.find((item: any) => item.country === country)?.percentage || 0,
+        silver: medalData.rounds[maxRound].silver.find((item: any) => item.country === country)?.percentage || 0,
+        bronze: medalData.rounds[maxRound].bronze.find((item: any) => item.country === country)?.percentage || 0,
+}));
 
     return combinedData.sort((a: any, b: any) => {
       const aValue = a[sortColumn];
@@ -121,9 +143,9 @@ const OlympiadSims = () => {
                 <div className="inline-block">{mapCountryToFlag(row.country)}</div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.gold.toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.silver.toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.bronze.toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.gold).toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.silver).toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.bronze).toFixed(1)}</td>
             </tr>
           ))}
         </tbody>
@@ -135,7 +157,7 @@ const OlympiadSims = () => {
     <div>
       {isClient && (
         <div className="p-4">
-          <h2 className="text-lg font-bold text-center mb-4">Medal Chances by Country</h2>
+          <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2>
           <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
           {renderTable()}
         </div>

@@ -13,7 +13,7 @@ const Sims: any = () => {
                 format="11 rounds of 4v4 team battles"
             />
             {/* add text to make clear that this page is in beta, dont trust on simulations yet */}
-            <p className = "text-xl font-bold text-center text-black mb-2 mt-12">This page is in beta. Do not trust the simulations yet.</p>
+            {/* <p className = "text-xl font-bold text-center text-black mb-2 mt-12">This page is in beta. Do not trust the simulations yet.</p> */}
             <OlympiadSims />
         </div>
         </main>

@@ -6,6 +6,8 @@ interface Database {
     gold: string;
     silver: string;
     bronze: string;
+    round: string;
+    future_results: string;
   };
 }
 
@@ -24,10 +26,24 @@ export async function POST(req: NextRequest) {
     const db = createKysely<Database>();
     const table = "olympiad_2024";
 
-    // Fetch the simulation results from the database
+    // Fetch the unique rounds list and find the max round
+    const rounds = await db
+      .selectFrom(table)
+      .select("round")
+      .distinct()
+      .execute();
+
+    const maxRound = Math.max(
+      ...rounds.map(({ round }) =>
+        parseInt(round.replace("Round ", "").replace("Pre", "0"))
+      )
+    );
+
+    // Fetch the simulation results grouped by round
     const results = await db
       .selectFrom(table)
       .select(({ fn }) => [
+        "round",
         "gold",
         "silver",
         "bronze",
@@ -35,47 +51,68 @@ export async function POST(req: NextRequest) {
         fn.count<number>("silver").as("silver_count"),
         fn.count<number>("bronze").as("bronze_count"),
       ])
-      .groupBy(["gold", "silver", "bronze"])
+      .groupBy(["round", "gold", "silver", "bronze"])
       .execute();
 
-    // Calculate the total number of simulations
-    const totalSimulations = results.reduce(
-      (acc, row) => acc + parseInt(String(row.gold_count)),
-      0
-    );
+    results.forEach((row) => {
+      row.round = row.round.replace("Round ", "").replace("Pre", "0");
+    });
 
-    // Calculate the percentage for each medal type
-    const goldPercentages = results.reduce((acc, row) => {
-      acc[row.gold] = (acc[row.gold] || 0) + parseInt(String(row.gold_count));
+    // Calculate total simulations by round
+    const simulationsByRound = results.reduce((acc, row) => {
+      acc[row.round] = (acc[row.round] || 0) + parseInt(String(row.gold_count));
       return acc;
     }, {} as Record<string, number>);
 
-    const silverPercentages = results.reduce((acc, row) => {
-      acc[row.silver] = (acc[row.silver] || 0) + parseInt(String(row.silver_count));
-      return acc;
-    }, {} as Record<string, number>);
+    console.log(simulationsByRound);
 
-    const bronzePercentages = results.reduce((acc, row) => {
-      acc[row.bronze] = (acc[row.bronze] || 0) + parseInt(String(row.bronze_count));
-      return acc;
-    }, {} as Record<string, number>);
+    // Calculate percentages by round
+    const medalPercentagesByRound = results.reduce((acc, row) => {
+      if (!acc[row.round]) {
+        acc[row.round] = {
+          gold: {},
+          silver: {},
+          bronze: {},
+        };
+      }
 
-    // Prepare the response with calculated percentages
+      acc[row.round].gold[row.gold] =
+        (acc[row.round].gold[row.gold] || 0) +
+        parseInt(String(row.gold_count));
+      acc[row.round].silver[row.silver] =
+        (acc[row.round].silver[row.silver] || 0) +
+        parseInt(String(row.silver_count));
+      acc[row.round].bronze[row.bronze] =
+        (acc[row.round].bronze[row.bronze] || 0) +
+        parseInt(String(row.bronze_count));
+
+      return acc;
+    }, {} as Record<string, { gold: Record<string, number>; silver: Record<string, number>; bronze: Record<string, number> }>);
+
+    // Calculate nSims only for the latest round
+    const nSims = simulationsByRound[maxRound];
+
+    // Prepare the response with calculated percentages by round
     const response = {
-      gold: Object.entries(goldPercentages).map(([country, count]) => ({
-        country,
-        percentage: ((count / totalSimulations) * 100).toFixed(2),
+      rounds: Object.entries(medalPercentagesByRound).map(([round, data]) => ({
+        round,
+        gold: Object.entries(data.gold).map(([country, count]) => ({
+          country,
+          percentage: ((count / simulationsByRound[round]) * 100).toFixed(2),
+        })),
+        silver: Object.entries(data.silver).map(([country, count]) => ({
+          country,
+          percentage: ((count / simulationsByRound[round]) * 100).toFixed(2),
+        })),
+        bronze: Object.entries(data.bronze).map(([country, count]) => ({
+          country,
+          percentage: ((count / simulationsByRound[round]) * 100).toFixed(2),
+        })),
       })),
-      silver: Object.entries(silverPercentages).map(([country, count]) => ({
-        country,
-        percentage: ((count / totalSimulations) * 100).toFixed(2),
-      })),
-      bronze: Object.entries(bronzePercentages).map(([country, count]) => ({
-        country,
-        percentage: ((count / totalSimulations) * 100).toFixed(2),
-      })),
-      nSims: totalSimulations,
+      nSims,
+      highestRound: maxRound,
     };
+    console.log(response);
 
     return new NextResponse(JSON.stringify(response), {
       status: 200,
