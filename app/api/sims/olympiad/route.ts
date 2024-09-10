@@ -64,8 +64,6 @@ export async function POST(req: NextRequest) {
       return acc;
     }, {} as Record<string, number>);
 
-    console.log(simulationsByRound);
-
     // Calculate percentages by round
     const medalPercentagesByRound = results.reduce((acc, row) => {
       if (!acc[row.round]) {
@@ -112,7 +110,6 @@ export async function POST(req: NextRequest) {
       nSims,
       highestRound: maxRound,
     };
-    console.log(response);
 
     return new NextResponse(JSON.stringify(response), {
       status: 200,

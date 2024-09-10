@@ -9,7 +9,12 @@ type OlympiadTeamMap = {
   [key: string]: string;
 };
 
-const OlympiadSims = () => {
+// Define the props for the component
+type OlympiadSimsProps = {
+  showOnlyMedalChart?: boolean; // Optional prop to control rendering of only MedalChart
+};
+
+const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false }) => {
   const [isClient, setIsClient] = useState(false); // State to track client-side rendering
   const [medalData, setMedalData] = useState<any>(null); // State to store fetched data
   const [nSims, setNSims] = useState<number>(0); // State to store number of simulations
@@ -170,10 +175,16 @@ const OlympiadSims = () => {
     <div>
       {isClient && (
         <div className="p-4">
-          <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
-          <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
-          <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
-          {renderTable()} {/* Display the table with country names, flags, and medal chances */}
+          {showOnlyMedalChart ? (
+            <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> // Render only the MedalChart
+          ) : (
+            <>
+              <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
+              <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
+              <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
+              {renderTable()} {/* Display the table with country names, flags, and medal chances */}
+            </>
+          )}
         </div>
       )}
     </div>

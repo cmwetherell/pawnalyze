@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import ChessAI from "@/components/LoadingChessAI";
 import GetPredictions from "@/components/currentPredictions";
 import ChessButton from "@/components/Button";
+import OlympiadSims from "@/components/OlympiadSims";
 
 // const CurrentPredictions = dynamic(() => import("@/components/currentPredictions"), {
 //   loading: () => <ChessAI />, // Display this component while loading
@@ -26,6 +27,11 @@ export default function Home() {
             link="/elocator/"
           />
         </div>
+        <br></br>
+        <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
+        <OlympiadSims
+          showOnlyMedalChart={true}
+        />
           {/* test: current predictions for 2024 Candidates Tournament */}
         {/* <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
