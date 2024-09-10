@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import olympiadTeamMap from '@/public/olympiadTeamMap.json';
+import MedalChart from './MedalChart'; // Import the new MedalChart component
 
 // Define the types for olympiadTeamMap
 type OlympiadTeamMap = {
   [key: string]: string;
-}
+};
 
 const OlympiadSims = () => {
   const [isClient, setIsClient] = useState(false); // State to track client-side rendering
@@ -20,10 +21,10 @@ const OlympiadSims = () => {
     setIsClient(true); // Update the state to indicate client-side rendering
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/sims/olympiad", {
-          method: "POST",
+        const response = await fetch('/api/sims/olympiad', {
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({}), // Empty object since the new API doesn't require specific input
         });
@@ -34,10 +35,10 @@ const OlympiadSims = () => {
           setNSims(data.nSims); // Store total number of simulations
           setMaxRound(data.highestRound); // Store the maximum round number
         } else {
-          console.error("Server responded with an error:", response.status);
+          console.error('Server responded with an error:', response.status);
         }
       } catch (error) {
-        console.error("Failed to fetch:", error);
+        console.error('Failed to fetch:', error);
       }
     };
 
@@ -60,37 +61,43 @@ const OlympiadSims = () => {
   const getSortedData = () => {
     if (!medalData) return [];
 
-    //make list of any country that gets a gold silver OR bronze
-    const countryMedalList: string[] = []
+    // Make list of any country that gets a gold, silver, or bronze
+    const countryMedalList: string[] = [];
     medalData.rounds.forEach((round: any) => {
-        round.gold.forEach((gold: any) => {
-            if (!countryMedalList.includes(gold.country)) {
-                countryMedalList.push(gold.country)
-            }
-        })
-        round.silver.forEach((silver: any) => {
-            if (!countryMedalList.includes(silver.country)) {
-                countryMedalList.push(silver.country)
-            }
-        })
-        round.bronze.forEach((bronze: any) => {
-            if (!countryMedalList.includes(bronze.country)) {
-                countryMedalList.push(bronze.country)
-            }
-        })
-    })
+      round.gold.forEach((gold: any) => {
+        if (!countryMedalList.includes(gold.country)) {
+          countryMedalList.push(gold.country);
+        }
+      });
+      round.silver.forEach((silver: any) => {
+        if (!countryMedalList.includes(silver.country)) {
+          countryMedalList.push(silver.country);
+        }
+      });
+      round.bronze.forEach((bronze: any) => {
+        if (!countryMedalList.includes(bronze.country)) {
+          countryMedalList.push(bronze.country);
+        }
+      });
+    });
 
     const combinedData = countryMedalList.map((country: string) => ({
-        country,
-        gold: medalData.rounds[maxRound].gold.find((item: any) => item.country === country)?.percentage || 0,
-        silver: medalData.rounds[maxRound].silver.find((item: any) => item.country === country)?.percentage || 0,
-        bronze: medalData.rounds[maxRound].bronze.find((item: any) => item.country === country)?.percentage || 0,
-}));
+      country,
+      gold:
+        medalData.rounds[maxRound].gold.find((item: any) => item.country === country)?.percentage ||
+        0,
+      silver:
+        medalData.rounds[maxRound].silver.find((item: any) => item.country === country)
+          ?.percentage || 0,
+      bronze:
+        medalData.rounds[maxRound].bronze.find((item: any) => item.country === country)
+          ?.percentage || 0,
+    }));
 
     return combinedData.sort((a: any, b: any) => {
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
-      
+
       if (sortOrder === 'asc') {
         return aValue - bValue;
       } else {
@@ -143,9 +150,15 @@ const OlympiadSims = () => {
                 <div className="inline-block">{mapCountryToFlag(row.country)}</div>
               </td>
               <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.gold).toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.silver).toFixed(1)}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{parseFloat(row.bronze).toFixed(1)}</td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                {parseFloat(row.gold).toFixed(1)}
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                {parseFloat(row.silver).toFixed(1)}
+              </td>
+              <td className="border border-gray-300 px-4 py-2 text-center">
+                {parseFloat(row.bronze).toFixed(1)}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -157,9 +170,10 @@ const OlympiadSims = () => {
     <div>
       {isClient && (
         <div className="p-4">
-          <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2>
+          <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
           <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
-          {renderTable()}
+          <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
+          {renderTable()} {/* Display the table with country names, flags, and medal chances */}
         </div>
       )}
     </div>
