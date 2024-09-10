@@ -38,6 +38,8 @@ const Sims: any = () => {
                     you can read <a className="text-green-500" href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html">more technical details here</a> about the underlying model, method, and simulations. 
                     You can also find the code <a className="text-green-500" href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py">on GitHub.</a>
                 </p>
+                <br></br>
+                <p><strong>Note: </strong>If a country is on the list above, it means they at least won Bronze one time in one simulation, even if it says 0.0. Countries that never win a medal in current simulations will not be in the table above.</p>
             </div>
         </main>
     );
