@@ -27,7 +27,7 @@ const Sims: any = () => {
                 <p>
                     In case you are wondering, yes, it was a nightmare to program. And its not quite perfect. 
                     For example, Im tracking how many whites each country has played. So when two teams face off, 
-                    whoever has had white more times will get the black pieces. But when they have played white 
+                    whoever has had white on board one more times will get the black pieces on board one. But when they have played white 
                     the same amount of times, then the white pieces should go to whoever had white less recently. 
                     Right now, I just randomize who gets white - its a small detail, not materially impacting 
                     these predictions. But its a good example of the complexities of the Olympiad pairing algorithm.
