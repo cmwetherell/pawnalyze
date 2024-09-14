@@ -237,7 +237,7 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
   const conditionalMaxWidth: string = maxRound === 0 ? '400px' : '800px';
 
   return (
-    <div style={{ maxHeight: conditionalMaxWidth }} className={`flex mx-auto align-middle justify-center pb-5 ${className || ''}`}>
+    <div style={{ maxWidth: conditionalMaxWidth }} className={`flex mx-auto align-middle justify-center pb-5 ${className || ''}`}>
       {maxRound === 0 ? (
         <Bar data={generateBarChartData()} options={options} />
       ) : (
