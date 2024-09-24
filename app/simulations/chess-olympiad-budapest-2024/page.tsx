@@ -7,6 +7,7 @@ const Sims: any = () => {
     return (
         <main className="flex-1 flex flex-col min-h-screen bg-white">
             <div>
+                <h2>Congrats to India for winning Gold in both the Open and Women's event!</h2>
                 <TournamentInfo
                     name="Chess Olympiad Budapest 2024"
                     website="https://chessolympiad2024.fide.com/"
