@@ -28,10 +28,10 @@ export default function Home() {
           />
         </div>
         <br></br>
-        <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
+        {/* <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
         <OlympiadSims
           showOnlyMedalChart={true}
-        />
+        /> */}
           {/* test: current predictions for 2024 Candidates Tournament */}
         {/* <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
