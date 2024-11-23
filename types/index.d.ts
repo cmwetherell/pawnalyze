@@ -16,6 +16,7 @@ export type SiteConfig = {
     whitePlayer: string;
     blackPlayer: string;
     outcome?: null | string;
+    round?: number;
   };
 export type PercentageData = {
     name: string;
