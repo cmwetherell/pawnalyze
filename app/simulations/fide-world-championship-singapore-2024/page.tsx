@@ -13,7 +13,7 @@ const Sims: any = () => {
                     description="Reigning champion DIng Liren defends his title against Gukesh D."
                     format="14 classical games. Tiebreaks if necessary."
                 />
-                <WCCSims />
+                <WCCSims justGraph={false}/>
             </div>
         </main>
     );

@@ -23,7 +23,7 @@ const sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
   ],
 }));
 
-const WCCSims: React.FC = () => {
+const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   const [isClient, setIsClient] = useState(false);
   const [WCCData, setWCCData] = useState<any>(null);
   const [nSims, setNSims] = useState<number>(0);
@@ -140,6 +140,22 @@ const WCCSims: React.FC = () => {
     maintainAspectRatio: false,
   };
 
+  if (justGraph) {
+    return (
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <div style={{ height: '500px' }}>
+            <Line data={data} options={options} />
+          </div>
+          <p className="text-center mt-4 text-gray-600">
+            Based on {nSims} simulations after round {maxRound}.
+          </p>
+        </div>
+      </div>
+    );
+} else {
+
+
   return (
     <div className="max-w-7xl mx-auto p-4 space-y-6">
       <h1 className="text-3xl font-bold text-center text-gray-800">Simulated Results by Round</h1>
@@ -163,5 +179,6 @@ const WCCSims: React.FC = () => {
     </div>
   );
 };
+}
 
 export default WCCSims;

@@ -5,6 +5,7 @@ import ChessAI from "@/components/LoadingChessAI";
 import GetPredictions from "@/components/currentPredictions";
 import ChessButton from "@/components/Button";
 import OlympiadSims from "@/components/OlympiadSims";
+import WCCSims from "@/components/WCCSims";
 
 // const CurrentPredictions = dynamic(() => import("@/components/currentPredictions"), {
 //   loading: () => <ChessAI />, // Display this component while loading
@@ -27,7 +28,9 @@ export default function Home() {
             link="/elocator/"
           />
         </div>
-        <br></br>
+        {/* text tht says World Championship Simulations */}
+        <p className="text-4xl font-bold text-center text-black mb-2 mt-12">World Championship Simulations</p>
+        <WCCSims justGraph={true}/>
         {/* <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
         <OlympiadSims
           showOnlyMedalChart={true}
