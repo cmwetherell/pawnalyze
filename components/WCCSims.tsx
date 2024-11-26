@@ -10,7 +10,7 @@ import ChessButton from './Button';
 const COLORS_PALETTE = ['#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
 
 // Sample hardcoded round data
-const sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
+let sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
   round: index + 1,
   games: [
     {
@@ -22,6 +22,10 @@ const sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
     },
   ],
 }));
+
+// delete first n sample games
+const n = 1
+sampleGamesData = sampleGamesData.slice(n)
 
 const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   const [isClient, setIsClient] = useState(false);
@@ -77,13 +81,17 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     return <p>Loading...</p>;
   }
 
+  // Consistent player order based on the first round's data
+  const players = WCCData.byRound[0].winPercentages.map((wp: any) => wp.winner);
+
   // Process data for the chart
   const labels = WCCData.byRound.map((round: any) => `Round ${round.round}`);
-  const datasets = WCCData.byRound[0]?.winPercentages.map((_: any, index: number) => {
-    const playerName = WCCData.byRound[0].winPercentages[index].winner;
-    const data = WCCData.byRound.map((round: any) =>
-      parseFloat(round.winPercentages[index]?.percentage || 0)
-    );
+  const datasets = players.map((playerName: string, index: number) => {
+    const data = WCCData.byRound.map((round: any) => {
+      // Find the percentage for this specific player in each round
+      const playerData = round.winPercentages.find((wp: any) => wp.winner === playerName);
+      return parseFloat(playerData?.percentage || 0);
+    });
 
     return {
       label: playerName,
@@ -153,32 +161,30 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
         </div>
       </div>
     );
-} else {
-
-
-  return (
-    <div className="max-w-7xl mx-auto p-4 space-y-6">
-      <h1 className="text-3xl font-bold text-center text-gray-800">Simulated Results by Round</h1>
-      <div className="bg-white shadow-lg rounded-lg p-6">
-        <div style={{ height: '500px' }}>
-          <Line data={data} options={options} />
+  } else {
+    return (
+      <div className="max-w-7xl mx-auto p-4 space-y-6">
+        <h1 className="text-3xl font-bold text-center text-gray-800">Simulated Results by Round</h1>
+        <div className="bg-white shadow-lg rounded-lg p-6">
+          <div style={{ height: '500px' }}>
+            <Line data={data} options={options} />
+          </div>
+          <p className="text-center mt-4 text-gray-600">
+            Based on {nSims} simulations after round {maxRound}.
+          </p>
         </div>
-        <p className="text-center mt-4 text-gray-600">
-          Based on {nSims} simulations after round {maxRound}.
-        </p>
-      </div>
-      <div className="bg-gray-50 shadow-md rounded-lg p-4">
-        <div className="flex justify-center mb-4">
-          <ChessButton text="Update Simulations" onClick={handleUpdateSimulations} />
+        <div className="bg-gray-50 shadow-md rounded-lg p-4">
+          <div className="flex justify-center mb-4">
+            <ChessButton text="Update Simulations" onClick={handleUpdateSimulations} />
+          </div>
+          <GameHouseGeneral
+            gamesData={sampleGamesData}
+            onGameFilterChange={setFilteredGames}
+          />
         </div>
-        <GameHouseGeneral
-          gamesData={sampleGamesData}
-          onGameFilterChange={setFilteredGames}
-        />
       </div>
-    </div>
-  );
+    );
+  }
 };
-}
 
 export default WCCSims;

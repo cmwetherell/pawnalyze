@@ -1,130 +1,161 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createKysely } from "@vercel/postgres-kysely";
-import { RESPONSE_LIMIT_DEFAULT } from "next/dist/server/api-utils";
-import internal from "stream";
 
 interface Database {
   wcc24: {
     winner: string;
     tie: number;
-    round: number;
+    round: any;
     // Dynamic columns for each game and round, e.g., "Din|Guk|1", "Guk|Din|2", etc.
   };
 }
 
 export async function POST(req: NextRequest) {
-    try {
-      if (req.method !== "POST") {
-        return new NextResponse(
-          JSON.stringify({ message: "Method Not Allowed" }),
-          {
-            status: 405,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-  
-      const db = createKysely<Database>();
-      const table = "wcc24";
-  
-      const body = await req.json();
-      const { filters } = body;
-  
-      if (!filters || !Array.isArray(filters)) {
-        return new NextResponse(
-          JSON.stringify({ message: "Invalid filters provided" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-  
-      const selectColumns = ["winner", "tie", "round", ...filters.map(filter => filter.split('|').slice(0, 3).join('|'))];
-  
-      const results = await db
-        .selectFrom(table)
-        .select(selectColumns)
-        .execute();
-  
-      // Filter results based on the filters logic
-      const filteredResults = results.filter((row) =>
-        filters.every((filter) => {
-          const [gameId_a, gameId_b, roundStr, outcome] = filter.split("|");
-          const gameId = `${gameId_a}|${gameId_b}`;
-          const round = parseInt(roundStr, 10);
-          const columnName = `${gameId}|${round}`;
-          const columnValue = row[columnName];
-  
-          if (outcome === "w") return columnValue === 1.0;
-          if (outcome === "b") return columnValue === 0.0;
-          if (outcome === "d") return columnValue === 0.5;
-          return false;
-        })
-      );
-  
-      const totalSimulations = filteredResults.length;
-  
-      if (totalSimulations === 0) {
-        return new NextResponse(
-          JSON.stringify({ message: "No results match the given filters." }),
-          {
-            status: 404,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-  
-      // Aggregate data by round
-      const roundsData = filteredResults.reduce((acc, row) => {
-        const round = row.round;
-        if (!acc[round]) {
-          acc[round] = {
-            winCounts: {},
-            tieCount: 0,
-            nSims: 0,
-          };
-        }
-  
-        acc[round].winCounts[row.winner] = (acc[round].winCounts[row.winner] || 0) + 1;
-        acc[round].tieCount += row.tie;
-        acc[round].nSims += 1;
-  
-        return acc;
-      }, {} as Record<number, { winCounts: Record<string, number>; tieCount: number; nSims: number }>);
-  
-      // Identify the highest round
-      const highestRound = Math.max(...Object.keys(roundsData).map(Number));
-  
-      // Build the response
-      const response = {
-        byRound: Object.entries(roundsData).map(([round, data]) => ({
-          round: parseInt(round, 10),
-          winPercentages: Object.entries(data.winCounts).map(([winner, count]) => ({
-            winner,
-            percentage: ((count as number / data.nSims) * 100).toFixed(2),
-          })),
-          tiePercentage: ((data.tieCount / data.nSims) * 100).toFixed(2),
-          nSims: data.nSims,
-        })),
-        highestRound,
-        tiePercentageForHighestRound: ((roundsData[highestRound].tieCount / roundsData[highestRound].nSims) * 100).toFixed(2),
-        nSimsForHighestRound: roundsData[highestRound].nSims,
-      };
-  
-      return new NextResponse(JSON.stringify(response), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } catch (e: any) {
-      console.error(e);
+  try {
+    if (req.method !== "POST") {
       return new NextResponse(
-        JSON.stringify({ error: "Internal Server Error", details: e.message }),
+        JSON.stringify({ message: "Method Not Allowed" }),
         {
-          status: 500,
+          status: 405,
           headers: { "Content-Type": "application/json" },
         }
       );
     }
+
+    const db = createKysely<Database>();
+    const table = "wcc24";
+
+    const body = await req.json();
+    const { filters } = body;
+
+    // Step 1: Find the maximum round
+    const maxRoundResult = await db
+      .selectFrom(table)
+      .select("round")
+      .orderBy("round", "desc")
+      .limit(1)
+      .execute();
+
+    if (maxRoundResult.length === 0) {
+      return new NextResponse(
+        JSON.stringify({ message: "No data available" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const maxRound = maxRoundResult[0].round;
+
+    // Get ALL results without any filtering for base data up to max round
+    const baseResults = await db
+      .selectFrom(table)
+      .select(["winner", "tie", "round"])
+      .execute();
+
+    // Aggregate data by round for unfiltered results
+    const roundsData = baseResults.reduce((acc, row) => {
+      const round = row.round;
+      if (!acc[round]) {
+        acc[round] = {
+          winCounts: {},
+          tieCount: 0,
+          nSims: 0,
+        };
+      }
+
+      acc[round].winCounts[row.winner] = (acc[round].winCounts[row.winner] || 0) + 1;
+      acc[round].tieCount += row.tie;
+      acc[round].nSims += 1;
+
+      return acc;
+    }, {} as Record<number, { winCounts: Record<string, number>; tieCount: number; nSims: number }>);
+
+    // Prepare base response with existing rounds
+    const response = {
+      byRound: Object.entries(roundsData).map(([round, data]) => ({
+        round: parseInt(round, 10),
+        winPercentages: Object.entries(data.winCounts).map(([winner, count]) => ({
+          winner,
+          percentage: ((count as number / data.nSims) * 100).toFixed(2),
+        })),
+        tiePercentage: ((data.tieCount / data.nSims) * 100).toFixed(2),
+        nSims: data.nSims,
+      })),
+      highestRound: maxRound,
+      tiePercentageForHighestRound: ((roundsData[maxRound].tieCount / roundsData[maxRound].nSims) * 100).toFixed(2),
+      nSimsForHighestRound: roundsData[maxRound].nSims,
+    };
+
+    // If filters are provided, add a "Sim" round with filtered data from the highest round
+    if (filters && filters.length > 0) {
+      // Add dynamic columns for filters
+      const selectColumns = ["winner", "tie", "round", ...filters.map((filter: string) => filter.split('|').slice(0, 3).join('|'))];
+      
+      const filteredResults = await db
+        .selectFrom(table)
+        .select(selectColumns)
+        .execute()
+        .then(results => results.filter((row) =>
+          filters.every((filter: string) => {
+            const [gameId_a, gameId_b, roundStr, outcome] = filter.split("|");
+            const gameId = `${gameId_a}|${gameId_b}`;
+            const round = parseInt(roundStr, 10);
+            const columnName = `${gameId}|${round}`;
+            const columnValue = row[columnName];
+
+            if (outcome === "w") return columnValue === 1.0;
+            if (outcome === "b") return columnValue === 0.0;
+            if (outcome === "d") return columnValue === 0.5;
+            return false;
+          })
+        ))
+        .then((results: any[]) => results.filter(row => row.round === maxRound));
+
+      if (filteredResults.length > 0) {
+        const simRoundData = filteredResults.reduce((acc, row) => {
+          acc.winCounts[row.winner] = (acc.winCounts[row.winner] || 0) + 1;
+          acc.tieCount += row.tie;
+          acc.nSims += 1;
+          return acc;
+        }, {
+          winCounts: {},
+          tieCount: 0,
+          nSims: 0
+        });
+
+        const simRound = {
+          round: 100,
+          winPercentages: Object.entries(simRoundData.winCounts).map(([winner, count]) => ({
+            winner,
+            percentage: ((count as number / simRoundData.nSims) * 100).toFixed(2),
+          })),
+          tiePercentage: ((simRoundData.tieCount / simRoundData.nSims) * 100).toFixed(2),
+          nSims: simRoundData.nSims,
+        };
+
+        response.byRound.push(simRound);
+
+        // Update nSimsForHighestRound with the Sim round's nSims
+        response.nSimsForHighestRound = simRoundData.nSims;
+        response.tiePercentageForHighestRound = ((simRoundData.tieCount / simRoundData.nSims) * 100).toFixed(2);
+             
+      }
+    }
+
+    return new NextResponse(JSON.stringify(response), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (e: any) {
+    console.error(e);
+    return new NextResponse(
+      JSON.stringify({ error: "Internal Server Error", details: e.message }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
-  
+}
