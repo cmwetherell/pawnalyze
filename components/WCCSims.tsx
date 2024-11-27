@@ -24,7 +24,7 @@ let sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
 }));
 
 // delete first n sample games
-const n = 2
+const n = 3
 sampleGamesData = sampleGamesData.slice(n)
 
 const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
