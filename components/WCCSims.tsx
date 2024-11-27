@@ -9,29 +9,11 @@ import ChessButton from './Button';
 
 const COLORS_PALETTE = ['#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
 
-// Sample hardcoded round data
-let sampleGamesData = Array.from({ length: 14 }, (_, index) => ({
-  round: index + 1,
-  games: [
-    {
-      id: `game${index + 1}`,
-      blackPlayer: index % 2 === 0 ? 'Ding Liren' : 'Gukesh D',
-      whitePlayer: index % 2 === 0 ? 'Gukesh D' : 'Ding Liren',
-      outcome: null,
-      round: index + 1,
-    },
-  ],
-}));
-
-// delete first n sample games
-const n = 3
-sampleGamesData = sampleGamesData.slice(n)
-
 const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   const [isClient, setIsClient] = useState(false);
   const [WCCData, setWCCData] = useState<any>(null);
   const [nSims, setNSims] = useState<number>(0);
-  const [maxRound, setMaxRound] = useState<number>(0);
+  const [maxRound, setMaxRound] = useState<number>(0); // Initialize to 0
   const [filteredGames, setFilteredGames] = useState<Game[]>([]); // Track user-selected game outcomes
 
   const generateFilters = () =>
@@ -76,6 +58,26 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     setIsClient(true);
     fetchSimulations([]); // Initial fetch with no filters
   }, []); // Only run on mount
+
+  // Define sampleGamesData inside the component and slice it based on maxRound
+  const sampleGamesData = React.useMemo(() => {
+    const totalRounds = 14;
+    let gamesData = Array.from({ length: totalRounds }, (_, index) => ({
+      round: index + 1,
+      games: [
+        {
+          id: `game${index + 1}`,
+          blackPlayer: index % 2 === 0 ? 'Ding Liren' : 'Gukesh D',
+          whitePlayer: index % 2 === 0 ? 'Gukesh D' : 'Ding Liren',
+          outcome: null,
+          round: index + 1,
+        },
+      ],
+    }));
+
+    // Remove games from round 1 to maxRound
+    return gamesData.slice(maxRound);
+  }, [maxRound]);
 
   if (!WCCData || !isClient) {
     return <p>Loading...</p>;
