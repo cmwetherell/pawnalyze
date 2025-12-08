@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
@@ -11,24 +8,13 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const fontHeading = localFont({
-  src: "../assets/fonts/CalSans-SemiBold.woff2",
-  variable: "--font-heading",
-});
-
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1a1f" },
   ],
 };
 
@@ -87,18 +73,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
-          fontHeading.variable
-        )}
-      >
+    <html lang="en" className="scroll-smooth">
+      <body className="min-h-screen font-body antialiased bg-ebony text-ivory">
         <Analytics />
         <GoogleAnalytics gaId="G-59WSL645R4" />
         <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
+        <main className="flex flex-col min-h-screen relative">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>
