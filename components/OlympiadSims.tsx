@@ -123,47 +123,32 @@ const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false 
     const sortedData = getSortedData();
 
     return (
-      <table className="table-auto border-collapse border border-gray-300 min-w-[80%] align-middle justify-center mx-auto">
+      <table className="mx-auto w-full border-separate border-spacing-0 overflow-hidden rounded-3xl border border-white/10 text-sm text-sand">
         <thead>
-          <tr className="bg-gray-800 text-white">
-            <th className="border border-gray-300 px-4 py-2 min-w-[25px] text-center">Flag</th>
-            <th className="border border-gray-300 px-4 py-2 min-w-[75px] text-center">Country</th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('gold')}
-            >
+          <tr className="bg-white/10 text-left text-xs uppercase tracking-[0.3em] text-sand-muted">
+            <th className="px-4 py-3 text-center">Flag</th>
+            <th className="px-4 py-3">Country</th>
+            <th className="px-4 py-3 text-center cursor-pointer" onClick={() => handleSort('gold')}>
               Gold (%) {sortColumn === 'gold' && (sortOrder === 'asc' ? '▲' : '▼')}
             </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('silver')}
-            >
+            <th className="px-4 py-3 text-center cursor-pointer" onClick={() => handleSort('silver')}>
               Silver (%) {sortColumn === 'silver' && (sortOrder === 'asc' ? '▲' : '▼')}
             </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('bronze')}
-            >
+            <th className="px-4 py-3 text-center cursor-pointer" onClick={() => handleSort('bronze')}>
               Bronze (%) {sortColumn === 'bronze' && (sortOrder === 'asc' ? '▲' : '▼')}
             </th>
           </tr>
         </thead>
         <tbody>
           {sortedData.map((row: any, index: any) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-              <td className="border border-gray-300 px-4 py-2 text-center align-middle">
+            <tr key={index} className={index % 2 === 0 ? 'bg-white/5' : 'bg-white/10'}>
+              <td className="px-4 py-2 text-center align-middle">
                 <div className="inline-block">{mapCountryToFlag(row.country)}</div>
               </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.gold).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.silver).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.bronze).toFixed(1)}
-              </td>
+              <td className="px-4 py-2">{row.country}</td>
+              <td className="px-4 py-2 text-center">{parseFloat(row.gold).toFixed(1)}</td>
+              <td className="px-4 py-2 text-center">{parseFloat(row.silver).toFixed(1)}</td>
+              <td className="px-4 py-2 text-center">{parseFloat(row.bronze).toFixed(1)}</td>
             </tr>
           ))}
         </tbody>
@@ -174,13 +159,13 @@ const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false 
   return (
     <div>
       {isClient && (
-        <div className="p-4">
+        <div className="p-4 text-sand">
           {showOnlyMedalChart ? (
             <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> // Render only the MedalChart
           ) : (
             <>
-              <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
-              <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
+              <h2 className="mb-4 text-center font-display text-2xl">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
+              <p className="mb-4 text-center text-sm text-sand-muted">Total Simulations: {nSims}</p> {/* Display number of simulations */}
               <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
               {renderTable()} {/* Display the table with country names, flags, and medal chances */}
             </>

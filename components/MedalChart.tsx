@@ -19,7 +19,7 @@ interface MedalChartProps {
   className?: string;
 }
 
-const COLORS_PALETTE = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+const COLORS_PALETTE = ['#f5c063', '#95f5c3', '#ff6243', '#00c2a8', '#f28b50', '#ffd3ba', '#9ad5ff', '#d387f1'];
 
 const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, className }) => {
   // Create a color map based on the top N countries from the latest round
@@ -178,6 +178,9 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
   };
 
   // Define the chart options with custom legend and tooltip settings
+  const axisColor = 'rgba(247, 244, 234, 0.8)';
+  const gridColor = 'rgba(247, 244, 234, 0.08)';
+
   const options: any = {
     aspectRatio: 2, // Maintain aspect ratio
     plugins: {
@@ -195,7 +198,7 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
               lineWidth: 1,
             }));
           },
-          color: 'black',
+          color: axisColor,
         },
       },
       tooltip: {
@@ -210,10 +213,16 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
     },
     scales: {
       x: {
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          color: gridColor,
+        },
         title: {
           display: true,
           text: maxRound === 0 ? 'Country' : 'Round',
-          color: 'black',
+          color: axisColor,
           font: {
             size: 12,
           },
@@ -223,13 +232,19 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         title: {
           display: true,
           text: 'Win Gold %',
-          color: 'black',
+          color: axisColor,
           font: {
             size: 12,
           },
         },
         min: 0,
         suggestedMax: 50,
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          color: gridColor,
+        },
       },
     },
   };

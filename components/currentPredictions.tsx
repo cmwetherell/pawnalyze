@@ -158,10 +158,10 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
   // Define colors for the pie chart
   // Palette 1: Soft and Diverse
-  const COLORS_PALETTE_1 = ['#6A4C93', '#F9A1BC', '#FFD166', '#06D6A0', '#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
+  const COLORS_PALETTE_1 = ['#f5c063', '#95f5c3', '#ff6243', '#00c2a8', '#f28b50', '#ffd3ba', '#9ad5ff', '#d387f1'];
 
   // Palette 2: Bold and Bright
-  const COLORS_PALETTE_2 = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+  const COLORS_PALETTE_2 = ['#f9f871', '#95f5c3', '#ffb347', '#00c2a8', '#f28b50', '#ffd3ba', '#9ad5ff', '#d387f1'];
 
   // Player names - Ensure the order matches your COLORS_PALETTE
   let playerNames: string[] = Array.from(
@@ -217,6 +217,9 @@ const data = {
     };
   }),
 };
+const axisColor = 'rgba(247, 244, 234, 0.85)';
+const gridColor = 'rgba(247, 244, 234, 0.08)';
+
 const options: any = {
   plugins: {
     legend: {
@@ -224,7 +227,7 @@ const options: any = {
       position: "right",
       reverse: true,
       labels: {
-        color: 'black',
+        color: axisColor,
       },
     },
     
@@ -278,17 +281,19 @@ const options: any = {
       title: {
         display: true,
         text: 'Round',
-        color: 'black',
+        color: axisColor,
         font: {
           size: 14,
         },
       },
+      ticks: { color: axisColor },
+      grid: { color: gridColor },
     },
     y: {
       title: {
         display: true,
         text: 'Win % by Player',
-        color: 'black',
+        color: axisColor,
         font: {
           size: 14,
         },
@@ -298,6 +303,8 @@ const options: any = {
       stacked: false,
       min: 0,
       max: 100,
+      ticks: { color: axisColor },
+      grid: { color: gridColor },
     },
   },
   maintainAspectRatio: false,
@@ -311,9 +318,9 @@ const options: any = {
           <>
             <Line data={data} options={options} />
             {totalGames > 0 && (
-              <>
-              <p className="text-md text-center font-bold mb-2 mt-4 text-black">Based on {totalGames} simulations</p>
-              </>
+              <p className="mt-4 text-center text-sm font-semibold text-sand">
+                Based on {totalGames} simulations
+              </p>
             )}
           </>
         )}

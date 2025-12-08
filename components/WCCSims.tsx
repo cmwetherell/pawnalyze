@@ -7,7 +7,7 @@ import GameHouseGeneral from './GameHouseGeneral';
 import { Game } from '@/types';
 import ChessButton from './Button';
 
-const COLORS_PALETTE = ['#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
+const COLORS_PALETTE = ['#f5c063', '#95f5c3', '#ff6243', '#00c2a8'];
 
 const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   const [isClient, setIsClient] = useState(false);
@@ -111,13 +111,16 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     datasets,
   };
 
+  const axisColor = 'rgba(247, 244, 234, 0.9)';
+  const gridColor = 'rgba(247, 244, 234, 0.08)';
+
   const options = {
     plugins: {
       legend: {
         display: true,
         position: 'right' as const,
         labels: {
-          color: 'black',
+          color: axisColor,
         },
       },
       tooltip: {
@@ -134,17 +137,21 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
         title: {
           display: true,
           text: 'Round',
-          color: 'black',
+          color: axisColor,
         },
+        ticks: { color: axisColor },
+        grid: { color: gridColor },
       },
       y: {
         title: {
           display: true,
           text: 'Win % by Player',
-          color: 'black',
+          color: axisColor,
         },
         min: 0,
         max: 100,
+        ticks: { color: axisColor },
+        grid: { color: gridColor },
       },
     },
     maintainAspectRatio: false,
@@ -152,12 +159,12 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
 
   if (justGraph) {
     return (
-      <div className="max-w-7xl mx-auto p-4 space-y-6">
-        <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="mx-auto max-w-6xl space-y-6 rounded-4xl border border-white/10 bg-black/30 p-6 shadow-subtle">
+        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-ink-soft/90 to-ink/70 p-6">
           <div style={{ height: '500px' }}>
             <Line data={data} options={options} />
           </div>
-          <p className="text-center mt-4 text-gray-600">
+          <p className="mt-4 text-center text-sm text-sand-muted">
             Based on {nSims} simulations after round {maxRound}.
           </p>
         </div>
@@ -165,19 +172,19 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     );
   } else {
     return (
-      <div className="max-w-7xl mx-auto p-4 space-y-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800">Simulated Results by Round</h1>
-        <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="mx-auto max-w-6xl space-y-6 rounded-4xl border border-white/10 bg-black/20 p-6 shadow-subtle">
+        <h1 className="text-center font-display text-3xl text-sand">Simulated Results by Round</h1>
+        <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-ink-soft/90 to-ink/70 p-6">
           <div style={{ height: '500px' }}>
             <Line data={data} options={options} />
           </div>
-          <p className="text-center mt-4 text-gray-600">
+          <p className="mt-4 text-center text-sm text-sand-muted">
             Based on {nSims} simulations after round {maxRound}.
           </p>
         </div>
-        <div className="bg-gray-50 shadow-md rounded-lg p-4">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
           <div className="flex justify-center mb-4">
-            <ChessButton text="Update Simulations" onClick={handleUpdateSimulations} />
+            <ChessButton text="Update Simulations" onClick={handleUpdateSimulations} variant="secondary" />
           </div>
           <GameHouseGeneral
             gamesData={sampleGamesData}

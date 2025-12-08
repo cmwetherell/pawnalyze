@@ -1,22 +1,20 @@
 import SimulationResults from "@/components/SimulationResults";
 import TournamentInfo from "@/components/TournamentInfo";
 
-const Sims: any = () => {
-    return (
-        <main className="flex-1 flex flex-col min-h-screen bg-white">
-        <div>
-            <TournamentInfo
-                name="2024 Womens Candidates Tournament"
-                website="https://candidates.fide.com/"
-                description="The Womens Candidates Tournament determines the challenger for the World Chess Championship, who will face Ju Wenjun."
-                format="8-player double round-robin"
-            />
-            <SimulationResults 
-                eventTable="womens_candidates_2024"
-
-            />
-        </div>
-        </main>
-    );
-    }
+const Sims = () => {
+  return (
+    <main className="container space-y-10 py-16">
+      <section className="space-y-4">
+        <p className="text-xs uppercase tracking-[0.5em] text-sand-muted">Event dossier</p>
+        <TournamentInfo
+          name="2024 Womens Candidates Tournament"
+          website="https://candidates.fide.com/"
+          description="Determines the challenger to reigning champion Ju Wenjun."
+          format="8-player double round-robin"
+        />
+      </section>
+      <SimulationResults eventTable="womens_candidates_2024" />
+    </main>
+  );
+};
 export default Sims;

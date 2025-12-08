@@ -1,22 +1,22 @@
 import WCCSims from "@/components/WCCSims";
-import SimulationResults from "@/components/SimulationResults";
 import TournamentInfo from "@/components/TournamentInfo";
-import Link from "next/link";
 
-const Sims: any = () => {
-    return (
-        <main className="flex-1 flex flex-col min-h-screen bg-white">
-            <div>
-                <TournamentInfo
-                    name="FIDE Chess World Championship Singapore 2024"
-                    website="https://worldchampionship.fide.com/"
-                    description="Reigning champion DIng Liren defends his title against Gukesh D."
-                    format="14 classical games. Tiebreaks if necessary."
-                />
-                <WCCSims justGraph={false}/>
-            </div>
-        </main>
-    );
-}
-
+const Sims = () => {
+  return (
+    <main className="container space-y-10 py-16">
+      <section className="space-y-4">
+        <p className="text-xs uppercase tracking-[0.5em] text-sand-muted">Event dossier</p>
+        <TournamentInfo
+          name="FIDE Chess World Championship Singapore 2024"
+          website="https://worldchampionship.fide.com/"
+          description="Ding Liren vs Gukesh D, 14 classical games with rapid/blitz tiebreaks if needed."
+          format="14 classical games"
+        />
+      </section>
+      <section className="rounded-4xl border border-white/10 bg-black/30 p-6 shadow-subtle">
+        <WCCSims justGraph={false} />
+      </section>
+    </main>
+  );
+};
 export default Sims;
