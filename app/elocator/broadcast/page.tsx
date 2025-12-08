@@ -1,7 +1,7 @@
 'use client'
 import BroadcastRoundComponent from '@/components/elocator/Broadcast';
 
-export default function Broadcast(): JSX.Element {
+export default function Broadcast() {
     return (
         <main className="flex-1 flex flex-col min-h-screen bg-white">
             <div>

@@ -1,6 +1,6 @@
 import TournamentInfo from '@/components/TournamentInfo';
 
-export default function SimPage(): JSX.Element {
+export default function SimPage() {
     return (
         <main className="flex-1 flex flex-col min-h-screen relative">
             {/* Hero Section */}
