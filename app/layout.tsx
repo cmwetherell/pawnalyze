@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
+import { Playfair_Display, Work_Sans } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
@@ -11,14 +9,18 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
+const fontDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
 });
 
-const fontHeading = localFont({
-  src: "../assets/fonts/CalSans-SemiBold.woff2",
-  variable: "--font-heading",
+const fontBody = Work_Sans({
+  subsets: ["latin"],
+  variable: "--font-body",
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
 interface RootLayoutProps {
@@ -27,8 +29,8 @@ interface RootLayoutProps {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: light)", color: "#0f1419" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f1419" },
   ],
 };
 
@@ -87,19 +89,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="scroll-smooth">
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
-          fontHeading.variable
+          "min-h-screen font-body antialiased relative",
+          fontDisplay.variable,
+          fontBody.variable
         )}
       >
         <Analytics />
         <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        <div className="relative z-10">
+          <Navbar />
+          <main className="flex flex-col min-h-screen">{children}</main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
