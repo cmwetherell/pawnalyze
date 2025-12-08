@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect } from 'react';
 import GamePicker from './GamePicker';
 import { Game } from '@/types';
@@ -44,8 +45,9 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
   const isRoundCompleted = (games: Game[]) => games.every(game => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <h2 className="text-center font-display text-xl uppercase tracking-[0.35em] text-paper">Pick game outcomes</h2>
+      <p className="text-center text-sm text-slate">Lock results, then rerun the tree.</p>
       {initialGames.map((round, index) => {
         // Check if the round is completed
         const roundCompleted = isRoundCompleted(round.games);
@@ -54,7 +56,7 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
         if (!roundCompleted) {
           return (
             <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
+              <h3 className="text-center text-sm uppercase tracking-[0.45em] text-slate">Round {round.round}</h3>
               {round.games.map((game) => (
                 <GamePicker
                   key={game.id}

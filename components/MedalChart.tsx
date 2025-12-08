@@ -19,7 +19,7 @@ interface MedalChartProps {
   className?: string;
 }
 
-const COLORS_PALETTE = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+const COLORS_PALETTE = ['#f6c177', '#72f5c7', '#ff6b6b', '#9ea8c7', '#f09383', '#7aa2f7', '#fbd38d', '#a0e9ff'];
 
 const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, className }) => {
   // Create a color map based on the top N countries from the latest round
@@ -178,31 +178,27 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
   };
 
   // Define the chart options with custom legend and tooltip settings
+  const axisColor = 'rgba(244,239,228,0.8)';
+  const gridColor = 'rgba(255,255,255,0.08)';
+
   const options: any = {
-    aspectRatio: 2, // Maintain aspect ratio
     plugins: {
-      maintainAspectRatio: false,
       legend: {
-        display: true, // Show legend for Line chart
-        position: 'right', // Move legend to the right
+        display: true,
+        position: 'right',
         labels: {
-          generateLabels: (chart: any) => {
-            const { data } = chart;
-            return data.datasets.map((dataset: any) => ({
-              text: dataset.label,
-              fillStyle: dataset.backgroundColor,
-              strokeStyle: dataset.borderColor,
-              lineWidth: 1,
-            }));
-          },
-          color: 'black',
+          color: axisColor,
+          usePointStyle: true,
         },
       },
       tooltip: {
+        backgroundColor: 'rgba(4,5,12,0.95)',
+        borderColor: 'rgba(255,255,255,0.08)',
+        borderWidth: 1,
         callbacks: {
           label: function (context: any) {
             const label = context.dataset.label || '';
-            const value = context.parsed.y || 0;
+            const value = context.parsed.y || context.parsed || 0;
             return `${label}: ${value.toFixed(1)}%`;
           },
         },
@@ -213,36 +209,48 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         title: {
           display: true,
           text: maxRound === 0 ? 'Country' : 'Round',
-          color: 'black',
-          font: {
-            size: 12,
-          },
+          color: axisColor,
+        },
+        ticks: {
+          color: axisColor,
+        },
+        grid: {
+          color: gridColor,
         },
       },
       y: {
         title: {
           display: true,
           text: 'Win Gold %',
-          color: 'black',
-          font: {
-            size: 12,
-          },
+          color: axisColor,
+        },
+        ticks: {
+          color: axisColor,
         },
         min: 0,
-        suggestedMax: 50,
+        suggestedMax: 60,
+        grid: {
+          color: gridColor,
+        },
       },
     },
+    maintainAspectRatio: false,
   };
 
-  const conditionalMaxWidth: string = maxRound === 0 ? '400px' : '800px';
+  const conditionalMaxWidth: string = maxRound === 0 ? '420px' : '820px';
 
   return (
-    <div style={{ maxWidth: conditionalMaxWidth }} className={`flex mx-auto align-middle justify-center pb-5 ${className || ''}`}>
-      {maxRound === 0 ? (
-        <Bar data={generateBarChartData()} options={options} />
-      ) : (
-        <Line data={generateLineChartData()} options={options} />
-      )}
+    <div
+      style={{ maxWidth: conditionalMaxWidth }}
+      className={`mx-auto w-full rounded-2xl border border-white/10 bg-black/20 p-4 ${className || ''}`}
+    >
+      <div className="h-[360px]">
+        {maxRound === 0 ? (
+          <Bar data={generateBarChartData()} options={options} />
+        ) : (
+          <Line data={generateLineChartData()} options={options} />
+        )}
+      </div>
     </div>
   );
 }

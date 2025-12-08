@@ -27,43 +27,18 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 relative">
-  
-      <div className="mb-8" style={{ display: 'flex', justifyContent: 'center' }}>
-        <div style={{ display: 'block', maxWidth: '800px', width: '100%' }}>
-          <h2 className="text-2xl font-bold mb-2 text-center">Simulation Results</h2>
-          <GetPredictions
-            nsims = {nsims}
-            gameFilters = {gameFilters}
-            updateTrigger = {updateTrigger} // Pass the update trigger as a prop
-            eventTable = {eventTable}
-          />
-        </div>
+    <div className="glass-panel space-y-6 p-6">
+      <div className="text-center">
+        <h2 className="font-display text-2xl uppercase tracking-[0.35em] text-paper">Simulation results</h2>
+        <p className="text-sm text-slate">Adjust outcomes, rerun the Monte Carlo, and watch the chart redraw.</p>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="mb-4">
-        {/* <label htmlFor="nsims" className="text-md font-medium text-gray-700">
-          Max Number of Simulations:
-        </label>
-        <input
-          type="number"
-          id="nsims"
-          value={nsims}
-          onChange={handleNsimsChange}
-          className="text-center mt-1 block p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        /> */}
-        <ChessButton
-          text="Update Simulations"
-          onClick={handleSubmit}
-        />
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+        <GetPredictions nsims={nsims} gameFilters={gameFilters} updateTrigger={updateTrigger} eventTable={eventTable} />
       </div>
-
+      <div className="flex justify-center">
+        <ChessButton text="Update simulations" onClick={handleSubmit} />
       </div>
-      <GameHouse 
-        onGameFilterChange={handleGameFilterChange}
-        eventTable = {eventTable}
-      />
-  
+      <GameHouse onGameFilterChange={handleGameFilterChange} eventTable={eventTable} />
     </div>
   );
   

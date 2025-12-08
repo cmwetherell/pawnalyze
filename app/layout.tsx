@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
+import { Big_Shoulders_Display, Sora, JetBrains_Mono } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
@@ -11,14 +9,22 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
+const fontDisplay = Big_Shoulders_Display({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "600", "700"],
+  variable: "--font-display",
 });
 
-const fontHeading = localFont({
-  src: "../assets/fonts/CalSans-SemiBold.woff2",
-  variable: "--font-heading",
+const fontBody = Sora({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-body",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
 });
 
 interface RootLayoutProps {
@@ -90,16 +96,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
-          fontHeading.variable
+          "min-h-screen bg-ink text-paper antialiased selection:bg-mint/25 selection:text-paper",
+          fontDisplay.variable,
+          fontBody.variable,
+          fontMono.variable
         )}
       >
-        <Analytics />
-        <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        <div className="relative flex min-h-screen flex-col">
+          <span className="pointer-events-none absolute inset-x-10 top-0 h-[1px] bg-gradient-to-r from-transparent via-mint/60 to-transparent opacity-50" />
+          <Analytics />
+          <GoogleAnalytics gaId="G-59WSL645R4" />
+          <Navbar />
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </div>
       </body>
     </html>
   );

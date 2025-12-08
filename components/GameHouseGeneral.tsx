@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import GamePicker from './GamePicker';
 import { Game } from '@/types';
@@ -9,7 +11,6 @@ interface GameHouseProps {
   eventTable?: string; // Optional if gamesData is provided
   gamesData?: { round: number; games: Game[] }[]; // Optional if eventTable is provided
 }
-
 
 const GameHouseGeneral: React.FC<GameHouseProps> = ({ onGameFilterChange, eventTable, gamesData }) => {
   const [gamesWithOutcomes, setGamesWithOutcomes] = useState<Game[]>([]);
@@ -55,15 +56,16 @@ const GameHouseGeneral: React.FC<GameHouseProps> = ({ onGameFilterChange, eventT
     games.every((game) => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
+    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+      <h2 className="text-center font-display text-xl uppercase tracking-[0.35em] text-paper">Pick game outcomes</h2>
+      <p className="text-center text-sm text-slate">Lock results to steer the Monte Carlo rerun.</p>
       {initialGames.map((round, index) => {
         const roundCompleted = isRoundCompleted(round.games);
 
         if (!roundCompleted) {
           return (
-            <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
+            <div key={`round-${index}`} className="mt-6 space-y-4">
+              <h3 className="text-center text-sm uppercase tracking-[0.45em] text-slate">Round {round.round}</h3>
               {round.games.map((game) => (
                 <GamePicker
                   key={game.id}

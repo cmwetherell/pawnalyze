@@ -68,13 +68,14 @@ const AnalyzeGame: React.FC = () => {
             setCurrentFEN(analysisData.positionAnalysis[newIndex].fen);
         }
     };
-    const buttonStyle = "w-12 bg-primary border-2 border-black text-black font-bold py-2 px-4 rounded hover:bg-black hover:text-white transition duration-300 ease-in-out";
+    const navButtonStyle =
+        "flex h-12 w-12 items-center justify-center rounded-full border border-white/20 text-paper transition hover:border-mint/60 hover:text-mint";
 
     return (
-        <>
-            <p className="text-2xl font-bold">Enter the PGN for the game to analyze.</p>
+        <div className="space-y-4">
+            <p className="text-center text-sm uppercase tracking-[0.4em] text-slate">Paste PGN to analyze entire games</p>
             <textarea
-                className="w-3/4 h-32 p-4 rounded-lg border-2 border-gray-300 text-black"
+                className="h-32 w-full rounded-2xl border border-white/15 bg-black/30 p-4 text-paper placeholder:text-slate focus:border-mint/60 focus:outline-none"
                 placeholder="Paste PGN here"
                 value={pgn}
                 onChange={(e) => setPgn(e.target.value)}
@@ -87,23 +88,23 @@ const AnalyzeGame: React.FC = () => {
                 
             </ChessButton>
 
-            <div className="flex flex-col items-center justify-between p-4">
+            <div className="flex flex-col items-center justify-between rounded-2xl border border-white/10 bg-ink-soft/70 p-4">
                 <ChessBoard fen={currentFEN} />
             </div>
-            <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                <button className={buttonStyle} onClick={() => moveToPosition(0)}>&lt;&lt;</button>
-                <button className={buttonStyle} onClick={() => moveToPosition(currentIndex - 1)}>&lt;</button>
-                <button className={buttonStyle} onClick={() => moveToPosition(currentIndex + 1)}>&gt;</button>
-                <button className={buttonStyle} onClick={() => moveToPosition(analysisData ? analysisData.positionAnalysis.length - 1 : 0)}>&gt;&gt;</button>
+            <div className="mt-4 flex justify-center gap-3">
+                <button className={navButtonStyle} onClick={() => moveToPosition(0)}>&lt;&lt;</button>
+                <button className={navButtonStyle} onClick={() => moveToPosition(currentIndex - 1)}>&lt;</button>
+                <button className={navButtonStyle} onClick={() => moveToPosition(currentIndex + 1)}>&gt;</button>
+                <button className={navButtonStyle} onClick={() => moveToPosition(analysisData ? analysisData.positionAnalysis.length - 1 : 0)}>&gt;&gt;</button>
             </div>
-            <div style={{ minWidth: '300px', marginTop: '10px' }}>
-                Current FEN: {currentFEN}<br />
-                Complexity Score: {analysisData?.positionAnalysis[currentIndex]?.complexity || "N/A"}<br />
-                Position Evaluation: {analysisData?.positionAnalysis[currentIndex]?.evaluation || "N/A"}
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 text-sm text-slate">
+                <p className="font-mono text-xs text-paper">Current FEN: {currentFEN || "N/A"}</p>
+                <p>Complexity score: {analysisData?.positionAnalysis[currentIndex]?.complexity || "N/A"}</p>
+                <p>Position evaluation: {analysisData?.positionAnalysis[currentIndex]?.evaluation || "N/A"}</p>
             </div>
             {analysisData && <DisplayEval positionAnalysis={analysisData.positionAnalysis} />}
 
-        </>
+        </div>
     );
 }
 

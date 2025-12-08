@@ -1,55 +1,54 @@
-import Link from "next/link"
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
+type ChessButtonProps = {
+  text: string;
+  link?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  width?: string;
+};
 
+const ChessButton = ({ text, link, onClick, disabled, width }: ChessButtonProps) => {
+  const buttonWidth = width ? width : "min-w-[11rem]";
 
-type chessButtonProps = {
-    text: string,
-    link?: string,
-    onClick?: () => void
-    disabled?: boolean
-    width?: string
-    
-}
+  const baseClassName = cn(
+    "group relative inline-flex items-center justify-center overflow-hidden rounded-full border border-white/20 px-6 py-3 text-xs font-semibold uppercase tracking-[0.35em]",
+    "bg-gradient-to-r from-mint/20 via-transparent to-brass/35 text-paper shadow-glow transition duration-300",
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-mint/60",
+    buttonWidth,
+    disabled
+      ? "cursor-not-allowed opacity-50"
+      : "hover:-translate-y-0.5 hover:border-mint/60 hover:shadow-[0_0_35px_rgba(114,245,199,0.5)]"
+  );
 
-const ChessButton = ({text, link, onClick, disabled, width}: chessButtonProps) => {
-    // if width is set, width, else w-48
+  const Content = (
+    <>
+      <span className="absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100">
+        <span className="absolute inset-0 bg-gradient-to-r from-mint/30 via-transparent to-brass/45 blur-xl" />
+      </span>
+      <span className="relative z-10">{text}</span>
+    </>
+  );
 
-    const buttonWidth = width ? width : "w-48"
+  if (onClick) {
+    return (
+      <button className={baseClassName} onClick={onClick} disabled={disabled}>
+        {Content}
+      </button>
+    );
+  }
 
-    const busttonClassName = `${buttonWidth} bg-primary border-2 border-black text-black font-bold py-2 px-4 rounded hover:bg-black hover:text-white transition duration-300 ease-in-out`
-    // Conditionally render Link or button based on props
-    if (onClick) {
-        // If onClick is provided, render a button with the onClick handler
-        return (
-            <div className="mt-3">
-            <button
-                className={busttonClassName}
-                onClick={onClick}
-                disabled={disabled}
-            >
-                {text}
-                
-            </button>
-            </div>
-        );
-    } else if (link) {
-        // If link is provided, render Link component
-        return (
-            <Link href={link} passHref>
-                <button
-                style={{ display: "block", margin: "0 auto" }}
-                    className = {busttonClassName}
-                    >
-    
-                        {text}
-                </button>
-            </Link>
-        );
-    } else {
-        // Fallback or error handling if neither link nor onClick is provided
-        console.error('ChessButton requires either a link or an onClick handler');
-        return null;
-    }
-}
+  if (link) {
+    return (
+      <Link href={link} passHref className="inline-flex justify-center">
+        <span className={baseClassName}>{Content}</span>
+      </Link>
+    );
+  }
+
+  console.error("ChessButton requires either a link or an onClick handler");
+  return null;
+};
 
 export default ChessButton;
