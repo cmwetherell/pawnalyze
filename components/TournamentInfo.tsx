@@ -43,7 +43,7 @@ const TournamentInfo = ({
               rel="noreferrer"
               className="mt-1 block font-display text-base normal-case tracking-normal text-mint transition hover:text-amber"
             >
-              Visit ->
+              Visit {'->'}
             </a>
           </div>
         </div>

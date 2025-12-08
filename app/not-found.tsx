@@ -9,7 +9,7 @@ export default function Custom404() {
         <p className="mt-3 text-sand-muted">The line you followed fizzled out. Let&apos;s re-route you.</p>
         <div className="mt-6 flex flex-col gap-3">
           <Link href="/" className="text-mint transition hover:text-amber">
-            Return to the console ->
+            Return to the console {'->'}
           </Link>
           <Link
             href="https://blog.pawnalyze.com/"
