@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { Line, Bar } from 'react-chartjs-2';
-import 'chart.js/auto'; // Import to register the controllers
+import 'chart.js/auto';
 import { ChartData } from 'chart.js';
 
 interface MedalChartProps {
@@ -15,16 +15,16 @@ interface MedalChartProps {
     }[];
   };
   maxRound: number;
-  topN: number; // New prop to specify the number of top countries to display
+  topN: number;
   className?: string;
 }
 
-const COLORS_PALETTE = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+// Updated colors for dark theme
+const COLORS_PALETTE = ['#D4A84B', '#3B82F6', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4'];
 
 const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, className }) => {
-  // Create a color map based on the top N countries from the latest round
   const colorMap = useMemo(() => {
-    const latestRoundData = medalData?.rounds?.[maxRound]?.gold || []; // Get data from the latest round
+    const latestRoundData = medalData?.rounds?.[maxRound]?.gold || [];
     const sortedData = latestRoundData
       .map((item) => ({
         country: item.country,
@@ -32,7 +32,6 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
       }))
       .sort((a, b) => b.percentage - a.percentage);
 
-    // Assign colors to each country based on their ranking in the latest round
     const map: Record<string, string> = {};
     sortedData.forEach((item, index) => {
       if (index < COLORS_PALETTE.length) {
@@ -40,18 +39,15 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
       }
     });
 
-    // Assign a color for 'Other'
-    map['Other'] = '#CCCCCC';
+    map['Other'] = '#71717A';
 
     return map;
   }, [medalData, maxRound]);
 
-  // Function to get top N countries based on the specified round
   const getTopNCountries = (roundIndex: number) => {
     const roundData = medalData?.rounds?.[roundIndex] || {};
     if (!roundData || !roundData.gold) return [];
 
-    // Sort the countries based on gold medal percentages in descending order
     const sortedData = roundData.gold
       .map((item) => ({
         country: item.country,
@@ -59,14 +55,11 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
       }))
       .sort((a, b) => b.percentage - a.percentage);
 
-    // Get the top N countries and the rest as "Other"
     const topCountries = sortedData.slice(0, topN);
     const otherCountries = sortedData.slice(topN);
 
-    // Calculate the total percentage for "Other" countries
     const otherPercentage = otherCountries.reduce((sum, country) => sum + country.percentage, 0);
 
-    // Add the "Other" entry if there are any countries grouped as "Other"
     if (otherPercentage > 0) {
       topCountries.push({ country: 'Other', percentage: otherPercentage });
     }
@@ -74,10 +67,8 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
     return topCountries;
   };
 
-  // Function to get top N countries based on the latest round (maxRound)
   const getTopNCountriesFromLatestRound = () => {
     const latestRoundData = medalData?.rounds?.[maxRound]?.gold || [];
-    // Sort the countries based on gold medal percentages in descending order
     const sortedData = latestRoundData
       .map((item) => ({
         country: item.country,
@@ -85,16 +76,12 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
       }))
       .sort((a, b) => b.percentage - a.percentage);
 
-    // Get the top N countries
     const topCountries = sortedData.slice(0, topN);
-
-    // Determine if there are 'Other' countries
     const hasOther = sortedData.length > topN;
 
     return { topCountries, hasOther };
   };
 
-  // Function to generate the data for the Bar chart
   const generateBarChartData = (): ChartData<'bar', number[], unknown> => {
     const topCountries = getTopNCountries(maxRound);
     if (topCountries.length === 0) {
@@ -110,26 +97,24 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         {
           label: 'Gold Medal Chances (%)',
           data,
-          backgroundColor: topCountries.map((item) => colorMap[item.country] || '#CCCCCC'), // Use the color map
-          borderColor: topCountries.map((item) => colorMap[item.country] || '#CCCCCC'),
+          backgroundColor: topCountries.map((item) => colorMap[item.country] || '#71717A'),
+          borderColor: topCountries.map((item) => colorMap[item.country] || '#71717A'),
           borderWidth: 1,
+          borderRadius: 4,
         },
       ],
     };
   };
 
-  // Function to generate the data for the Line chart
   const generateLineChartData = (): ChartData<'line', number[], unknown> => {
     if (!medalData || !medalData.rounds) {
       return { labels: [], datasets: [] };
     }
 
-    const labels = medalData.rounds.map((_, index) => `Round ${index}`);
+    const labels = medalData.rounds.map((_, index) => `R${index}`);
 
-    // Get the list of top N countries and whether there is 'Other', based on the latest round
     const { topCountries, hasOther } = getTopNCountriesFromLatestRound();
 
-    // For each country, collect their gold percentages over rounds
     const datasets = topCountries.map((countryItem) => {
       const countryName = countryItem.country;
 
@@ -142,13 +127,18 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         label: countryName,
         data,
         fill: false,
-        borderColor: colorMap[countryName] || '#CCCCCC',
-        backgroundColor: colorMap[countryName] || '#CCCCCC',
-        tension: 0.1, // Optional: curve tension
+        borderColor: colorMap[countryName] || '#71717A',
+        backgroundColor: colorMap[countryName] || '#71717A',
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: colorMap[countryName] || '#71717A',
+        pointBorderColor: '#0A0A0B',
+        pointBorderWidth: 2,
+        borderWidth: 2,
       };
     });
 
-    // If there is 'Other', calculate the 'Other' dataset
     if (hasOther) {
       const otherData = medalData.rounds.map((round) => {
         const otherPercentage = round.gold.reduce((sum, item) => {
@@ -165,9 +155,15 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         label: 'Other',
         data: otherData,
         fill: false,
-        borderColor: colorMap['Other'] || '#CCCCCC',
-        backgroundColor: colorMap['Other'] || '#CCCCCC',
-        tension: 0.1,
+        borderColor: colorMap['Other'] || '#71717A',
+        backgroundColor: colorMap['Other'] || '#71717A',
+        tension: 0.3,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: colorMap['Other'] || '#71717A',
+        pointBorderColor: '#0A0A0B',
+        pointBorderWidth: 2,
+        borderWidth: 2,
       });
     }
 
@@ -177,28 +173,36 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
     };
   };
 
-  // Define the chart options with custom legend and tooltip settings
   const options: any = {
-    aspectRatio: 2, // Maintain aspect ratio
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
     plugins: {
-      maintainAspectRatio: false,
       legend: {
-        display: true, // Show legend for Line chart
-        position: 'right', // Move legend to the right
+        display: true,
+        position: 'right',
         labels: {
-          generateLabels: (chart: any) => {
-            const { data } = chart;
-            return data.datasets.map((dataset: any) => ({
-              text: dataset.label,
-              fillStyle: dataset.backgroundColor,
-              strokeStyle: dataset.borderColor,
-              lineWidth: 1,
-            }));
+          color: '#A1A1AA',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
           },
-          color: 'black',
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 15,
         },
       },
       tooltip: {
+        backgroundColor: '#1F1F23',
+        titleColor: '#FAFAFA',
+        bodyColor: '#A1A1AA',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function (context: any) {
             const label = context.dataset.label || '';
@@ -210,22 +214,49 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
     },
     scales: {
       x: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.04)',
+          drawBorder: false,
+        },
+        ticks: {
+          color: '#71717A',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
+          },
+        },
         title: {
           display: true,
           text: maxRound === 0 ? 'Country' : 'Round',
-          color: 'black',
+          color: '#A1A1AA',
           font: {
+            family: 'var(--font-body)',
             size: 12,
+            weight: 500 as const,
           },
         },
       },
       y: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.04)',
+          drawBorder: false,
+        },
+        ticks: {
+          color: '#71717A',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
+          },
+          callback: (value: any) => `${value}%`,
+        },
         title: {
           display: true,
           text: 'Win Gold %',
-          color: 'black',
+          color: '#A1A1AA',
           font: {
+            family: 'var(--font-body)',
             size: 12,
+            weight: 500 as const,
           },
         },
         min: 0,
@@ -234,10 +265,11 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
     },
   };
 
-  const conditionalMaxWidth: string = maxRound === 0 ? '400px' : '800px';
-
   return (
-    <div style={{ maxWidth: conditionalMaxWidth }} className={`flex mx-auto align-middle justify-center pb-5 ${className || ''}`}>
+    <div 
+      style={{ height: '400px', maxWidth: maxRound === 0 ? '400px' : '100%' }} 
+      className={`mx-auto ${className || ''}`}
+    >
       {maxRound === 0 ? (
         <Bar data={generateBarChartData()} options={options} />
       ) : (
@@ -245,6 +277,6 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
       )}
     </div>
   );
-}
+};
 
 export default MedalChart;

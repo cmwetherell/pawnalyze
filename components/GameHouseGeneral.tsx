@@ -6,10 +6,9 @@ import womensCandByRound from '@/public/womensCandByRound.json';
 
 interface GameHouseProps {
   onGameFilterChange: (games: Game[]) => void;
-  eventTable?: string; // Optional if gamesData is provided
-  gamesData?: { round: number; games: Game[] }[]; // Optional if eventTable is provided
+  eventTable?: string;
+  gamesData?: { round: number; games: Game[] }[];
 }
-
 
 const GameHouseGeneral: React.FC<GameHouseProps> = ({ onGameFilterChange, eventTable, gamesData }) => {
   const [gamesWithOutcomes, setGamesWithOutcomes] = useState<Game[]>([]);
@@ -55,29 +54,53 @@ const GameHouseGeneral: React.FC<GameHouseProps> = ({ onGameFilterChange, eventT
     games.every((game) => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
-      {initialGames.map((round, index) => {
-        const roundCompleted = isRoundCompleted(round.games);
+    <div className="space-y-6">
+      <h2 className="font-display text-heading-lg text-text-primary text-center">
+        Pick Game Outcomes
+      </h2>
+      
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {initialGames.map((round, index) => {
+          const roundCompleted = isRoundCompleted(round.games);
 
-        if (!roundCompleted) {
-          return (
-            <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
-              {round.games.map((game) => (
-                <GamePicker
-                  key={game.id}
-                  whitePlayer={game.whitePlayer}
-                  blackPlayer={game.blackPlayer}
-                  onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
-                />
-              ))}
-            </div>
-          );
-        }
+          if (!roundCompleted) {
+            return (
+              <div 
+                key={`round-${index}`} 
+                className="
+                  p-5 
+                  rounded-xl 
+                  bg-bg-elevated/50
+                  border border-border-subtle
+                "
+              >
+                <h3 className="
+                  font-display text-heading-md 
+                  text-text-primary 
+                  mb-4
+                  pb-2
+                  border-b border-border-subtle
+                ">
+                  Round {round.round}
+                </h3>
+                
+                <div className="space-y-3">
+                  {round.games.map((game) => (
+                    <GamePicker
+                      key={game.id}
+                      whitePlayer={game.whitePlayer}
+                      blackPlayer={game.blackPlayer}
+                      onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
+                    />
+                  ))}
+                </div>
+              </div>
+            );
+          }
 
-        return null;
-      })}
+          return null;
+        })}
+      </div>
     </div>
   );
 };

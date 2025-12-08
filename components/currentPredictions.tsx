@@ -1,51 +1,24 @@
 'use client'
 
 import React, { useEffect, useState } from "react";
-import { Bar, Line } from 'react-chartjs-2';
-import 'chart.js/auto'; // Import to register the controllers.
+import { Line } from 'react-chartjs-2';
+import 'chart.js/auto';
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
 import { Game } from "@/types";
 
-// import ChartDataLabels from 'chartjs-plugin-datalabels';
-// import { Chart } from 'chart.js';
-// Chart.register(ChartDataLabels);
-
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
-import ChessButton from "./Button";
-import { reverse } from "dns";
-import { off } from "process";
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
+// Updated color palette for dark theme
+const COLORS_PALETTE = ['#D4A84B', '#3B82F6', '#EC4899', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4'];
+
 const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: CurrentPredictionsProps) => {
-  const [isClient, setIsClient] = useState(false); // Add a state to track client-side rendering
+  const [isClient, setIsClient] = useState(false);
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState('');
-
-  const PlayerDropdown = () => {
-    return (
-      <div>
-        <label htmlFor="player-select" className="text-lg font-bold mb-2 text-center">
-          Select Player:
-        </label>
-        <select
-          id="player-select"
-          value={selectedPlayer}
-          onChange={(e) => setSelectedPlayer(e.target.value)}
-          className="ml-2 p-1 text-md mb-2 max-w-36"
-        >
-          <option value="">All Players</option>
-          {playerNames.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
-      </div>
-    );
-  };
 
   let initialGames: { round: number; games: Game[] }[] = [];
 
@@ -55,20 +28,12 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
     console.log(e);
   }
 
-  // // Create a new array with filtered games without the round element
-  // const filteredGames = initialGames.flatMap(roundData =>
-  //   roundData.games.filter(game => game.outcome === 'win' || game.outcome === 'draw' || game.outcome === 'loss')
-  // );
-
-  // // combine the filtered games with the gameFilters
-  // const combinedGames = [...filteredGames, ...gameFilters];
-
   useEffect(() => {
-    setIsClient(true); // Update the state to indicate client-side rendering
+    setIsClient(true);
     const fetchData = async () => {
       const requestBody = {
         gameFilters: gameFilters,
-        limitSims: nsims, // Adjust this to fetch 1000 random samples
+        limitSims: nsims,
         eventTable: eventTable,
       };
 
@@ -83,9 +48,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
         if (response.ok) {
           const data = await response.json();
-          // console.log(data);
 
-          // Transform the data into the expected object format
           const transformedData = data.reduce((acc: Record<string, any>, curr: any) => {
             const { Round, winner, win_count } = curr;
             if (!acc[Round]) {
@@ -101,11 +64,9 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
             return acc;
           }, {});
 
-          // Transform the data into a format suitable for the stacked bar chart
           const chartData: Record<string, PercentageData[]> = {};
           customOrder = []
           for (const round in transformedData) {
-            // add round to customOrder
             customOrder.push(round);
             
             const roundData = transformedData[round];
@@ -126,23 +87,18 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
             const indexB = roundOrder.indexOf(b);
 
             if (indexA === -1 && indexB === -1) {
-              // If both elements are not found in the roundOrder array, compare them as strings
               return a.localeCompare(b);
             } else if (indexA === -1) {
-              // If a is not found in the roundOrder array, it should come after b
               return 1;
             } else if (indexB === -1) {
-              // If b is not found in the roundOrder array, it should come after a
               return -1;
             } else {
-              // Compare the indices of a and b in the roundOrder array
               return indexA - indexB;
             }
           });
 
           setPlayerWinPercentagesByRound(chartData);
 
-          // Set totalGames to be the sum of win_count for rounds where Round is "Simulated"
           const simulatedRound = transformedData["Simulated"];
           setTotalGames(simulatedRound ? simulatedRound.totalGames : 0);
         } else {
@@ -156,14 +112,6 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
     fetchData();
   }, [updateTrigger]);
 
-  // Define colors for the pie chart
-  // Palette 1: Soft and Diverse
-  const COLORS_PALETTE_1 = ['#6A4C93', '#F9A1BC', '#FFD166', '#06D6A0', '#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
-
-  // Palette 2: Bold and Bright
-  const COLORS_PALETTE_2 = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
-
-  // Player names - Ensure the order matches your COLORS_PALETTE
   let playerNames: string[] = Array.from(
     new Set(
       initialGames.reduce((players: string[], round) => {
@@ -175,145 +123,154 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
     )
   );
 
-  // Map player names to colors from the chosen palette
   const playerColorsMap = playerNames.reduce((acc: PlayerColorsMap, playerName, index) => {
-    acc[playerName] = COLORS_PALETTE_2[index]; // Use COLORS_PALETTE_1 for the other palette
+    acc[playerName] = COLORS_PALETTE[index % COLORS_PALETTE.length];
     return acc;
   }, {});
 
-  // Prepare data for Chart.js, mapping each player to their color
-// make customOrder list only contain rounds that have been played
-// filter out rounds that do not have any data
-
-// customOrder = customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label));
-
-  // Prepare data for Chart.js, mapping each player to their color
   const playerPercentages = playerNames
-  .filter((name) => selectedPlayer === '' || name === selectedPlayer)
-  .map((name) => {
-    const playerData = customOrder.map(label =>
-      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
-    );
-    const latestWinPercentage = playerData[playerData.length - 1];
-    return { name, percentage: latestWinPercentage };
-  });
+    .filter((name) => selectedPlayer === '' || name === selectedPlayer)
+    .map((name) => {
+      const playerData = customOrder.map(label =>
+        playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+      );
+      const latestWinPercentage = playerData[playerData.length - 1];
+      return { name, percentage: latestWinPercentage };
+    });
 
   playerPercentages.sort((a, b) => a.percentage - b.percentage);
 
-const data = {
-  labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
-  datasets: playerPercentages.map(({ name, percentage }) => {
-    const playerData = customOrder.map(label =>
-      playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
-    );
-    return {
-      label: `(${percentage.toFixed(1)}%) ${name}`,
-      data: playerData,
-      backgroundColor: playerColorsMap[name],
-      borderColor: playerColorsMap[name],
-      fill: false,
-      hoverOffset: 4,
-      pointRadius: 0,
-    };
-  }),
-};
-const options: any = {
-  plugins: {
-    legend: {
-      display: true,
-      position: "right",
-      reverse: true,
-      labels: {
-        color: 'black',
-      },
+  const data = {
+    labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
+    datasets: playerPercentages.map(({ name, percentage }) => {
+      const playerData = customOrder.map(label =>
+        playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
+      );
+      return {
+        label: `(${percentage.toFixed(1)}%) ${name}`,
+        data: playerData,
+        backgroundColor: playerColorsMap[name],
+        borderColor: playerColorsMap[name],
+        fill: false,
+        hoverOffset: 4,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: playerColorsMap[name],
+        pointBorderColor: '#0A0A0B',
+        pointBorderWidth: 2,
+        borderWidth: 2,
+        tension: 0.3,
+      };
+    }),
+  };
+
+  const options: any = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
     },
-    
-    tooltip: {
-      enabled: true,
-      callbacks: {
-        label: function(context: any) {
-          const dataset = context.dataset;
-          const dataIndex = context.dataIndex;
-          const value = dataset.data[dataIndex];
-          const playerName = dataset.label.replace(/\(.*?\)/, '').trim();
-          return `${playerName}: ${value}%`;
-        },
-      },
-    },
-    // datalabels: {
-    //   display: function(context: any) {
-    //     const dataset = context.dataset;
-    //     const datasetIndex = context.datasetIndex;
-    //     const dataIndex = context.dataIndex;
-    //     return dataIndex === dataset.data.length - 1 && dataset.data[dataIndex] !== 0;
-    //   },
-    //   align: 'left',
-    //   offset: 10,
-    //   padding: {
-    //     left: 4,
-    //     right: 4,
-    //     top: 1,
-    //     bottom: 1,
-    //   },
-    //   // anchor: 'end',
-    //   // offset: -50,
-    //   backgroundColor: 'white',
-    //   borderRadius: 4,
-    //   color: 'black',
-    //   font: {
-    //     size: 12,
-    //     weight: 'bold',
-    //   },
-    //   formatter: function(value: any, context: any) {
-    //     const playerName = context.dataset.label;
-    //     const truncatedName = playerName;
-    //     const percentage = value.toFixed(1);
-    //     return `${truncatedName}: ${percentage}%`;
-    //   },
-    //   clip: false,
-    // },
-  },
-  scales: {
-    x: {
-      title: {
+    plugins: {
+      legend: {
         display: true,
-        text: 'Round',
-        color: 'black',
-        font: {
-          size: 14,
+        position: "right",
+        reverse: true,
+        labels: {
+          color: '#A1A1AA',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
+          },
+          usePointStyle: true,
+          pointStyle: 'circle',
+          padding: 15,
+        },
+      },
+      tooltip: {
+        backgroundColor: '#1F1F23',
+        titleColor: '#FAFAFA',
+        bodyColor: '#A1A1AA',
+        borderColor: 'rgba(255, 255, 255, 0.08)',
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        enabled: true,
+        callbacks: {
+          label: function(context: any) {
+            const dataset = context.dataset;
+            const dataIndex = context.dataIndex;
+            const value = dataset.data[dataIndex];
+            const playerName = dataset.label.replace(/\(.*?\)/, '').trim();
+            return `${playerName}: ${value}%`;
+          },
         },
       },
     },
-    y: {
-      title: {
-        display: true,
-        text: 'Win % by Player',
-        color: 'black',
-        font: {
-          size: 14,
+    scales: {
+      x: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.04)',
+          drawBorder: false,
         },
+        ticks: {
+          color: '#71717A',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
+          },
+        },
+        title: {
+          display: true,
+          text: 'Round',
+          color: '#A1A1AA',
+          font: {
+            family: 'var(--font-body)',
+            size: 12,
+            weight: 500 as const,
+          },
+        },
+      },
+      y: {
+        grid: {
+          color: 'rgba(255, 255, 255, 0.04)',
+          drawBorder: false,
+        },
+        ticks: {
+          color: '#71717A',
+          font: {
+            family: 'var(--font-body)',
+            size: 11,
+          },
+          callback: (value: any) => `${value}%`,
+        },
+        title: {
+          display: true,
+          text: 'Win % by Player',
+          color: '#A1A1AA',
+          font: {
+            family: 'var(--font-body)',
+            size: 12,
+            weight: 500 as const,
+          },
+        },
+        stacked: false,
         min: 0,
-        suggestedMax: 100,
+        max: 100,
       },
-      stacked: false,
-      min: 0,
-      max: 100,
     },
-  },
-  maintainAspectRatio: false,
-};
+  };
 
   return (
     <div>
-      {/* <PlayerDropdown /> */}
-      <div style={{ height: '500px' }}> {/* Container must have a height */}
+      <div style={{ height: '450px' }}>
         {isClient && (
           <>
             <Line data={data} options={options} />
             {totalGames > 0 && (
-              <>
-              <p className="text-md text-center font-bold mb-2 mt-4 text-black">Based on {totalGames} simulations</p>
-              </>
+              <p className="text-sm text-center mt-6 text-text-muted">
+                Based on <span className="text-accent font-medium">{totalGames.toLocaleString()}</span> simulations
+              </p>
             )}
           </>
         )}

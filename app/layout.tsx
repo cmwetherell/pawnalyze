@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
+import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
@@ -11,11 +10,23 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
+// Display font - Elegant serif for headings
+const fontDisplay = Cormorant_Garamond({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-display",
+  display: "swap",
 });
 
+// Body font - Clean, modern sans-serif
+const fontBody = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+// Keep CalSans for brand elements
 const fontHeading = localFont({
   src: "../assets/fonts/CalSans-SemiBold.woff2",
   variable: "--font-heading",
@@ -27,8 +38,8 @@ interface RootLayoutProps {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: light)", color: "#0A0A0B" },
+    { media: "(prefers-color-scheme: dark)", color: "#0A0A0B" },
   ],
 };
 
@@ -74,12 +85,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    // apple: [
-    //   {
-    //     url: "/apple-touch-icon.png",
-    //     sizes: "180x180",
-    //   },
-    // ],
   },
   manifest: `${siteConfig.url}/site.webmanifest`,
   metadataBase: new URL(siteConfig.metadataBase),
@@ -87,19 +92,32 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
+          "min-h-screen bg-bg-primary font-body antialiased text-text-primary overflow-x-hidden",
+          fontBody.variable,
+          fontDisplay.variable,
           fontHeading.variable
         )}
       >
         <Analytics />
         <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        
+        {/* Background Effects */}
+        <div className="fixed inset-0 bg-grid pointer-events-none opacity-50" />
+        <div className="fixed inset-0 bg-radial-glow pointer-events-none" />
+        
+        {/* Main Layout */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-1">
+            <div className="section-container">
+              {children}
+            </div>
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );
