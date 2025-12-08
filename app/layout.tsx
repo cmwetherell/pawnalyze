@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
@@ -11,9 +10,16 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
+const fontBody = IBM_Plex_Sans({
   subsets: ["latin"],
-  variable: "--font-sans",
+  weight: ["400", "500", "600"],
+  variable: "--font-body",
+});
+
+const fontDisplay = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-display",
 });
 
 const fontHeading = localFont({
@@ -90,16 +96,23 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
+          "min-h-screen bg-ink text-sand antialiased relative overflow-x-hidden",
+          fontBody.variable,
+          fontDisplay.variable,
           fontHeading.variable
         )}
       >
+        <div className="ambient-grid" aria-hidden="true" />
+        <div className="noise-layer" aria-hidden="true" />
+        <div className="glow-orb glow-orb--amber top-[-10%] left-[-5%]" aria-hidden="true" />
+        <div className="glow-orb glow-orb--mint bottom-[-15%] right-[-10%]" aria-hidden="true" />
         <Analytics />
         <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        <div className="relative z-10 flex min-h-screen flex-col">
+          <Navbar />
+          <div className="flex-1">{children}</div>
+          <Footer />
+        </div>
       </body>
     </html>
   );

@@ -33,11 +33,11 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
 
   // Adjusted for responsive design and max-width constraints
   const baseClassName =
-    'border-2 border-black text-black font-bold rounded transition duration-300 ease-in-out text-center'; // Common base styles
+    'rounded-2xl border border-white/20 px-4 py-2 font-semibold uppercase tracking-[0.3em] transition duration-300 ease-in-out text-center text-sand'; // Common base styles
   const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`; // Max width for player buttons
   const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`; // Max width for draw button
-  const selectedClassName = 'bg-black text-white';
-  const defaultClassName = 'bg-primary';
+  const selectedClassName = 'bg-amber text-ink border-amber/70';
+  const defaultClassName = 'bg-white/5 hover:border-mint/60 hover:text-mint';
 
   const getButtonClassName = (outcome: 'white' | 'draw' | 'black') => {
     let specificClassName = outcome === 'draw' ? drawButtonClassName : playerButtonClassName;
@@ -51,7 +51,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
   };
 
   return (
-    <div className="bg-white p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
+    <div className="flex flex-wrap items-center justify-center gap-3 bg-transparent"> {/* Added flex-wrap for responsiveness */}
       <button
         style={{ overflowX: 'hidden' }}
         className={getButtonClassName('white')}
@@ -76,7 +76,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
 
       {/* Optional section to display additional game details */}
       {gameDetails && (
-        <div className="text-sm text-gray-600 mt-2">
+        <div className="mt-2 text-sm text-sand-muted">
           {Object.entries(gameDetails).map(([key, value]) => (
             <p key={key} className="truncate">
               <strong>{key}:</strong> {value}

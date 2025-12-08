@@ -1,54 +1,112 @@
-'use client';
-
 import Image from "next/image";
-import Link from "next/link";
-//multiline tsx text string
+import ChessButton from "@/components/Button";
 
-import styled from 'styled-components';
+const highlights = [
+  {
+    title: "Media Signals",
+    detail: "Hans Niemann investigation cited by The New York Times and NPR for data rigor",
+  },
+  {
+    title: "Open Source DNA",
+    detail: "Core simulators + Elocator models are transparent and community-reviewable",
+  },
+  {
+    title: "Seattle Crafted",
+    detail: "Built nights and weekends inside a small Capitol Hill studio",
+  },
+];
 
-// bold text
-//hex code for neon green: #39ff14
-const StyledLink = styled.a`
-    font-weight: bold;
-    text-decoration: none;
-    &:hover {
-        text-decoration: underline;
-    }
-`;
+const milestones = [
+  {
+    year: "2021",
+    text: "Pawnalyze begins as a personal notebook to track classical prep for friends on the circuit.",
+  },
+  {
+    year: "2022",
+    text: "Monte Carlo engine ships with tournament visualizations and a pipeline into the public blog.",
+  },
+  {
+    year: "2023",
+    text: "Elocator launches with a neural net trained on 100K GM moves to estimate position complexity.",
+  },
+  {
+    year: "2024",
+    text: "Broadcast tools, medal radars, and APIs turn Pawnalyze into a proper chess intelligence lab.",
+  },
+];
 
-
-
-const About = () => {
-    return (
-        <main className="flex-1 flex flex-col mt-3">
-        {/* <div className="flex-1 flex flex-col bg-white p-8 justify-center"> */}
-          <h1 className="text-6xl font-bold text-center text-black mb-2 mt-4">About</h1>
+export default function About() {
+  return (
+    <main className="container space-y-16 py-16">
+      <section className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-6">
+          <p className="text-xs uppercase tracking-[0.5em] text-sand-muted">About Pawnalyze</p>
+          <h1 className="font-display text-5xl text-sand">A lone-data-scientist skunkworks dedicated to chess clarity</h1>
+          <p className="text-lg text-sand-muted">
+            I&apos;m Caleb Wetherell, a Seattle-based data scientist and serial hobbyist. Pawnalyze is my perpetual lab
+            project where simulations, storytelling, and neural heuristics collide so the chess world can reason faster.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <ChessButton text="Say hello on X" link="https://www.twitter.com/pawnalyze" variant="secondary" />
+            <ChessButton text="Source on GitHub" link="https://github.com/cmwetherell" variant="ghost" />
+          </div>
+        </div>
+        <div className="rounded-4xl border border-white/10 bg-black/30 p-6">
           <Image
             src="/img/selfie.jpeg"
             alt="Caleb Wetherell"
-            width={300}
-            height={300}
-            className="rounded-xl justify-center mx-auto mt-2"
-            />
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <p className="text-base  mb-4">Welcome to Pawnalyze, a haven for chess enthusiasts and data lovers alike! My name is Caleb Wetherell, a Seattle-based data scientist with a penchant for chess, albeit not mastering it just yet. As a serial hobbyist, I dive into intriguing projects that blend my love for data and my array of interests, with chess taking center stage on Pawnalyze.</p>
-                <p className="text-base  mb-4">Pawnalyze is the culmination of my passion for data science and chess. I simulate  and make predictions for chess tournaments, and recently started analyzing the complexity of chess positions. This project reflects my journey in learning and entertainment, and I am thrilled to share it with you. For the curious minds, the code that powers these simulations is 
-                <Link href="https://www.github.com/cmwetherell/cmwetherell.github.io" passHref={true}><StyledLink> available on my GitHub</StyledLink></Link>.</p>
+            width={480}
+            height={480}
+            className="mx-auto rounded-3xl border border-white/20 object-cover"
+            priority
+          />
+          <p className="mt-4 text-center text-sm text-sand-muted">Building, modeling, and occasionally blundering pieces in Seattle.</p>
+        </div>
+      </section>
 
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Elocator: Unveiling the Complexity of Chess Positions</h3>
-                <p className="text-base  mb-4">In my continuous exploration of chess through data, I&apos;ve launched a groundbreaking project named Elocator. This open-source tool is designed to predict the complexity of chess positions for humans, providing a unique lens to understand what makes a position challenging. By defining complexity as the expected change in win percentage after a move, Elocator offers a novel perspective on the game&apos;s intricate dynamics.</p>
-                <p className="text-base  mb-4">Elocator operates on a dataset of FENs, analyzing the loss in win percentage when a grandmaster makes a move. Underpinned by a neural network trained on over 100,000 chess moves by grandmasters, it assigns a complexity score to positions, aiming to deepen our understanding of chess strategy. This tool not only serves as a bridge between human intuition and computational analysis but also opens new avenues for research and discussion within the chess community.</p>
+      <section className="grid gap-6 md:grid-cols-3">
+        {highlights.map((item) => (
+          <div key={item.title} className="rounded-3xl border border-white/10 bg-gradient-to-br from-black/30 to-black/10 p-6">
+            <p className="text-xs uppercase tracking-[0.4em] text-amber">{item.title}</p>
+            <p className="mt-3 text-sm text-sand-muted">{item.detail}</p>
+          </div>
+        ))}
+      </section>
 
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Recognition</h3>
-                <p className="text-base  mb-4">The journey with Pawnalyze and Elocator has led to significant recognition. My analysis of the Hans Niemann chess cheating scandal caught the attention of major media outlets, including The New York Times and NPR. These features underscore the impact of our work, bridging the gap between chess analysis and broader discussions on integrity and performance in the sport.</p>
-
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Join The Journey</h3>
-                <p className="text-base  mb-4">As Pawnalyze continues to evolve, so does my commitment to enhancing the chess community&apos;s understanding and appreciation of the game. Whether through the analytical insights from simulated tournaments or the groundbreaking analysis provided by Elocator, our mission remains to enrich the chess experience for players and enthusiasts around the world.</p>
-                <p className="text-base  mb-4">I invite you to explore the depths of chess analytics with me and delve into the intricacies of Elocator.</p>
-                <p className="text-base ">Thank you for visiting Pawnalyze. You can <Link href="https://www.twitter.com/pawnalyze/" passHref={true}><StyledLink> follow me on X/Twitter.</StyledLink></Link></p>
+      <section className="rounded-4xl border border-white/10 bg-black/30 p-8 shadow-subtle">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
+            <p className="text-xs uppercase tracking-[0.5em] text-sand-muted">Elocator</p>
+            <h2 className="font-display text-3xl text-sand">Decoding human complexity</h2>
+            <p className="mt-4 text-base text-sand-muted">
+              Elocator predicts how much a human is likely to lose from an engine-best line after any given move. It&apos;s
+              equal parts cheating deterrent, prep assistant, and storytelling device for commentators.
+            </p>
+            <p className="mt-4 text-base text-sand-muted">
+              The neural net looks at material makeup, king safety, imbalance patterns, and tempo swings. Each factor is
+              translated into expectations on how precise humans really are when the board explodes.
+            </p>
+            <a
+              href="https://github.com/cmwetherell/elocator"
+              className="mt-4 inline-flex text-mint"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Read the research notes ->
+            </a>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+            <div className="space-y-6">
+              {milestones.map((milestone) => (
+                <div key={milestone.year} className="flex gap-4">
+                  <div className="font-display text-2xl text-amber">{milestone.year}</div>
+                  <p className="text-sm text-sand-muted">{milestone.text}</p>
+                </div>
+              ))}
             </div>
-          </main>
-    );
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }
-
-export default About;

@@ -44,8 +44,8 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
   const isRoundCompleted = (games: Game[]) => games.every(game => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
+    <div className="rounded-3xl border border-white/10 bg-black/30 p-4 shadow-subtle">
+      <h2 className="mb-2 text-center font-display text-2xl text-sand">Pick Game Outcomes</h2>
       {initialGames.map((round, index) => {
         // Check if the round is completed
         const roundCompleted = isRoundCompleted(round.games);
@@ -54,7 +54,9 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
         if (!roundCompleted) {
           return (
             <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
+              <h3 className="mb-4 text-center text-sm uppercase tracking-[0.4em] text-sand-muted">
+                Round {round.round}
+              </h3>
               {round.games.map((game) => (
                 <GamePicker
                   key={game.id}
