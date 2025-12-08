@@ -158,10 +158,10 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
   // Define colors for the pie chart
   // Palette 1: Soft and Diverse
-  const COLORS_PALETTE_1 = ['#6A4C93', '#F9A1BC', '#FFD166', '#06D6A0', '#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
+  const COLORS_PALETTE_1 = ['#f6c177', '#72f5c7', '#ff6b6b', '#9ea8c7', '#f09383', '#7aa2f7', '#fbd38d', '#a0e9ff'];
 
-  // Palette 2: Bold and Bright
-  const COLORS_PALETTE_2 = ['#E63946', '#a4aba2', '#A8DADC', '#457B9D', '#1D3557', '#F4A261', '#2A9D8F', '#E76F51'];
+  // Palette 2: saturated neons
+  const COLORS_PALETTE_2 = ['#72f5c7', '#f6c177', '#ff6b6b', '#a0e9ff', '#f09383', '#7aa2f7', '#fbd38d', '#b8c0ff'];
 
   // Player names - Ensure the order matches your COLORS_PALETTE
   let playerNames: string[] = Array.from(
@@ -217,6 +217,9 @@ const data = {
     };
   }),
 };
+const axisColor = 'rgba(244, 239, 228, 0.7)';
+const gridColor = 'rgba(255,255,255,0.08)';
+
 const options: any = {
   plugins: {
     legend: {
@@ -224,12 +227,15 @@ const options: any = {
       position: "right",
       reverse: true,
       labels: {
-        color: 'black',
+        color: axisColor,
+        usePointStyle: true,
       },
     },
-    
     tooltip: {
       enabled: true,
+      backgroundColor: 'rgba(4,5,12,0.95)',
+      borderColor: 'rgba(255,255,255,0.08)',
+      borderWidth: 1,
       callbacks: {
         label: function(context: any) {
           const dataset = context.dataset;
@@ -240,55 +246,29 @@ const options: any = {
         },
       },
     },
-    // datalabels: {
-    //   display: function(context: any) {
-    //     const dataset = context.dataset;
-    //     const datasetIndex = context.datasetIndex;
-    //     const dataIndex = context.dataIndex;
-    //     return dataIndex === dataset.data.length - 1 && dataset.data[dataIndex] !== 0;
-    //   },
-    //   align: 'left',
-    //   offset: 10,
-    //   padding: {
-    //     left: 4,
-    //     right: 4,
-    //     top: 1,
-    //     bottom: 1,
-    //   },
-    //   // anchor: 'end',
-    //   // offset: -50,
-    //   backgroundColor: 'white',
-    //   borderRadius: 4,
-    //   color: 'black',
-    //   font: {
-    //     size: 12,
-    //     weight: 'bold',
-    //   },
-    //   formatter: function(value: any, context: any) {
-    //     const playerName = context.dataset.label;
-    //     const truncatedName = playerName;
-    //     const percentage = value.toFixed(1);
-    //     return `${truncatedName}: ${percentage}%`;
-    //   },
-    //   clip: false,
-    // },
   },
   scales: {
     x: {
       title: {
         display: true,
         text: 'Round',
-        color: 'black',
+        color: axisColor,
         font: {
           size: 14,
         },
+      },
+      ticks: {
+        color: axisColor,
+      },
+      grid: {
+        color: gridColor,
       },
     },
     y: {
       title: {
         display: true,
         text: 'Win % by Player',
-        color: 'black',
+        color: axisColor,
         font: {
           size: 14,
         },
@@ -298,26 +278,25 @@ const options: any = {
       stacked: false,
       min: 0,
       max: 100,
+      ticks: {
+        color: axisColor,
+      },
+      grid: {
+        color: gridColor,
+      },
     },
   },
   maintainAspectRatio: false,
 };
 
   return (
-    <div>
-      {/* <PlayerDropdown /> */}
-      <div style={{ height: '500px' }}> {/* Container must have a height */}
-        {isClient && (
-          <>
-            <Line data={data} options={options} />
-            {totalGames > 0 && (
-              <>
-              <p className="text-md text-center font-bold mb-2 mt-4 text-black">Based on {totalGames} simulations</p>
-              </>
-            )}
-          </>
-        )}
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4" style={{ height: '500px' }}>
+        {isClient && <Line data={data} options={options} />}
       </div>
+      {totalGames > 0 && (
+        <p className="text-center text-sm text-slate">Based on {totalGames} simulations</p>
+      )}
     </div>
   );
 };

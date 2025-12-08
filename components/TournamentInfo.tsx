@@ -10,22 +10,53 @@ interface TournamentInfoProps {
 }
 
 const TournamentInfo = ({ name, internalLink, website, description, format }: TournamentInfoProps) => {
-  return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      {/* If internalLink is not provided, use the website link */}
-      {internalLink ? (
-        <Link
-          href={internalLink}
-          className="text-2xl font-bold mb-2"
-          >
-          <h2 className="text-2xl font-bold mb-2 text-blue">{name}</h2> {/* Tournament name is more prominent */}
+  const containerClasses = "glass-panel accent-border flex flex-col gap-3 p-6";
+
+  const destination = internalLink || website;
+  const isExternal = destination?.startsWith("http");
+
+  const renderTitle = () => {
+    if (internalLink) {
+      return (
+        <Link href={internalLink}>
+          <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">{name}</h2>
         </Link>
-      ) : (
-        <h2 className="text-2xl font-bold mb-2">{name}</h2>
-      )}
-      <p className="text-md mb-1"><strong>Website:</strong> <a href={website} className="text-blue-600 hover:text-blue-800 visited:text-purple-600">{website}</a></p>
-      <p className="text-md mb-1"><strong>Description:</strong> {description}</p>
-      <p className="text-md mb-1"><strong>Format:</strong> {format}</p>
+      );
+    }
+
+    if (isExternal && destination) {
+      return (
+        <a href={destination} target="_blank" rel="noreferrer">
+          <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">{name}</h2>
+        </a>
+      );
+    }
+
+    return <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">{name}</h2>;
+  };
+
+  return (
+    <div className={containerClasses}>
+      {renderTitle()}
+      <p className="text-sm text-slate">{description}</p>
+      <p className="text-xs uppercase tracking-[0.35em] text-mint/80">{format}</p>
+      {destination &&
+        (isExternal ? (
+          <a
+            href={destination}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.35em] text-paper"
+          >
+            Visit
+            <span className="inline-block h-[1px] w-10 bg-gradient-to-r from-mint to-brass" />
+          </a>
+        ) : (
+          <Link href={destination} className="inline-flex items-center gap-2 text-sm uppercase tracking-[0.35em] text-paper">
+            Visit
+            <span className="inline-block h-[1px] w-10 bg-gradient-to-r from-mint to-brass" />
+          </Link>
+        ))}
     </div>
   );
 };

@@ -1,49 +1,68 @@
 import OlympiadSims from "@/components/OlympiadSims";
-import SimulationResults from "@/components/SimulationResults";
 import TournamentInfo from "@/components/TournamentInfo";
-import Link from "next/link";
 
 const Sims: any = () => {
-    return (
-        <main className="flex-1 flex flex-col min-h-screen bg-white">
-            <div>
-                <h2>Congrats to India for winning Gold in both the Open and Womens event!</h2>
-                <TournamentInfo
-                    name="Chess Olympiad Budapest 2024"
-                    website="https://chessolympiad2024.fide.com/"
-                    description="Country's battle it out 4v4 to find the best chess nation."
-                    format="11 rounds of 4v4 team battles"
-                />
-                <OlympiadSims />
-            </div>
-            <div>
-                <p className='pt-4 pb-2 font-bold text-2xl text-center'>What am I looking at?</p>
-                <p>
-                    Before the Olympiad kicked off, I ran 5,000 simulations of the tournament to come up 
-                    with a prediction for the probabilities that each country wins (or gets silver/bronze). 
-                    Then, after each round, I run new simulations based on the current results. My simulations 
-                    also take into account the official FIDE pairing logic.
-                </p>
-                <br></br>
-                <p>
-                    In case you are wondering, yes, it was a nightmare to program. And its not quite perfect. 
-                    For example, Im tracking how many whites each country has played. So when two teams face off, 
-                    whoever has had white on board one more times will get the black pieces on board one. But when they have played white 
-                    the same amount of times, then the white pieces should go to whoever had white less recently. 
-                    Right now, I just randomize who gets white - its a small detail, not materially impacting 
-                    these predictions. But its a good example of the complexities of the Olympiad pairing algorithm.
-                </p>
-                <br></br>
-                <p>
-                    That was a little bit of an introduction to the simulations for this particular event, and 
-                    you can read <a className="text-green-500" href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html">more technical details here</a> about the underlying model, method, and simulations. 
-                    You can also find the code <a className="text-green-500" href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py">on GitHub.</a>
-                </p>
-                <br></br>
-                <p><strong>Note: </strong>If a country is on the list above, it means they at least won Bronze one time in one simulation, even if it says 0.0. Countries that never win a medal in current simulations will not be in the table above.</p>
-            </div>
-        </main>
-    );
-}
+  return (
+    <main className="page-shell space-y-10">
+      <section className="glass-panel space-y-4 p-6">
+        <span className="tag-pill">Budapest 2024</span>
+        <h1 className="font-display text-3xl uppercase tracking-[0.35em] text-paper">
+          Congrats to India for sweeping gold in both events.
+        </h1>
+        <TournamentInfo
+          name="Chess Olympiad Budapest 2024"
+          website="https://chessolympiad2024.fide.com/"
+          description="Nations face off over eleven Swiss rounds to crown the strongest chess federation."
+          format="11 rounds of 4v4 team battles"
+        />
+      </section>
+
+      <section className="glass-panel p-6">
+        <div className="panel-heading">
+          <h2 className="text-2xl font-display uppercase tracking-[0.35em] text-paper">Live medal simulations</h2>
+        </div>
+        <div className="mt-4"><OlympiadSims /></div>
+      </section>
+
+      <section className="glass-panel space-y-4 p-6 text-slate">
+        <h3 className="text-center text-xl font-display uppercase tracking-[0.35em] text-paper">What am I looking at?</h3>
+        <p>
+          Before the first pawn moved we ran 5,000 simulations to pin the baseline medal chances. After each round the
+          engine ingests fresh results, follows the official FIDE pairing rules, and reruns the Monte Carlo stack with the
+          updated field.
+        </p>
+        <p>
+          Tracking color allocation, board order, and tie-break edge cases is surprisingly gnarly—when two squads have
+          equal white counts we randomize who gets board-one white. It barely nudges odds, but highlights how intricate the
+          Olympiad pairing tree really is.
+        </p>
+        <p>
+          Dive deeper into the simulation logic in{" "}
+          <a
+            className="text-mint"
+            href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html"
+            target="_blank"
+            rel="noreferrer"
+          >
+            this technical breakdown
+          </a>{" "}
+          or audit the{" "}
+          <a
+            className="text-mint"
+            href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py"
+            target="_blank"
+            rel="noreferrer"
+          >
+            source code
+          </a>
+          .
+        </p>
+        <p className="text-xs uppercase tracking-[0.35em] text-slate">
+          Note: appearing in the medal table means a country earned at least one simulated bronze (even if it reads 0.0%).
+        </p>
+      </section>
+    </main>
+  );
+};
 
 export default Sims;

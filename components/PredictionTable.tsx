@@ -1,3 +1,5 @@
+'use client';
+
 // PredictionTable.tsx
 import React from 'react';
 import { PercentageData } from '@/types'; // Assuming this is the correct path for your types
@@ -9,19 +11,19 @@ type PredictionTableProps = {
 
 const PredictionTable: React.FC<PredictionTableProps> = ({ playerWinPercentages }) => {
   return (
-    <div className="flex justify-center mt-6">
-      <table className="table-auto bg-white border-collapse border-black">
-        <thead className="text-xs text-white uppercase bg-black">
+    <div className="mt-6 overflow-hidden rounded-2xl border border-white/10">
+      <table className="min-w-full border-collapse text-sm text-slate">
+        <thead className="bg-white/10 text-xs uppercase tracking-[0.35em] text-paper">
           <tr>
-            <th className="py-2 px-4 rounded-tl-md">Player Name</th>
-            <th className="py-2 px-4 text-right rounded-tr-md">Win Percentage</th>
+            <th className="py-3 px-4 text-left">Player</th>
+            <th className="py-3 px-4 text-right">Win %</th>
           </tr>
         </thead>
-        <tbody className="text-sm divide-y divide-gray-200">
+        <tbody>
           {playerWinPercentages.map((player, index) => (
-            <tr key={index} className="hover:bg-gray-50">
-              <td className="py-2 px-4 border-b border-gray-200"> {player.name} </td>
-              <td className="py-2 px-4 text-right border-b border-gray-200"> {player.value.toFixed(1)}% </td>
+            <tr key={index} className={cn("border-b border-white/5", index % 2 === 0 ? "bg-white/5" : "bg-transparent")}>
+              <td className="py-3 px-4 text-paper">{player.name}</td>
+              <td className="py-3 px-4 text-right font-mono text-paper">{player.value.toFixed(1)}%</td>
             </tr>
           ))}
         </tbody>

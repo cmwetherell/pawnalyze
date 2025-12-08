@@ -123,66 +123,58 @@ const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false 
     const sortedData = getSortedData();
 
     return (
-      <table className="table-auto border-collapse border border-gray-300 min-w-[80%] align-middle justify-center mx-auto">
-        <thead>
-          <tr className="bg-gray-800 text-white">
-            <th className="border border-gray-300 px-4 py-2 min-w-[25px] text-center">Flag</th>
-            <th className="border border-gray-300 px-4 py-2 min-w-[75px] text-center">Country</th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('gold')}
-            >
-              Gold (%) {sortColumn === 'gold' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('silver')}
-            >
-              Silver (%) {sortColumn === 'silver' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('bronze')}
-            >
-              Bronze (%) {sortColumn === 'bronze' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedData.map((row: any, index: any) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-              <td className="border border-gray-300 px-4 py-2 text-center align-middle">
-                <div className="inline-block">{mapCountryToFlag(row.country)}</div>
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.gold).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.silver).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.bronze).toFixed(1)}
-              </td>
+      <div className="scroll-hide max-h-[420px] overflow-y-auto rounded-2xl border border-white/10">
+        <table className="min-w-full border-collapse text-sm text-slate">
+          <thead className="bg-white/10 text-xs uppercase tracking-[0.3em] text-paper">
+            <tr>
+              <th className="px-4 py-3 text-left">Flag</th>
+              <th className="px-4 py-3 text-left">Country</th>
+              <th className="cursor-pointer px-4 py-3 text-left" onClick={() => handleSort('gold')}>
+                Gold (%) {sortColumn === 'gold' && (sortOrder === 'asc' ? '▲' : '▼')}
+              </th>
+              <th className="cursor-pointer px-4 py-3 text-left" onClick={() => handleSort('silver')}>
+                Silver (%) {sortColumn === 'silver' && (sortOrder === 'asc' ? '▲' : '▼')}
+              </th>
+              <th className="cursor-pointer px-4 py-3 text-left" onClick={() => handleSort('bronze')}>
+                Bronze (%) {sortColumn === 'bronze' && (sortOrder === 'asc' ? '▲' : '▼')}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sortedData.map((row: any, index: any) => (
+              <tr
+                key={index}
+                className={index % 2 === 0 ? 'bg-white/5' : 'bg-white/0'}
+              >
+                <td className="px-4 py-3">
+                  <div className="inline-block">{mapCountryToFlag(row.country)}</div>
+                </td>
+                <td className="px-4 py-3 font-medium text-paper">{row.country}</td>
+                <td className="px-4 py-3">{parseFloat(row.gold).toFixed(1)}</td>
+                <td className="px-4 py-3">{parseFloat(row.silver).toFixed(1)}</td>
+                <td className="px-4 py-3">{parseFloat(row.bronze).toFixed(1)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
 
   return (
     <div>
       {isClient && (
-        <div className="p-4">
+        <div className="space-y-6">
           {showOnlyMedalChart ? (
-            <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> // Render only the MedalChart
+            <MedalChart medalData={medalData} maxRound={maxRound} topN={8} />
           ) : (
             <>
-              <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
-              <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
-              <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
-              {renderTable()} {/* Display the table with country names, flags, and medal chances */}
+              <h2 className="text-center font-display text-2xl uppercase tracking-[0.35em] text-paper">
+                {`Medal chances after round ${maxRound}`}
+              </h2>
+              <p className="text-center text-sm text-slate">Total simulations: {nSims}</p>
+              <MedalChart medalData={medalData} maxRound={maxRound} topN={8} />
+              {renderTable()}
             </>
           )}
         </div>

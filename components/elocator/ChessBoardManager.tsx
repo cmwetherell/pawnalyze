@@ -50,29 +50,24 @@ const ChessBoardManager: React.FC = () => {
   };
 
   return (
-    <>
-      <p className="text-2xl font-bold">Enter the FEN youd like to analyze below.</p>
+    <div className="space-y-4">
+      <p className="text-center text-sm uppercase tracking-[0.4em] text-slate">Enter the FEN you&apos;d like to analyze</p>
       <input
-      className="w-1/2 h-12 p-4 rounded-lg border-2 border-gray-300 text-black "
-      type="text"
-      placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-      id="fenInput"
-      defaultValue={""}
+        className="w-full rounded-2xl border border-white/15 bg-black/30 p-4 text-paper placeholder:text-slate focus:border-mint/60 focus:outline-none"
+        type="text"
+        placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        id="fenInput"
+        defaultValue={""}
       />
-      <ChessButton
-        text="Get Complexity"
-        onClick={updateBoard}
-      />
-      {/* <button className="bg-green-700 hover:bg-green-800 text-white font-bold py-4 px-4 rounded mt-3 mb-3"
-        onClick={updateBoard} style={{ padding: '5px 10px' }}>Get Complexity
-      </button> */}
-      <div className="mt-3"></div>
-      <ChessBoard fen={fen} />
-        
-      <div id="complexityScore" style={{ marginTop: '10px' }}>
+      <ChessButton text="Get Complexity" onClick={updateBoard} />
+      <div className="rounded-2xl border border-white/10 bg-ink-soft/70 p-4">
+        <ChessBoard fen={fen} />
+      </div>
+
+      <div className="space-y-2 rounded-2xl border border-white/10 bg-black/30 p-4 text-slate">
         {complexityScore !== null ? (
           <>
-            Complexity Score: {complexityScore}
+            <p className="text-paper">Complexity Score: {complexityScore}</p>
             <ComplexityBar score={Number(complexityScore)} />
           </>
         ) : (
@@ -80,10 +75,10 @@ const ChessBoardManager: React.FC = () => {
         )}
       </div>
 
-      <div>
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4 font-mono text-xs text-paper">
         Current FEN: {fen}
       </div>
-    </>
+    </div>
   );
 };
 

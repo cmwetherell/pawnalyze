@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, } from 'recharts';
 
@@ -43,50 +45,62 @@ const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
   const blackGameComplexitySum = dataForBlack.reduce((sum, position) => sum + position.BlackComplexity, 0);
   const blackGameComplexityAvg = blackGameComplexitySum / dataForBlack.length;
 
+  const gridColor = 'rgba(255,255,255,0.12)';
+  const axisColor = '#f4efe4';
+  const tooltipStyle = {
+    backgroundColor: 'rgba(4,5,12,0.95)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '16px',
+  };
+
   return (
-    <>
-      <h2>Game Evaluation</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={evaluationDataCapped} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="Evaluation" stroke="#8884d8" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <h2>White Position Complexity</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={dataForWhite} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="WhiteComplexity" stroke="#82ca9d" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <h2>Black Position Complexity</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={dataForBlack} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="BlackComplexity" stroke="#8884d8" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
+    <div className="space-y-6">
       <div>
-        <h3>White Average Complexity: {whiteGameComplexityAvg.toFixed(2)}</h3>
-        <h3>Black Average Complexity: {blackGameComplexityAvg.toFixed(2)}</h3>
+        <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">Game evaluation</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={evaluationDataCapped} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="Move" tick={{ fill: axisColor }} stroke={gridColor} />
+            <YAxis tick={{ fill: axisColor }} stroke={gridColor} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Legend wrapperStyle={{ color: axisColor }} />
+            <Line type="monotone" dataKey="Evaluation" stroke="#72f5c7" dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
-    
-      
-    </>
+
+      <div>
+        <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">White position complexity</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={dataForWhite} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="Move" tick={{ fill: axisColor }} stroke={gridColor} />
+            <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} tick={{ fill: axisColor }} stroke={gridColor} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Legend wrapperStyle={{ color: axisColor }} />
+            <Line type="monotone" dataKey="WhiteComplexity" stroke="#f6c177" dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div>
+        <h2 className="font-display text-xl uppercase tracking-[0.35em] text-paper">Black position complexity</h2>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={dataForBlack} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+            <XAxis dataKey="Move" tick={{ fill: axisColor }} stroke={gridColor} />
+            <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} tick={{ fill: axisColor }} stroke={gridColor} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Legend wrapperStyle={{ color: axisColor }} />
+            <Line type="monotone" dataKey="BlackComplexity" stroke="#a0e9ff" dot={false} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-slate">
+        <p>White average complexity: {whiteGameComplexityAvg.toFixed(2)}</p>
+        <p>Black average complexity: {blackGameComplexityAvg.toFixed(2)}</p>
+      </div>
+    </div>
   );
 };
 

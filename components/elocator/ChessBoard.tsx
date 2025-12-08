@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+'use client';
+
+import React from 'react';
 import Image from "next/image";
 
 interface SquareProps {
@@ -7,14 +9,15 @@ interface SquareProps {
   }
   
   const Square: React.FC<SquareProps> = ({ dark, piece }) => {
-    const fill = dark ? 'green' : 'white'; // Change 'black' to 'orange' for dark squares
+    const fill = dark ? 'rgba(21,23,44,0.95)' : 'rgba(246,193,119,0.1)';
     const style = {
       backgroundColor: fill,
-      width: '50px',
-      height: '50px',
+      width: '48px',
+      height: '48px',
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
+      border: '1px solid rgba(255,255,255,0.04)',
     };
   
     return (
@@ -55,7 +58,7 @@ interface SquareProps {
       board.push(<div key={y} style={{ display: 'flex' }}>{row}</div>);
     }
   
-    return <div>{board}</div>;
+    return <div className="inline-flex flex-col overflow-hidden rounded-2xl border border-white/15 bg-black/40 p-2">{board}</div>;
   };
 
 function parseFEN(fen: string): Record<number, string> {
