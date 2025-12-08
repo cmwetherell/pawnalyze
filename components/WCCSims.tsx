@@ -55,7 +55,8 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   };
 
   useEffect(() => {
-    // Fetch initial simulations on mount
+    // fetchSimulations is an async function that calls setState in its callback,
+    // which is the correct pattern for data fetching in effects
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSimulations([]);
   }, []);
