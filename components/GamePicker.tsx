@@ -5,7 +5,7 @@ interface GamePickerProps {
   whitePlayer: string;
   blackPlayer: string;
   onOutcomeChange: (outcome: 'white' | 'draw' | 'black') => void;
-  gameDetails?: { [key: string]: any }; // Optional prop for additional game data
+  gameDetails?: { [key: string]: any };
 }
 
 const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: GamePickerProps) => {
@@ -13,36 +13,15 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Function to update state based on screen width
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // 768px is a common breakpoint for mobile devices
+      setIsMobile(window.innerWidth <= 768);
     };
-
-    // Set initial state based on current screen width
     handleResize();
-
-    // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
-    // Cleanup event listener on component unmount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Function to truncate player name to 7 characters for mobile screens
-  const getDisplayName = (name: string) => (isMobile ? name.substring(0, 7) : name);
-
-  // Adjusted for responsive design and max-width constraints
-  const baseClassName =
-    'border-2 border-black text-black font-bold rounded transition duration-300 ease-in-out text-center'; // Common base styles
-  const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`; // Max width for player buttons
-  const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`; // Max width for draw button
-  const selectedClassName = 'bg-black text-white';
-  const defaultClassName = 'bg-primary';
-
-  const getButtonClassName = (outcome: 'white' | 'draw' | 'black') => {
-    let specificClassName = outcome === 'draw' ? drawButtonClassName : playerButtonClassName;
-    return `${specificClassName} ${selectedOutcome === outcome ? selectedClassName : defaultClassName}`;
-  };
+  const getDisplayName = (name: string) => (isMobile ? name.substring(0, 10) : name);
 
   const handleOutcomeSelect = (outcome: 'white' | 'draw' | 'black') => {
     const newOutcome = selectedOutcome === outcome ? null : outcome;
@@ -50,36 +29,64 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
     onOutcomeChange(newOutcome as 'white' | 'draw' | 'black');
   };
 
-  return (
-    <div className="bg-white p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
-      <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('white')}
-        onClick={() => handleOutcomeSelect('white')}
-      >
-        {getDisplayName(whitePlayer)}
-      </button>
-      <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('draw')}
-        onClick={() => handleOutcomeSelect('draw')}
-      >
-        Draw
-      </button>
-      <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('black')}
-        onClick={() => handleOutcomeSelect('black')}
-      >
-        {getDisplayName(blackPlayer)}
-      </button>
+  const getButtonStyle = (outcome: 'white' | 'draw' | 'black') => {
+    const isSelected = selectedOutcome === outcome;
+    
+    return `
+      flex-1 py-3 px-4 text-sm font-medium
+      transition-all duration-300 ease-out-expo
+      border border-white/[0.06]
+      ${isSelected
+        ? outcome === 'white'
+          ? 'bg-ivory-100 text-obsidian-950 border-ivory-100'
+          : outcome === 'black'
+          ? 'bg-obsidian-700 text-ivory-100 border-obsidian-700'
+          : 'bg-amber-400 text-obsidian-950 border-amber-400'
+        : 'bg-white/[0.03] text-obsidian-300 hover:bg-white/[0.06] hover:text-ivory-100'
+      }
+    `;
+  };
 
-      {/* Optional section to display additional game details */}
+  return (
+    <div className="p-1">
+      <div className="flex gap-1 rounded-lg overflow-hidden bg-obsidian-900/50">
+        {/* White Player Button */}
+        <button
+          className={`${getButtonStyle('white')} rounded-l-md`}
+          onClick={() => handleOutcomeSelect('white')}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span className="w-3 h-3 rounded-full bg-ivory-100 border border-obsidian-300 flex-shrink-0" />
+            <span className="truncate">{getDisplayName(whitePlayer)}</span>
+          </div>
+        </button>
+
+        {/* Draw Button */}
+        <button
+          className={getButtonStyle('draw')}
+          onClick={() => handleOutcomeSelect('draw')}
+        >
+          <span className="truncate">½ - ½</span>
+        </button>
+
+        {/* Black Player Button */}
+        <button
+          className={`${getButtonStyle('black')} rounded-r-md`}
+          onClick={() => handleOutcomeSelect('black')}
+        >
+          <div className="flex items-center justify-center gap-2">
+            <span className="truncate">{getDisplayName(blackPlayer)}</span>
+            <span className="w-3 h-3 rounded-full bg-obsidian-800 border border-obsidian-400 flex-shrink-0" />
+          </div>
+        </button>
+      </div>
+
+      {/* Optional Game Details */}
       {gameDetails && (
-        <div className="text-sm text-gray-600 mt-2">
+        <div className="mt-2 space-y-1">
           {Object.entries(gameDetails).map(([key, value]) => (
-            <p key={key} className="truncate">
-              <strong>{key}:</strong> {value}
+            <p key={key} className="text-xs text-obsidian-500 truncate">
+              <span className="font-medium">{key}:</span> {value}
             </p>
           ))}
         </div>

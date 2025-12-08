@@ -4,8 +4,6 @@ import { Game } from '@/types';
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
 
-
-
 const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (games: Game[]) => void; eventTable: string }) => {
   const [gamesWithOutcomes, setGamesWithOutcomes] = useState<Game[]>([]);
 
@@ -40,36 +38,45 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
     onGameFilterChange(gamesWithOutcomes);
   }, [gamesWithOutcomes, onGameFilterChange]);
 
-  // Check if all games in a round have the "outcome" key and it is not null
   const isRoundCompleted = (games: Game[]) => games.every(game => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
+    <div className="space-y-6">
       {initialGames.map((round, index) => {
-        // Check if the round is completed
         const roundCompleted = isRoundCompleted(round.games);
 
-        // Render the round only if it's not completed
         if (!roundCompleted) {
           return (
-            <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
-              {round.games.map((game) => (
-                <GamePicker
-                  key={game.id}
-                  whitePlayer={game.whitePlayer}
-                  blackPlayer={game.blackPlayer}
-                  onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
-                />
-              ))}
+            <div key={`round-${index}`} className="space-y-3">
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full bg-amber-400/10 text-amber-400 text-xs font-semibold uppercase tracking-wider">
+                  Round {round.round}
+                </span>
+                <div className="flex-1 h-px bg-white/[0.06]" />
+              </div>
+              
+              <div className="space-y-2">
+                {round.games.map((game) => (
+                  <GamePicker
+                    key={game.id}
+                    whitePlayer={game.whitePlayer}
+                    blackPlayer={game.blackPlayer}
+                    onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
+                  />
+                ))}
+              </div>
             </div>
           );
         }
 
-        // Return null if the round is completed to hide it
         return null;
       })}
+
+      {initialGames.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-obsidian-400">No upcoming games to select</p>
+        </div>
+      )}
     </div>
   );
 };
