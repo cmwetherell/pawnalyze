@@ -67,7 +67,7 @@ const ChessButton = ({
 
   const buttonClassName = `${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`
 
-  const ButtonContent = () => (
+  const buttonContent = (
     <>
       {icon && <span className="flex-shrink-0">{icon}</span>}
       <span className="relative z-10">{text}</span>
@@ -81,13 +81,13 @@ const ChessButton = ({
         onClick={onClick}
         disabled={disabled}
       >
-        <ButtonContent />
+        {buttonContent}
       </button>
     )
   } else if (link) {
     return (
       <Link href={link} className={buttonClassName}>
-        <ButtonContent />
+        {buttonContent}
       </Link>
     )
   } else {
