@@ -1,72 +1,63 @@
 'use client'
-// components/SimulationResults.tsx
+
 import React, { useState } from 'react';
-import GetPredictions from "@/components/currentPredictions" // Adjust the path as necessary
-import GameHouse from '@/components/GameHouse' // Adjust the path as necessary
+import GetPredictions from "@/components/currentPredictions";
+import GameHouse from '@/components/GameHouse';
 import ChessButton from './Button';
-import { Game, eventTableProps } from '@/types';
-
-
+import { Game } from '@/types';
 
 const SimulationResults = ({ eventTable }: { eventTable: string }) => {
-  const [nsims, setNsims] = useState<number>(10000); // Default to 100 simulations
-  const [gameFilters, setGameFilters] = useState<Game[]>([]); // Initialize with no filters
-  const [updateTrigger, setUpdateTrigger] = useState(0); // Initialize update trigger
+  const [nsims, setNsims] = useState<number>(10000);
+  const [gameFilters, setGameFilters] = useState<Game[]>([]);
+  const [updateTrigger, setUpdateTrigger] = useState(0);
 
-  const handleGameFilterChange = (selectedGames: Game[]) => { // Fix: Change the type of selectedGames to Game[]
-    setGameFilters(selectedGames); // Assume selectedGames is an array of game outcomes
+  const handleGameFilterChange = (selectedGames: Game[]) => {
+    setGameFilters(selectedGames);
   };
 
-  const handleNsimsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setNsims(Number(event.target.value)); // Update the number of simulations
-  }
-
   const handleSubmit = () => {
-
-    setUpdateTrigger(current => current + 1); // Increment the trigger to initiate an update
+    setUpdateTrigger(current => current + 1);
   };
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4 relative">
-  
-      <div className="mb-8" style={{ display: 'flex', justifyContent: 'center' }}>
-        <div style={{ display: 'block', maxWidth: '800px', width: '100%' }}>
-          <h2 className="text-2xl font-bold mb-2 text-center">Simulation Results</h2>
+    <div className="space-y-8">
+      {/* Results Section */}
+      <div>
+        <h2 className="font-display text-2xl font-semibold text-ivory-100 mb-6 text-center">
+          Simulation Results
+        </h2>
+        <div className="max-w-4xl mx-auto">
           <GetPredictions
-            nsims = {nsims}
-            gameFilters = {gameFilters}
-            updateTrigger = {updateTrigger} // Pass the update trigger as a prop
-            eventTable = {eventTable}
+            nsims={nsims}
+            gameFilters={gameFilters}
+            updateTrigger={updateTrigger}
+            eventTable={eventTable}
           />
         </div>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }} className="mb-4">
-        {/* <label htmlFor="nsims" className="text-md font-medium text-gray-700">
-          Max Number of Simulations:
-        </label>
-        <input
-          type="number"
-          id="nsims"
-          value={nsims}
-          onChange={handleNsimsChange}
-          className="text-center mt-1 block p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-        /> */}
-        <ChessButton
-          text="Update Simulations"
-          onClick={handleSubmit}
+
+      {/* Scenario Explorer */}
+      <div className="pt-8 border-t border-white/[0.06]">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="font-display text-xl font-semibold text-ivory-100">Scenario Explorer</h3>
+            <p className="text-obsidian-400 text-sm mt-1">Select game outcomes to see how probabilities change</p>
+          </div>
+          <ChessButton
+            text="Update Simulations"
+            onClick={handleSubmit}
+            variant="primary"
+            size="sm"
+          />
+        </div>
+        
+        <GameHouse 
+          onGameFilterChange={handleGameFilterChange}
+          eventTable={eventTable}
         />
       </div>
-
-      </div>
-      <GameHouse 
-        onGameFilterChange={handleGameFilterChange}
-        eventTable = {eventTable}
-      />
-  
     </div>
   );
-  
 };
 
 export default SimulationResults;

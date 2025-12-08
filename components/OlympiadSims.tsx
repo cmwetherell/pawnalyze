@@ -2,71 +2,68 @@
 
 import React, { useEffect, useState } from 'react';
 import olympiadTeamMap from '@/public/olympiadTeamMap.json';
-import MedalChart from './MedalChart'; // Import the new MedalChart component
+import MedalChart from './MedalChart';
 
-// Define the types for olympiadTeamMap
 type OlympiadTeamMap = {
   [key: string]: string;
 };
 
-// Define the props for the component
 type OlympiadSimsProps = {
-  showOnlyMedalChart?: boolean; // Optional prop to control rendering of only MedalChart
+  showOnlyMedalChart?: boolean;
 };
 
 const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false }) => {
-  const [isClient, setIsClient] = useState(false); // State to track client-side rendering
-  const [medalData, setMedalData] = useState<any>(null); // State to store fetched data
-  const [nSims, setNSims] = useState<number>(0); // State to store number of simulations
-  const [maxRound, setMaxRound] = useState<number>(0); // State to store the maximum round number
-  const [sortColumn, setSortColumn] = useState<string>('gold'); // State to store current sorting column
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // State to store current sorting order
+  const [isClient, setIsClient] = useState(false);
+  const [medalData, setMedalData] = useState<any>(null);
+  const [nSims, setNSims] = useState<number>(0);
+  const [maxRound, setMaxRound] = useState<number>(0);
+  const [sortColumn, setSortColumn] = useState<string>('gold');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsClient(true); // Update the state to indicate client-side rendering
+    setIsClient(true);
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch('/api/sims/olympiad', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({}), // Empty object since the new API doesn't require specific input
+          body: JSON.stringify({}),
         });
 
         if (response.ok) {
           const data = await response.json();
-          setMedalData(data); // Store fetched data in state
-          setNSims(data.nSims); // Store total number of simulations
-          setMaxRound(data.highestRound); // Store the maximum round number
+          setMedalData(data);
+          setNSims(data.nSims);
+          setMaxRound(data.highestRound);
         } else {
           console.error('Server responded with an error:', response.status);
         }
       } catch (error) {
         console.error('Failed to fetch:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
   }, []);
 
-  // Function to handle column sorting
   const handleSort = (column: 'gold' | 'silver' | 'bronze') => {
     if (sortColumn === column) {
-      // If the current column is already sorted, toggle the order
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
-      // Otherwise, sort by the new column in descending order
       setSortColumn(column);
       setSortOrder('desc');
     }
   };
 
-  // Function to sort data based on selected column and order
   const getSortedData = () => {
     if (!medalData) return [];
 
-    // Make list of any country that gets a gold, silver, or bronze
     const countryMedalList: string[] = [];
     medalData.rounds.forEach((round: any) => {
       round.gold.forEach((gold: any) => {
@@ -111,78 +108,114 @@ const OlympiadSims: React.FC<OlympiadSimsProps> = ({ showOnlyMedalChart = false 
     });
   };
 
-  // Function to map country names to their respective flags
   const mapCountryToFlag = (country: string) => {
     const teamMap: OlympiadTeamMap = olympiadTeamMap;
     const teamCode = teamMap[country];
     return <div className={`tn_${teamCode}`}></div>;
   };
 
-  // Render the table with country names, their flags, and their chances of winning each medal
   const renderTable = () => {
     const sortedData = getSortedData();
 
     return (
-      <table className="table-auto border-collapse border border-gray-300 min-w-[80%] align-middle justify-center mx-auto">
-        <thead>
-          <tr className="bg-gray-800 text-white">
-            <th className="border border-gray-300 px-4 py-2 min-w-[25px] text-center">Flag</th>
-            <th className="border border-gray-300 px-4 py-2 min-w-[75px] text-center">Country</th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('gold')}
-            >
-              Gold (%) {sortColumn === 'gold' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('silver')}
-            >
-              Silver (%) {sortColumn === 'silver' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-            <th
-              className="border border-gray-300 px-4 py-2 cursor-pointer min-w-[50px] text-center"
-              onClick={() => handleSort('bronze')}
-            >
-              Bronze (%) {sortColumn === 'bronze' && (sortOrder === 'asc' ? '▲' : '▼')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedData.map((row: any, index: any) => (
-            <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}>
-              <td className="border border-gray-300 px-4 py-2 text-center align-middle">
-                <div className="inline-block">{mapCountryToFlag(row.country)}</div>
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">{row.country}</td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.gold).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.silver).toFixed(1)}
-              </td>
-              <td className="border border-gray-300 px-4 py-2 text-center">
-                {parseFloat(row.bronze).toFixed(1)}
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[500px]">
+          <thead>
+            <tr className="border-b border-white/[0.06]">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-obsidian-400 uppercase tracking-wider">
+                Flag
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-obsidian-400 uppercase tracking-wider">
+                Country
+              </th>
+              <th 
+                className="px-4 py-3 text-center text-xs font-semibold text-amber-400 uppercase tracking-wider cursor-pointer hover:text-amber-300 transition-colors"
+                onClick={() => handleSort('gold')}
+              >
+                Gold {sortColumn === 'gold' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th 
+                className="px-4 py-3 text-center text-xs font-semibold text-obsidian-300 uppercase tracking-wider cursor-pointer hover:text-ivory-100 transition-colors"
+                onClick={() => handleSort('silver')}
+              >
+                Silver {sortColumn === 'silver' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
+              <th 
+                className="px-4 py-3 text-center text-xs font-semibold text-amber-600 uppercase tracking-wider cursor-pointer hover:text-amber-500 transition-colors"
+                onClick={() => handleSort('bronze')}
+              >
+                Bronze {sortColumn === 'bronze' && (sortOrder === 'asc' ? '↑' : '↓')}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-white/[0.03]">
+            {sortedData.map((row: any, index: any) => (
+              <tr 
+                key={index} 
+                className="hover:bg-white/[0.02] transition-colors"
+              >
+                <td className="px-4 py-3">
+                  <div className="inline-block">{mapCountryToFlag(row.country)}</div>
+                </td>
+                <td className="px-4 py-3 text-ivory-100 font-medium">
+                  {row.country}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`font-mono ${parseFloat(row.gold) > 0 ? 'text-amber-400' : 'text-obsidian-500'}`}>
+                    {parseFloat(row.gold).toFixed(1)}%
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`font-mono ${parseFloat(row.silver) > 0 ? 'text-obsidian-300' : 'text-obsidian-500'}`}>
+                    {parseFloat(row.silver).toFixed(1)}%
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`font-mono ${parseFloat(row.bronze) > 0 ? 'text-amber-600' : 'text-obsidian-500'}`}>
+                    {parseFloat(row.bronze).toFixed(1)}%
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-full border-2 border-amber-400/20 border-t-amber-400 animate-spin" />
+          <p className="text-obsidian-400 text-sm">Loading simulations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
       {isClient && (
-        <div className="p-4">
+        <div className="space-y-8">
           {showOnlyMedalChart ? (
-            <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> // Render only the MedalChart
+            <MedalChart medalData={medalData} maxRound={maxRound} topN={8} />
           ) : (
             <>
-              <h2 className="text-lg font-bold text-center mb-4">{`Medal Chances by Country After Round ${maxRound}`}</h2> {/* Display the current round number */}
-              <p className="text-center mb-4">Total Simulations: {nSims}</p> {/* Display number of simulations */}
-              <MedalChart medalData={medalData} maxRound={maxRound} topN={8} /> {/* Display the MedalChart component */}
-              {renderTable()} {/* Display the table with country names, flags, and medal chances */}
+              <div className="text-center">
+                <h2 className="font-display text-2xl font-semibold text-ivory-100 mb-2">
+                  Medal Chances After Round {maxRound}
+                </h2>
+                <p className="text-obsidian-400 text-sm">
+                  Based on <span className="text-amber-400 font-medium">{nSims.toLocaleString()}</span> simulations
+                </p>
+              </div>
+              
+              <MedalChart medalData={medalData} maxRound={maxRound} topN={8} />
+              
+              <div className="glass-card overflow-hidden">
+                {renderTable()}
+              </div>
             </>
           )}
         </div>

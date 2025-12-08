@@ -1,0 +1,10 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://pawnalyze.com
+
+# Sitemaps
+Sitemap: https://pawnalyze.com/sitemap.xml
+Sitemap: https://blog.pawnalyze.com/sitemap.xml

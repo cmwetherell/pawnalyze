@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Playfair_Display, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
 import { siteConfig } from "@/config/site";
 import { Viewport } from "next";
 import { cn } from "@/lib/utils";
@@ -11,14 +9,22 @@ import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
 
-const fontSans = FontSans({
+const fontDisplay = Playfair_Display({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-display",
+  display: "swap",
 });
 
-const fontHeading = localFont({
-  src: "../assets/fonts/CalSans-SemiBold.woff2",
-  variable: "--font-heading",
+const fontBody = Outfit({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 interface RootLayoutProps {
@@ -27,8 +33,8 @@ interface RootLayoutProps {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: light)", color: "#0d0d10" },
+    { media: "(prefers-color-scheme: dark)", color: "#0d0d10" },
   ],
 };
 
@@ -74,12 +80,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    // apple: [
-    //   {
-    //     url: "/apple-touch-icon.png",
-    //     sizes: "180x180",
-    //   },
-    // ],
   },
   manifest: `${siteConfig.url}/site.webmanifest`,
   metadataBase: new URL(siteConfig.metadataBase),
@@ -87,19 +87,45 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
-          fontSans.variable,
-          fontHeading.variable
+          "min-h-screen bg-obsidian-950 font-body antialiased",
+          fontDisplay.variable,
+          fontBody.variable,
+          fontMono.variable
         )}
       >
         <Analytics />
         <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        
+        {/* Main Layout Container */}
+        <div className="relative flex min-h-screen flex-col">
+          {/* Background Effects */}
+          <div className="fixed inset-0 -z-10">
+            {/* Gradient Glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[150%] h-[600px] bg-gradient-to-b from-amber-400/[0.07] via-amber-500/[0.03] to-transparent blur-3xl" />
+            {/* Subtle Grid Pattern */}
+            <div 
+              className="absolute inset-0 opacity-[0.02]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(251, 191, 36, 0.3) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(251, 191, 36, 0.3) 1px, transparent 1px)
+                `,
+                backgroundSize: '60px 60px',
+              }}
+            />
+          </div>
+          
+          <Navbar />
+          
+          <main className="flex-1">
+            {children}
+          </main>
+          
+          <Footer />
+        </div>
       </body>
     </html>
   );
