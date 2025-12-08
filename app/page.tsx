@@ -123,7 +123,7 @@ export default function Home() {
             <div className="space-y-3 text-sm text-sand-muted">
               <div className="flex items-center justify-between">
                 <span>Complexity scale</span>
-                <span className="font-display text-sand">1 -> 10</span>
+                <span className="font-display text-sand">1 {'->'} 10</span>
               </div>
               <div className="h-2 rounded-full bg-white/10">
                 <div className="h-full w-4/5 rounded-full bg-gradient-to-r from-mint via-amber to-lava"></div>

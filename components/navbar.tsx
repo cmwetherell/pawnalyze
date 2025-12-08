@@ -58,7 +58,7 @@ const Navbar = () => {
           >
             Launch Console
             <span className="inline-block transition duration-300 group-hover:translate-x-1">
-              ->
+              {'->'}
             </span>
           </Link>
         </div>
@@ -75,7 +75,7 @@ const Navbar = () => {
       <div className="ticker-track border-t border-white/10 bg-black/40 text-[0.65rem] text-sand-muted">
         <div className="ticker-loop">
           <span>Signal 64 • Chess Forecast Network • Human Complexity Index</span>
-          <span>Live Feeds -> Candidates • Olympiad • WCC • Elocator</span>
+          <span>Live Feeds {'->'} Candidates • Olympiad • WCC • Elocator</span>
           <span>Model Build 05 · Hyperspeed Monte Carlo • Pawnalyze Studios</span>
         </div>
       </div>
