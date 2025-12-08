@@ -5,7 +5,7 @@ interface GamePickerProps {
   whitePlayer: string;
   blackPlayer: string;
   onOutcomeChange: (outcome: 'white' | 'draw' | 'black') => void;
-  gameDetails?: { [key: string]: any }; // Optional prop for additional game data
+  gameDetails?: { [key: string]: any };
 }
 
 const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: GamePickerProps) => {
@@ -13,36 +13,16 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Function to update state based on screen width
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768); // 768px is a common breakpoint for mobile devices
+      setIsMobile(window.innerWidth <= 768);
     };
 
-    // Set initial state based on current screen width
     handleResize();
-
-    // Add event listener for window resize
     window.addEventListener('resize', handleResize);
-
-    // Cleanup event listener on component unmount
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Function to truncate player name to 7 characters for mobile screens
   const getDisplayName = (name: string) => (isMobile ? name.substring(0, 7) : name);
-
-  // Adjusted for responsive design and max-width constraints
-  const baseClassName =
-    'border-2 border-black text-black font-bold rounded transition duration-300 ease-in-out text-center'; // Common base styles
-  const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`; // Max width for player buttons
-  const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`; // Max width for draw button
-  const selectedClassName = 'bg-black text-white';
-  const defaultClassName = 'bg-primary';
-
-  const getButtonClassName = (outcome: 'white' | 'draw' | 'black') => {
-    let specificClassName = outcome === 'draw' ? drawButtonClassName : playerButtonClassName;
-    return `${specificClassName} ${selectedOutcome === outcome ? selectedClassName : defaultClassName}`;
-  };
 
   const handleOutcomeSelect = (outcome: 'white' | 'draw' | 'black') => {
     const newOutcome = selectedOutcome === outcome ? null : outcome;
@@ -50,36 +30,71 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
     onOutcomeChange(newOutcome as 'white' | 'draw' | 'black');
   };
 
+  const getButtonStyles = (outcome: 'white' | 'draw' | 'black') => {
+    const isSelected = selectedOutcome === outcome;
+    
+    const baseStyles = `
+      relative overflow-hidden
+      px-3 py-2.5
+      text-xs font-semibold uppercase tracking-wider
+      rounded-lg
+      transition-all duration-300 ease-out-expo
+      focus:outline-none focus:ring-2 focus:ring-accent/50
+    `;
+    
+    if (isSelected) {
+      if (outcome === 'white') {
+        return `${baseStyles} bg-white text-bg-primary shadow-glow-sm`;
+      } else if (outcome === 'black') {
+        return `${baseStyles} bg-text-primary text-bg-primary`;
+      } else {
+        return `${baseStyles} bg-accent text-bg-primary shadow-glow-sm`;
+      }
+    }
+    
+    return `${baseStyles} bg-bg-tertiary text-text-secondary border border-border-subtle hover:border-border-hover hover:text-text-primary`;
+  };
+
   return (
-    <div className="bg-white p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
+    <div className="flex items-center gap-2">
+      {/* White Player Button */}
       <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('white')}
+        className={`flex-1 min-w-0 ${getButtonStyles('white')}`}
         onClick={() => handleOutcomeSelect('white')}
+        title={whitePlayer}
       >
-        {getDisplayName(whitePlayer)}
+        <span className="flex items-center justify-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-white border border-text-muted/30 flex-shrink-0" />
+          <span className="truncate">{getDisplayName(whitePlayer)}</span>
+        </span>
       </button>
+      
+      {/* Draw Button */}
       <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('draw')}
+        className={`flex-shrink-0 w-16 ${getButtonStyles('draw')}`}
         onClick={() => handleOutcomeSelect('draw')}
       >
-        Draw
+        ½-½
       </button>
+      
+      {/* Black Player Button */}
       <button
-        style={{ overflowX: 'hidden' }}
-        className={getButtonClassName('black')}
+        className={`flex-1 min-w-0 ${getButtonStyles('black')}`}
         onClick={() => handleOutcomeSelect('black')}
+        title={blackPlayer}
       >
-        {getDisplayName(blackPlayer)}
+        <span className="flex items-center justify-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-bg-primary border border-text-muted/30 flex-shrink-0" />
+          <span className="truncate">{getDisplayName(blackPlayer)}</span>
+        </span>
       </button>
 
-      {/* Optional section to display additional game details */}
+      {/* Optional game details */}
       {gameDetails && (
-        <div className="text-sm text-gray-600 mt-2">
+        <div className="text-xs text-text-muted mt-2 pl-2">
           {Object.entries(gameDetails).map(([key, value]) => (
             <p key={key} className="truncate">
-              <strong>{key}:</strong> {value}
+              <strong className="text-text-secondary">{key}:</strong> {value}
             </p>
           ))}
         </div>
