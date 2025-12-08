@@ -24,7 +24,6 @@ const COLORS_PALETTE = [
 ];
 
 const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: CurrentPredictionsProps) => {
-  const [isClient, setIsClient] = useState(false);
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -39,7 +38,6 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   }
 
   useEffect(() => {
-    setIsClient(true);
     const fetchData = async () => {
       setIsLoading(true);
       const requestBody = {
@@ -123,7 +121,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
     };
 
     fetchData();
-  }, [updateTrigger]);
+  }, [updateTrigger, eventTable, gameFilters, nsims]);
 
   let playerNames: string[] = Array.from(
     new Set(
@@ -293,9 +291,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   return (
     <div className="space-y-4">
       <div style={{ height: '450px' }}>
-        {isClient && (
-          <Line data={data} options={options} />
-        )}
+        <Line data={data} options={options} />
       </div>
       {totalGames > 0 && (
         <div className="text-center pt-4 border-t border-white/[0.06]">

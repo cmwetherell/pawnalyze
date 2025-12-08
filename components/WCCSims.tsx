@@ -11,7 +11,6 @@ import ChessButton from './Button';
 const COLORS_PALETTE = ['#fbbf24', '#60a5fa', '#34d399', '#f472b6'];
 
 const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
-  const [isClient, setIsClient] = useState(false);
   const [WCCData, setWCCData] = useState<any>(null);
   const [nSims, setNSims] = useState<number>(0);
   const [maxRound, setMaxRound] = useState<number>(0);
@@ -56,7 +55,8 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   };
 
   useEffect(() => {
-    setIsClient(true);
+    // Fetch initial simulations on mount
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSimulations([]);
   }, []);
 
@@ -77,7 +77,7 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     return gamesData.slice(maxRound);
   }, [maxRound]);
 
-  if (!WCCData || !isClient) {
+  if (!WCCData) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="flex flex-col items-center gap-4">
