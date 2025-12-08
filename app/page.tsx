@@ -7,50 +7,77 @@ import ChessButton from "@/components/Button";
 import OlympiadSims from "@/components/OlympiadSims";
 import WCCSims from "@/components/WCCSims";
 
-// const CurrentPredictions = dynamic(() => import("@/components/currentPredictions"), {
-//   loading: () => <ChessAI />, // Display this component while loading
-// });
-
 export default function Home() {
   return (
-    <main className="flex-1 flex flex-col mt-6">
-      {/* <div className="flex-1 flex flex-col bg-white p-8 justify-center"> */}
-        <h1 className="text-6xl font-bold text-center text-black mb-2 mt-12">Your source for chess analytics</h1>
-        <p className="text-2xl text-center text-black">Insights for chess tournaments, games, and positions.</p>
-        <div className="flex-1 mt-4 mb-12">
-        <div className="flex justify-center mx-auto space-x-4" style={{ maxWidth: "200px" }}>
-          <ChessButton
-            text="Simulations"
-            link="/simulations/"
-          />
-          <ChessButton
-            text="Elocator"
-            link="/elocator/"
-          />
+    <main className="flex-1 flex flex-col relative overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative min-h-[85vh] flex items-center justify-center px-6 lg:px-12 py-20">
+        {/* Decorative elements */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gold/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gold/3 rounded-full blur-3xl"></div>
+        
+        <div className="relative z-10 max-w-5xl mx-auto text-center">
+          {/* Main heading with elegant typography */}
+          <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold text-ivory mb-6 leading-tight animate-fade-in-up">
+            <span className="block">Your source for</span>
+            <span className="block text-gold mt-2">chess analytics</span>
+          </h1>
+          
+          {/* Subtitle */}
+          <p className="font-body text-xl md:text-2xl text-ivory/70 mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up animate-delay-200">
+            Insights for chess tournaments, games, and positions. 
+            Discover patterns, predict outcomes, and explore the depth of chess strategy.
+          </p>
+          
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-16 animate-fade-in-up animate-delay-300">
+            <ChessButton
+              text="Explore Simulations"
+              link="/simulations/"
+              variant="primary"
+            />
+            <ChessButton
+              text="Try Elocator"
+              link="/elocator/"
+              variant="secondary"
+            />
+          </div>
         </div>
-        {/* text tht says World Championship Simulations */}
-        <p className="text-4xl font-bold text-center text-black mb-2 mt-12">World Championship Simulations</p>
-        <WCCSims justGraph={true}/>
-        {/* <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
-        <OlympiadSims
-          showOnlyMedalChart={true}
-        /> */}
-          {/* test: current predictions for 2024 Candidates Tournament */}
-        {/* <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Candidates Tournament | Pawnalyze.com</p>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <GetPredictions
-            nsims={10000}
-            gameFilters = {[]} // no filters
-            eventTable="candidates_2024"
-            />
-        <p className="mt-6 text-8 font-bold text-center text-black">Predictions for 2024 Womens Candidates Tournament | Pawnalyze.com</p>
-          <GetPredictions
-            nsims={10000}
-            gameFilters = {[]} // no filters
-            eventTable="womens_candidates_2024"
-            />
-        </div> */}
-      </div>
+        
+        {/* Elegant divider */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent"></div>
+      </section>
+
+      {/* World Championship Section */}
+      <section className="relative py-20 px-6 lg:px-12">
+        <div className="max-w-7xl mx-auto">
+          {/* Section header */}
+          <div className="text-center mb-16 animate-fade-in-up animate-delay-400">
+            <div className="inline-block mb-4">
+              <div className="h-px w-24 bg-gold mx-auto mb-4"></div>
+              <h2 className="font-display text-4xl md:text-5xl font-bold text-ivory mb-4">
+                World Championship
+                <span className="block text-gold mt-2">Simulations</span>
+              </h2>
+              <div className="h-px w-24 bg-gold mx-auto mt-4"></div>
+            </div>
+            <p className="font-body text-lg text-ivory/60 max-w-2xl mx-auto">
+              Advanced probabilistic modeling of championship outcomes
+            </p>
+          </div>
+          
+          {/* Chart container with elegant styling */}
+          <div className="relative bg-charcoal/50 backdrop-blur-sm border border-gold/20 rounded-lg p-8 md:p-12 shadow-elegant animate-fade-in-up animate-delay-500">
+            <div className="absolute inset-0 bg-gradient-luxury rounded-lg opacity-50"></div>
+            <div className="relative z-10">
+              <WCCSims justGraph={true}/>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Additional spacing */}
+      <div className="h-20"></div>
     </main>
   );
 }
