@@ -9,18 +9,16 @@ export default function SimPage(): JSX.Element {
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Active Tournaments</p>
     </div>
     <div>
-    <TournamentInfo
-                    name="FIDE Chess World Championship Singapore 2024"
-                    internalLink='/simulations/fide-world-championship-singapore-2024'
-                    website="https://worldchampionship.fide.com/"
-                    description="Reigning champion DIng Liren defends his title against Gukesh D."
-                    format="14 classical games. Tiebreaks if necessary."
-                />
-    </div>
-    <div>
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Past Tournaments</p>
     </div>
     <div>
+        <TournamentInfo
+                name="FIDE Chess World Championship Singapore 2024"
+                internalLink='/simulations/fide-world-championship-singapore-2024'
+                website="https://worldchampionship.fide.com/"
+                description="Reigning champion DIng Liren defends his title against Gukesh D."
+                format="14 classical games. Tiebreaks if necessary."
+            />
         <TournamentInfo
                 name="Chess Olympiad Budapest 2024"
                 internalLink="/simulations/chess-olympiad-budapest-2024"
