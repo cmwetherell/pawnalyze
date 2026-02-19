@@ -28,9 +28,15 @@ export default function Home() {
             link="/elocator/"
           />
         </div>
-        {/* text tht says World Championship Simulations */}
-        <p className="text-4xl font-bold text-center text-black mb-2 mt-12">World Championship Simulations</p>
-        <WCCSims justGraph={true}/>
+        <p className="text-4xl font-bold text-center text-black mb-2 mt-12">2026 Candidates Tournament Simulations</p>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <GetPredictions
+            nsims={10000}
+            gameFilters={[]}
+            updateTrigger={0}
+            eventTable="candidates_2026"
+          />
+        </div>
         {/* <p className="text-l text-center text-black font-bold">Current Predictions for Budapest Olympiad</p>
         <OlympiadSims
           showOnlyMedalChart={true}

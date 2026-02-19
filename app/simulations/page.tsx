@@ -9,6 +9,22 @@ export default function SimPage(): JSX.Element {
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Active Tournaments</p>
     </div>
     <div>
+        <TournamentInfo
+            name="2026 Candidates Tournament"
+            internalLink="/simulations/candidates-2026"
+            website="https://candidates.fide.com/"
+            description="The Candidates Tournament determines the challenger for the World Chess Championship, who will face D. Gukesh."
+            format="8-player double round-robin"
+        />
+        <TournamentInfo
+            name="2026 Womens Candidates Tournament"
+            internalLink="/simulations/womens-candidates-2026"
+            website="https://candidates.fide.com/"
+            description="The Womens Candidates Tournament determines the challenger for the World Chess Championship, who will face Ju Wenjun."
+            format="8-player double round-robin"
+        />
+    </div>
+    <div>
         <p className = "text-4xl font-bold text-center text-black mb-2 mt-12">Past Tournaments</p>
     </div>
     <div>
@@ -16,7 +32,7 @@ export default function SimPage(): JSX.Element {
                 name="FIDE Chess World Championship Singapore 2024"
                 internalLink='/simulations/fide-world-championship-singapore-2024'
                 website="https://worldchampionship.fide.com/"
-                description="Reigning champion DIng Liren defends his title against Gukesh D."
+                description="Reigning champion Ding Liren defends his title against Gukesh D."
                 format="14 classical games. Tiebreaks if necessary."
             />
         <TournamentInfo

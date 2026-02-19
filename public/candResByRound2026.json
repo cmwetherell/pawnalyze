@@ -1,0 +1,352 @@
+[
+  {
+    "round": 1,
+    "games": [
+      {
+        "id": "Nak|Blu",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Car|Esi",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Esipenko, Andrey"
+      },
+      {
+        "id": "Gir|Sin",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Sindarov, Javokhir"
+      },
+      {
+        "id": "Pra|Wei",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Wei, Yi"
+      }
+    ]
+  },
+  {
+    "round": 2,
+    "games": [
+      {
+        "id": "Blu|Esi",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Esipenko, Andrey"
+      },
+      {
+        "id": "Nak|Sin",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Sindarov, Javokhir"
+      },
+      {
+        "id": "Car|Wei",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Wei, Yi"
+      },
+      {
+        "id": "Gir|Pra",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Praggnanandhaa R"
+      }
+    ]
+  },
+  {
+    "round": 3,
+    "games": [
+      {
+        "id": "Sin|Blu",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Esi|Wei",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Wei, Yi"
+      },
+      {
+        "id": "Nak|Pra",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Praggnanandhaa R"
+      },
+      {
+        "id": "Car|Gir",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Giri, Anish"
+      }
+    ]
+  },
+  {
+    "round": 4,
+    "games": [
+      {
+        "id": "Blu|Wei",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Wei, Yi"
+      },
+      {
+        "id": "Sin|Pra",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Praggnanandhaa R"
+      },
+      {
+        "id": "Esi|Gir",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Giri, Anish"
+      },
+      {
+        "id": "Nak|Car",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Caruana, Fabiano"
+      }
+    ]
+  },
+  {
+    "round": 5,
+    "games": [
+      {
+        "id": "Pra|Blu",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Wei|Gir",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Giri, Anish"
+      },
+      {
+        "id": "Sin|Car",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Caruana, Fabiano"
+      },
+      {
+        "id": "Esi|Nak",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Nakamura, Hikaru"
+      }
+    ]
+  },
+  {
+    "round": 6,
+    "games": [
+      {
+        "id": "Blu|Gir",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Giri, Anish"
+      },
+      {
+        "id": "Pra|Car",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Caruana, Fabiano"
+      },
+      {
+        "id": "Wei|Nak",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Nakamura, Hikaru"
+      },
+      {
+        "id": "Sin|Esi",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Esipenko, Andrey"
+      }
+    ]
+  },
+  {
+    "round": 7,
+    "games": [
+      {
+        "id": "Car|Blu",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Gir|Nak",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Nakamura, Hikaru"
+      },
+      {
+        "id": "Pra|Esi",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Esipenko, Andrey"
+      },
+      {
+        "id": "Wei|Sin",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Sindarov, Javokhir"
+      }
+    ]
+  },
+  {
+    "round": 8,
+    "games": [
+      {
+        "id": "Blu|Nak",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Nakamura, Hikaru"
+      },
+      {
+        "id": "Esi|Car",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Caruana, Fabiano"
+      },
+      {
+        "id": "Sin|Gir",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Giri, Anish"
+      },
+      {
+        "id": "Wei|Pra",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Praggnanandhaa R"
+      }
+    ]
+  },
+  {
+    "round": 9,
+    "games": [
+      {
+        "id": "Esi|Blu",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Sin|Nak",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Nakamura, Hikaru"
+      },
+      {
+        "id": "Wei|Car",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Caruana, Fabiano"
+      },
+      {
+        "id": "Pra|Gir",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Giri, Anish"
+      }
+    ]
+  },
+  {
+    "round": 10,
+    "games": [
+      {
+        "id": "Blu|Sin",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Sindarov, Javokhir"
+      },
+      {
+        "id": "Wei|Esi",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Esipenko, Andrey"
+      },
+      {
+        "id": "Pra|Nak",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Nakamura, Hikaru"
+      },
+      {
+        "id": "Gir|Car",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Caruana, Fabiano"
+      }
+    ]
+  },
+  {
+    "round": 11,
+    "games": [
+      {
+        "id": "Wei|Blu",
+        "whitePlayer": "Wei, Yi",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Pra|Sin",
+        "whitePlayer": "Praggnanandhaa R",
+        "blackPlayer": "Sindarov, Javokhir"
+      },
+      {
+        "id": "Gir|Esi",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Esipenko, Andrey"
+      },
+      {
+        "id": "Car|Nak",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Nakamura, Hikaru"
+      }
+    ]
+  },
+  {
+    "round": 12,
+    "games": [
+      {
+        "id": "Blu|Pra",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Praggnanandhaa R"
+      },
+      {
+        "id": "Gir|Wei",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Wei, Yi"
+      },
+      {
+        "id": "Car|Sin",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Sindarov, Javokhir"
+      },
+      {
+        "id": "Nak|Esi",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Esipenko, Andrey"
+      }
+    ]
+  },
+  {
+    "round": 13,
+    "games": [
+      {
+        "id": "Gir|Blu",
+        "whitePlayer": "Giri, Anish",
+        "blackPlayer": "Bluebaum, Matthias"
+      },
+      {
+        "id": "Car|Pra",
+        "whitePlayer": "Caruana, Fabiano",
+        "blackPlayer": "Praggnanandhaa R"
+      },
+      {
+        "id": "Nak|Wei",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Wei, Yi"
+      },
+      {
+        "id": "Esi|Sin",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Sindarov, Javokhir"
+      }
+    ]
+  },
+  {
+    "round": 14,
+    "games": [
+      {
+        "id": "Blu|Car",
+        "whitePlayer": "Bluebaum, Matthias",
+        "blackPlayer": "Caruana, Fabiano"
+      },
+      {
+        "id": "Nak|Gir",
+        "whitePlayer": "Nakamura, Hikaru",
+        "blackPlayer": "Giri, Anish"
+      },
+      {
+        "id": "Esi|Pra",
+        "whitePlayer": "Esipenko, Andrey",
+        "blackPlayer": "Praggnanandhaa R"
+      },
+      {
+        "id": "Sin|Wei",
+        "whitePlayer": "Sindarov, Javokhir",
+        "blackPlayer": "Wei, Yi"
+      }
+    ]
+  }
+]

@@ -4,6 +4,9 @@ import { createKysely } from "@vercel/postgres-kysely";
 
 interface Database {
   candidates_2024: any; // see github.com/kysely-org/kysely
+  womens_candidates_2024: any;
+  candidates_2026: any;
+  womens_candidates_2026: any;
 }
 
 interface Sim {
@@ -69,7 +72,7 @@ export async function POST(req: NextRequest) {
         
         const RoundsUnique = await queryRounds.execute();
         const highestRound = Math.max(...RoundsUnique.map(({ Round }) => Round.match(/\d+/)?.[0] || 0).map(Number));
-        const highestRoundString = highestRound === 0 ? 'Pre' : `Round ${highestRound}`;
+        const highestRoundStr = highestRound === 0 ? 'Pre' : String(highestRound);
         const countOfRounds = RoundsUnique.length;
 
         limitSims *= countOfRounds;
@@ -106,7 +109,7 @@ export async function POST(req: NextRequest) {
             convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
                 querySim = querySim.where(filter.gameKey, '=', filter.outcome)
             });
-            querySim = querySim.where('Round', '=', highestRound);
+            querySim = querySim.where('Round', '=', highestRoundStr);
             querySim = querySim.groupBy(['winner', 'Round']);
             const simulated = await querySim.execute();
 

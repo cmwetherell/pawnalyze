@@ -6,7 +6,7 @@ import { FaX } from 'react-icons/fa6';
 const Footer = () => {
     return (
         <footer className="bg-white text-black p-4 flex justify-between items-center">
-            <p>&copy; 2024 Pawnalyze</p>
+            <p>&copy; {new Date().getFullYear()} Pawnalyze</p>
             <div className="flex items-center">
                 <Link href="https://www.twitter.com/pawnalyze" passHref>
                     <p className="text-black hover:text-gray-700 mx-2">

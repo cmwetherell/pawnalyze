@@ -12,6 +12,8 @@ import { Game } from "@/types";
 
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
+import candResByRound2026 from '@/public/candResByRound2026.json';
+import womensCandByRound2026 from '@/public/womensCandByRound2026.json';
 import ChessButton from "./Button";
 import { reverse } from "dns";
 import { off } from "process";
@@ -50,7 +52,15 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   let initialGames: { round: number; games: Game[] }[] = [];
 
   try {
-    initialGames = eventTable === 'candidates_2024' ? candResByRound : womensCandByRound;
+    if (eventTable === 'candidates_2026') {
+      initialGames = candResByRound2026;
+    } else if (eventTable === 'womens_candidates_2026') {
+      initialGames = womensCandByRound2026;
+    } else if (eventTable === 'candidates_2024') {
+      initialGames = candResByRound;
+    } else {
+      initialGames = womensCandByRound;
+    }
   } catch (e) {
     console.log(e);
   }
@@ -200,8 +210,64 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
 
   playerPercentages.sort((a, b) => a.percentage - b.percentage);
 
+const availableRounds = customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label));
+const hasRoundData = availableRounds.some(r => /^\d+$/.test(r));
+const showBarChart = !hasRoundData;
+const hasSimulated = availableRounds.includes('Simulated');
+
+// Bar chart data for pre-tournament / single-round view
+const barPlayerPercentages = [...playerPercentages].sort((a, b) => b.percentage - a.percentage);
+const barData = {
+  labels: barPlayerPercentages.map(p => p.name),
+  datasets: [{
+    data: barPlayerPercentages.map(p => p.percentage),
+    backgroundColor: barPlayerPercentages.map(p => playerColorsMap[p.name]),
+    borderColor: barPlayerPercentages.map(p => playerColorsMap[p.name]),
+    borderWidth: 1,
+    barPercentage: 0.8,
+  }],
+};
+const barOptions: any = {
+  indexAxis: 'y' as const,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      callbacks: {
+        label: function(context: any) {
+          return `Win probability: ${context.parsed.x.toFixed(1)}%`;
+        },
+      },
+    },
+  },
+  scales: {
+    x: {
+      title: {
+        display: true,
+        text: 'Win Probability (%)',
+        color: 'black',
+        font: { size: 14 },
+      },
+      min: 0,
+      max: Math.min(100, Math.ceil((barPlayerPercentages[0]?.percentage || 50) * 1.3 / 5) * 5),
+      ticks: {
+        callback: function(value: any) { return value + '%'; },
+      },
+    },
+    y: {
+      ticks: {
+        color: 'black',
+        font: { size: 13, weight: 'bold' as const },
+      },
+    },
+  },
+  maintainAspectRatio: false,
+};
+
+// Line chart data for ongoing tournament (multiple rounds)
 const data = {
-  labels: customOrder.filter(label => Object.keys(playerWinPercentagesByRound).includes(label)),
+  labels: availableRounds,
   datasets: playerPercentages.map(({ name, percentage }) => {
     const playerData = customOrder.map(label =>
       playerWinPercentagesByRound[label]?.find(entry => entry.name === name)?.value || 0
@@ -306,18 +372,23 @@ const options: any = {
   return (
     <div>
       {/* <PlayerDropdown /> */}
+      {isClient && showBarChart && hasSimulated && (
+        <p className="text-sm text-center text-gray-500 italic mb-2">Predictions updated to reflect game selections below</p>
+      )}
       <div style={{ height: '500px' }}> {/* Container must have a height */}
         {isClient && (
           <>
-            <Line data={data} options={options} />
-            {totalGames > 0 && (
-              <>
-              <p className="text-md text-center font-bold mb-2 mt-4 text-black">Based on {totalGames} simulations</p>
-              </>
+            {showBarChart ? (
+              <Bar data={barData} options={barOptions} />
+            ) : (
+              <Line data={data} options={options} />
             )}
           </>
         )}
       </div>
+      {isClient && totalGames > 0 && (
+        <p className="text-sm text-center text-gray-500 mt-2 mb-0">Based on {totalGames} simulations</p>
+      )}
     </div>
   );
 };

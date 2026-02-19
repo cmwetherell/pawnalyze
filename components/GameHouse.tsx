@@ -3,6 +3,8 @@ import GamePicker from './GamePicker';
 import { Game } from '@/types';
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
+import candResByRound2026 from '@/public/candResByRound2026.json';
+import womensCandByRound2026 from '@/public/womensCandByRound2026.json';
 
 
 
@@ -12,7 +14,15 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
   let initialGames: { round: number; games: Game[] }[] = [];
 
   try {
-    initialGames = eventTable === 'candidates_2024' ? candResByRound : womensCandByRound;
+    if (eventTable === 'candidates_2026') {
+      initialGames = candResByRound2026;
+    } else if (eventTable === 'womens_candidates_2026') {
+      initialGames = womensCandByRound2026;
+    } else if (eventTable === 'candidates_2024') {
+      initialGames = candResByRound;
+    } else {
+      initialGames = womensCandByRound;
+    }
   } catch (e) {
     console.log(e);
   }

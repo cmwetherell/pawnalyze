@@ -1,0 +1,352 @@
+[
+  {
+    "round": 1,
+    "games": [
+      {
+        "id": "Zhu|Ram",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Kon|Ass",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      },
+      {
+        "id": "Gor|Des",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Deshmukh, Divya"
+      },
+      {
+        "id": "Tan|Lag",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Lagno, Kateryna"
+      }
+    ]
+  },
+  {
+    "round": 2,
+    "games": [
+      {
+        "id": "Ram|Ass",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      },
+      {
+        "id": "Zhu|Des",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Deshmukh, Divya"
+      },
+      {
+        "id": "Kon|Lag",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Lagno, Kateryna"
+      },
+      {
+        "id": "Gor|Tan",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Tan, Zhongyi"
+      }
+    ]
+  },
+  {
+    "round": 3,
+    "games": [
+      {
+        "id": "Des|Ram",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Ass|Lag",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Lagno, Kateryna"
+      },
+      {
+        "id": "Zhu|Tan",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Tan, Zhongyi"
+      },
+      {
+        "id": "Kon|Gor",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      }
+    ]
+  },
+  {
+    "round": 4,
+    "games": [
+      {
+        "id": "Ram|Lag",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Lagno, Kateryna"
+      },
+      {
+        "id": "Des|Tan",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Tan, Zhongyi"
+      },
+      {
+        "id": "Ass|Gor",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      },
+      {
+        "id": "Zhu|Kon",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Koneru, Humpy"
+      }
+    ]
+  },
+  {
+    "round": 5,
+    "games": [
+      {
+        "id": "Tan|Ram",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Lag|Gor",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      },
+      {
+        "id": "Des|Kon",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Koneru, Humpy"
+      },
+      {
+        "id": "Ass|Zhu",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Zhu, Jiner"
+      }
+    ]
+  },
+  {
+    "round": 6,
+    "games": [
+      {
+        "id": "Ram|Gor",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      },
+      {
+        "id": "Tan|Kon",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Koneru, Humpy"
+      },
+      {
+        "id": "Lag|Zhu",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Zhu, Jiner"
+      },
+      {
+        "id": "Des|Ass",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      }
+    ]
+  },
+  {
+    "round": 7,
+    "games": [
+      {
+        "id": "Kon|Ram",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Gor|Zhu",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Zhu, Jiner"
+      },
+      {
+        "id": "Tan|Ass",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      },
+      {
+        "id": "Lag|Des",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Deshmukh, Divya"
+      }
+    ]
+  },
+  {
+    "round": 8,
+    "games": [
+      {
+        "id": "Ram|Zhu",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Zhu, Jiner"
+      },
+      {
+        "id": "Ass|Kon",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Koneru, Humpy"
+      },
+      {
+        "id": "Des|Gor",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      },
+      {
+        "id": "Lag|Tan",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Tan, Zhongyi"
+      }
+    ]
+  },
+  {
+    "round": 9,
+    "games": [
+      {
+        "id": "Ass|Ram",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Des|Zhu",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Zhu, Jiner"
+      },
+      {
+        "id": "Lag|Kon",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Koneru, Humpy"
+      },
+      {
+        "id": "Tan|Gor",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      }
+    ]
+  },
+  {
+    "round": 10,
+    "games": [
+      {
+        "id": "Ram|Des",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Deshmukh, Divya"
+      },
+      {
+        "id": "Lag|Ass",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      },
+      {
+        "id": "Tan|Zhu",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Zhu, Jiner"
+      },
+      {
+        "id": "Gor|Kon",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Koneru, Humpy"
+      }
+    ]
+  },
+  {
+    "round": 11,
+    "games": [
+      {
+        "id": "Lag|Ram",
+        "whitePlayer": "Lagno, Kateryna",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Tan|Des",
+        "whitePlayer": "Tan, Zhongyi",
+        "blackPlayer": "Deshmukh, Divya"
+      },
+      {
+        "id": "Gor|Ass",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      },
+      {
+        "id": "Kon|Zhu",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Zhu, Jiner"
+      }
+    ]
+  },
+  {
+    "round": 12,
+    "games": [
+      {
+        "id": "Ram|Tan",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Tan, Zhongyi"
+      },
+      {
+        "id": "Gor|Lag",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Lagno, Kateryna"
+      },
+      {
+        "id": "Kon|Des",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Deshmukh, Divya"
+      },
+      {
+        "id": "Zhu|Ass",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Assaubayeva, Bibisara"
+      }
+    ]
+  },
+  {
+    "round": 13,
+    "games": [
+      {
+        "id": "Gor|Ram",
+        "whitePlayer": "Goryachkina, Aleksandra",
+        "blackPlayer": "Rameshbabu, Vaishali"
+      },
+      {
+        "id": "Kon|Tan",
+        "whitePlayer": "Koneru, Humpy",
+        "blackPlayer": "Tan, Zhongyi"
+      },
+      {
+        "id": "Zhu|Lag",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Lagno, Kateryna"
+      },
+      {
+        "id": "Ass|Des",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Deshmukh, Divya"
+      }
+    ]
+  },
+  {
+    "round": 14,
+    "games": [
+      {
+        "id": "Ram|Kon",
+        "whitePlayer": "Rameshbabu, Vaishali",
+        "blackPlayer": "Koneru, Humpy"
+      },
+      {
+        "id": "Zhu|Gor",
+        "whitePlayer": "Zhu, Jiner",
+        "blackPlayer": "Goryachkina, Aleksandra"
+      },
+      {
+        "id": "Ass|Tan",
+        "whitePlayer": "Assaubayeva, Bibisara",
+        "blackPlayer": "Tan, Zhongyi"
+      },
+      {
+        "id": "Des|Lag",
+        "whitePlayer": "Deshmukh, Divya",
+        "blackPlayer": "Lagno, Kateryna"
+      }
+    ]
+  }
+]
