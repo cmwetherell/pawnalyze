@@ -1,6 +1,8 @@
 
 import TournamentInfo from '@/components/TournamentInfo';
 
+import type { JSX } from "react";
+
 export default function SimPage(): JSX.Element {
     return (
 

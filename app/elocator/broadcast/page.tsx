@@ -1,5 +1,7 @@
-'use client'
+'use client';
 import BroadcastRoundComponent from '@/components/elocator/Broadcast';
+
+import type { JSX } from "react";
 
 export default function Broadcast(): JSX.Element {
     return (
@@ -12,4 +14,4 @@ export default function Broadcast(): JSX.Element {
             </div>
         </main>
     );
-};
+}
