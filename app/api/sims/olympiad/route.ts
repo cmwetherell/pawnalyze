@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createKysely } from "@vercel/postgres-kysely";
+import { sql } from "kysely";
+
+const MAX_RECORDS = 10000;
 
 interface Database {
   olympiad_2024: {
@@ -39,9 +42,16 @@ export async function POST(req: NextRequest) {
       )
     );
 
-    // Fetch the simulation results grouped by round
-    const results = await db
+    // Sample up to 10k random records, then aggregate
+    const subquery = db
       .selectFrom(table)
+      .selectAll()
+      .orderBy(sql`RANDOM()`)
+      .limit(MAX_RECORDS)
+      .as('sub');
+
+    const results = await db
+      .selectFrom(subquery)
       .select(({ fn }) => [
         "round",
         "gold",

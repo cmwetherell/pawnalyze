@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createKysely } from "@vercel/postgres-kysely";
+import { sql } from "kysely";
+
+const MAX_RECORDS = 10000;
 
 interface Database {
   wcc24: {
@@ -48,10 +51,12 @@ export async function POST(req: NextRequest) {
 
     const maxRound = maxRoundResult[0].round;
 
-    // Get ALL results without any filtering for base data up to max round
+    // Sample up to 10k random records for base data
     const baseResults = await db
       .selectFrom(table)
       .select(["winner", "tie", "round"])
+      .orderBy(sql`RANDOM()`)
+      .limit(MAX_RECORDS)
       .execute();
 
     // Aggregate data by round for unfiltered results
@@ -93,9 +98,11 @@ export async function POST(req: NextRequest) {
       // Add dynamic columns for filters
       const selectColumns = ["winner", "tie", "round", ...filters.map((filter: string) => filter.split('|').slice(0, 3).join('|'))];
       
+      // Fetch in random order, filter in JS, then take up to 10k
       const filteredResults = await db
         .selectFrom(table)
         .select(selectColumns)
+        .orderBy(sql`RANDOM()`)
         .execute()
         .then(results => results.filter((row) =>
           filters.every((filter: string) => {
@@ -111,7 +118,8 @@ export async function POST(req: NextRequest) {
             return false;
           })
         ))
-        .then((results: any[]) => results.filter(row => row.round === maxRound));
+        .then((results: any[]) => results.filter(row => row.round === maxRound))
+        .then((results: any[]) => results.slice(0, MAX_RECORDS));
 
       if (filteredResults.length > 0) {
         const simRoundData = filteredResults.reduce((acc, row) => {

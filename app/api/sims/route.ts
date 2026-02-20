@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Game } from "@/types";
 import { createKysely } from "@vercel/postgres-kysely";
+import { sql } from "kysely";
 
 interface Database {
   candidates_2024: any; // see github.com/kysely-org/kysely
@@ -59,61 +60,54 @@ export async function POST(req: NextRequest) {
             };
         }
 
-        // some ntoes to myself: if the converted game filters length is more than 4 * n-1 rounds (exclude pre), then do simulation stuff, otherwise, sample 10k records from each roubnd and concatenate?
-    
         const convertedGameFilters = gameFilters.map(convertGame);
-
-        // print len of convertedGameFilters
-        console.log("filters: ", convertedGameFilters)
 
         const db = createKysely<Database>();
 
         let queryRounds = db.selectFrom(eventTable).select('Round').distinct();
-        
+
         const RoundsUnique = await queryRounds.execute();
         const highestRound = Math.max(...RoundsUnique.map(({ Round }) => Round.match(/\d+/)?.[0] || 0).map(Number));
         const highestRoundStr = highestRound === 0 ? 'Pre' : String(highestRound);
-        const countOfRounds = RoundsUnique.length;
 
-        limitSims *= countOfRounds;
-
+        // Sample up to 10k random records AFTER any filtering, BEFORE aggregation
         let subquery = db
             .selectFrom(eventTable)
             .selectAll()
-            // .limit(limitSims)
+            .orderBy(sql`RANDOM()`)
+            .limit(limitSims)
             .as('sub');
 
-        let query = db.selectFrom(subquery).select(({ fn, val, ref }) => [
+        let query = db.selectFrom(subquery).select(({ fn }) => [
             'winner',
             'Round',
             fn.count<number>('winner').as('win_count'),
         ]);
-    
-        // convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
-        //     query = query.where(filter.gameKey, '=', filter.outcome)
-        // });
-        
+
         query = query.groupBy(['winner', 'Round']);
 
         const history = await query.execute();
 
         let predictions = []
 
-        //  write code for if len gameFilters > 0
         if (convertedGameFilters.length > 0) {
-            let querySim = db.selectFrom(eventTable).select(({ fn, val, ref }) => [
+            // Build filtered subquery: apply game outcome filters first, then sample up to 10k
+            let simSubquery = db.selectFrom(eventTable).selectAll();
+            convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
+                simSubquery = simSubquery.where(filter.gameKey, '=', filter.outcome)
+            });
+            simSubquery = simSubquery
+                .where('Round', '=', highestRoundStr)
+                .orderBy(sql`RANDOM()`)
+                .limit(limitSims);
+
+            let querySim = db.selectFrom(simSubquery.as('sim_sub')).select(({ fn, val }) => [
                 'winner',
                 val("Simulated").as('Round'),
                 fn.count<number>('winner').as('win_count'),
             ]);
-            convertedGameFilters.forEach((filter: { gameKey: any, outcome: any; }) => {
-                querySim = querySim.where(filter.gameKey, '=', filter.outcome)
-            });
-            querySim = querySim.where('Round', '=', highestRoundStr);
             querySim = querySim.groupBy(['winner', 'Round']);
             const simulated = await querySim.execute();
-
-            // concatenate history and simulated into new object called "predictions"
 
             predictions = history.concat(simulated);
         }
