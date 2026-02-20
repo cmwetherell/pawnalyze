@@ -251,7 +251,7 @@ export default function ScenarioBuilder({
         </div>
 
         {/* Game cards */}
-        <div className="flex-1 overflow-y-auto px-4 space-y-1.5 pb-2">
+        <div className="flex-1 overflow-y-auto px-4 pt-1 space-y-1.5 pb-2">
           {activeRoundData?.games.map(game => (
             <GamePickerCard
               key={game.id}
