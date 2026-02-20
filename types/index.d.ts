@@ -32,6 +32,7 @@ export type CurrentPredictionsProps = {
     gameFilters: Game[];
     updateTrigger?: number; // Add an optional updateTrigger prop
     eventTable: string;
+    onLoadingChange?: (loading: boolean) => void;
   };
 
   export type eventTableProps = {

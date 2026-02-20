@@ -16,7 +16,7 @@ const ChessButton = ({text, link, onClick, disabled, width}: chessButtonProps) =
 
     const buttonWidth = width ? width : "w-48"
 
-    const busttonClassName = `${buttonWidth} bg-primary border-2 border-black text-black font-bold py-2 px-4 rounded hover:bg-black hover:text-white transition duration-300 ease-in-out`
+    const busttonClassName = `${buttonWidth} font-bold py-2 px-4 rounded border-2 transition duration-300 ease-in-out ${disabled ? 'bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed' : 'bg-primary border-black text-black hover:bg-black hover:text-white'}`
     // Conditionally render Link or button based on props
     if (onClick) {
         // If onClick is provided, render a button with the onClick handler

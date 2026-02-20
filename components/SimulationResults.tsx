@@ -12,6 +12,7 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
   const [nsims, setNsims] = useState<number>(10000); // Default to 100 simulations
   const [gameFilters, setGameFilters] = useState<Game[]>([]); // Initialize with no filters
   const [updateTrigger, setUpdateTrigger] = useState(0); // Initialize update trigger
+  const [loading, setLoading] = useState(false);
 
   const handleGameFilterChange = (selectedGames: Game[]) => { // Fix: Change the type of selectedGames to Game[]
     setGameFilters(selectedGames); // Assume selectedGames is an array of game outcomes
@@ -32,12 +33,15 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
       <div className="mb-8" style={{ display: 'flex', justifyContent: 'center' }}>
         <div style={{ display: 'block', maxWidth: '800px', width: '100%' }}>
           <h2 className="text-2xl font-bold mb-2 text-center">Simulation Results</h2>
-          <GetPredictions
-            nsims = {nsims}
-            gameFilters = {gameFilters}
-            updateTrigger = {updateTrigger} // Pass the update trigger as a prop
-            eventTable = {eventTable}
-          />
+          <div className={`transition-all duration-300 ${loading ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
+            <GetPredictions
+              nsims = {nsims}
+              gameFilters = {gameFilters}
+              updateTrigger = {updateTrigger}
+              eventTable = {eventTable}
+              onLoadingChange = {setLoading}
+            />
+          </div>
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -53,8 +57,9 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
           className="text-center mt-1 block p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
         /> */}
         <ChessButton
-          text="Update Simulations"
+          text={loading ? "Loading..." : "Update Simulations"}
           onClick={handleSubmit}
+          disabled={loading}
         />
       </div>
 

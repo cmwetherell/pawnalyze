@@ -21,7 +21,7 @@ import { off } from "process";
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
-const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: CurrentPredictionsProps) => {
+const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadingChange }: CurrentPredictionsProps) => {
   const [isClient, setIsClient] = useState(false); // Add a state to track client-side rendering
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
@@ -77,9 +77,10 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
   useEffect(() => {
     setIsClient(true); // Update the state to indicate client-side rendering
     const fetchData = async () => {
+      onLoadingChange?.(true);
       const requestBody = {
         gameFilters: gameFilters,
-        limitSims: nsims, // Adjust this to fetch 1000 random samples
+        limitSims: nsims,
         eventTable: eventTable,
       };
 
@@ -161,6 +162,8 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable }: Curre
         }
       } catch (error) {
         console.error("Failed to fetch:", error);
+      } finally {
+        onLoadingChange?.(false);
       }
     };
 
