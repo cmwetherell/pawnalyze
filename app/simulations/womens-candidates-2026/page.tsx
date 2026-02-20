@@ -14,7 +14,7 @@ const Sims: any = () => {
             {/* Intro */}
             <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-2">
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed max-w-3xl">
-                    Who will challenge Ju Wenjun for the title? We ran <strong className="text-gray-800">10,000 Monte Carlo
+                    Who will challenge Ju Wenjun for the title? We ran <strong className="text-gray-800">over one million Monte Carlo
                     simulations</strong> of the Women&rsquo;s Candidates Tournament to find out. Use the <strong className="text-gray-800">Scenario
                     Builder</strong> to set game outcomes and see how the probabilities shift in real time.
                 </p>
@@ -33,7 +33,7 @@ const Sims: any = () => {
                                 Each simulation plays out every remaining game of the 14-round double
                                 round-robin. Individual game outcomes are drawn from a model that
                                 accounts for each player&rsquo;s Elo rating, color advantage, and
-                                historical draw rates at the elite level. After 10,000 full tournament
+                                historical draw rates at the elite level. After over a million full tournament
                                 simulations, we tally how often each player finishes first to produce
                                 win probabilities.
                             </p>
