@@ -11,8 +11,8 @@ interface PlayerAvatarProps {
 }
 
 const sizeConfig = {
-  sm: { classes: 'w-7 h-7 text-[10px]', px: 28 },
-  md: { classes: 'w-9 h-9 text-xs', px: 36 },
+  sm: { classes: 'w-9 h-9 text-xs', px: 36 },
+  md: { classes: 'w-11 h-11 text-sm', px: 44 },
 };
 
 export default function PlayerAvatar({ name, size = 'sm', className = '' }: PlayerAvatarProps) {
