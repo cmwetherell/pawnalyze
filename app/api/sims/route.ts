@@ -70,21 +70,21 @@ export async function POST(req: NextRequest) {
         const highestRound = Math.max(...RoundsUnique.map(({ Round }) => Round.match(/\d+/)?.[0] || 0).map(Number));
         const highestRoundStr = highestRound === 0 ? 'Pre' : String(highestRound);
 
-        // Sample up to 10k random records AFTER any filtering, BEFORE aggregation
-        let subquery = db
+        // Sample up to limitSims random records PER ROUND, then aggregate
+        const numberedSubquery = db
             .selectFrom(eventTable)
             .selectAll()
-            .orderBy(sql`RANDOM()`)
-            .limit(limitSims)
-            .as('sub');
+            .select(sql`ROW_NUMBER() OVER (PARTITION BY "Round" ORDER BY RANDOM())`.as('rn'))
+            .as('numbered');
 
-        let query = db.selectFrom(subquery).select(({ fn }) => [
-            'winner',
-            'Round',
-            fn.count<number>('winner').as('win_count'),
-        ]);
-
-        query = query.groupBy(['winner', 'Round']);
+        let query = db.selectFrom(numberedSubquery)
+            .select(({ fn }) => [
+                'winner',
+                'Round',
+                fn.count<number>('winner').as('win_count'),
+            ])
+            .where('rn', '<=', limitSims)
+            .groupBy(['winner', 'Round']);
 
         const history = await query.execute();
 
