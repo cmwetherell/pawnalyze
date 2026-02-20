@@ -78,7 +78,7 @@ export function getPlayerInitials(name: string): string {
 /** Get the photo path for a player, or null if not in PLAYER_DATA */
 export function getPlayerPhoto(name: string): string | null {
   const slug = PLAYER_DATA[name]?.photo;
-  return slug ? `/players/${slug}.jpg` : null;
+  return slug ? `/players/${slug}.webp` : null;
 }
 
 /** Build a color map from player names array (preserves order-based assignment) */
