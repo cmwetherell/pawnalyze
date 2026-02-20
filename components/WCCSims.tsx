@@ -6,6 +6,7 @@ import 'chart.js/auto';
 import GameHouseGeneral from './GameHouseGeneral';
 import { Game } from '@/types';
 import ChessButton from './Button';
+import ChartSkeleton from './ChartSkeleton';
 
 const COLORS_PALETTE = ['#EF476F', '#118AB2', '#073B4C', '#FFC43D'];
 
@@ -80,7 +81,7 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   }, [maxRound]);
 
   if (!WCCData || !isClient) {
-    return <p>Loading...</p>;
+    return <ChartSkeleton variant="line" />;
   }
 
   // Consistent player order based on the first round's data

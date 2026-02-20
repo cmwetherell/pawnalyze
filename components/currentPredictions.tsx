@@ -15,6 +15,7 @@ import womensCandByRound from '@/public/womensCandByRound.json';
 import candResByRound2026 from '@/public/candResByRound2026.json';
 import womensCandByRound2026 from '@/public/womensCandByRound2026.json';
 import ChessButton from "./Button";
+import ChartSkeleton from "./ChartSkeleton";
 import { reverse } from "dns";
 import { off } from "process";
 
@@ -376,7 +377,9 @@ const options: any = {
         <p className="text-sm text-center text-gray-500 italic mb-2">Predictions updated to reflect game selections below</p>
       )}
       <div style={{ height: '500px' }}> {/* Container must have a height */}
-        {isClient && (
+        {!isClient || Object.keys(playerWinPercentagesByRound).length === 0 ? (
+          <ChartSkeleton variant="bar" height="100%" />
+        ) : (
           <>
             {showBarChart ? (
               <Bar data={barData} options={barOptions} />
