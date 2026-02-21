@@ -50,7 +50,6 @@ export default function ElocatorPage() {
     <main className="flex-1 flex flex-col">
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-8 w-full">
-        <div className="h-px w-16 bg-chess-gold mb-6" />
         <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-chess-gold/10 text-chess-gold border border-chess-gold/20 mb-4">
           AI-Powered
         </span>
