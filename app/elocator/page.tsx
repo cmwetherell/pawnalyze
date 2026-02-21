@@ -1,35 +1,15 @@
 'use client'
 
-import { useState } from 'react';
-import Image from "next/image";
-import Link from "next/link";
-import ChessBoardManager from "@/components/elocator/ChessBoardManager";
-import AnalyzeGame from "@/components/elocator/AnalyzeGame";
-import ChessButton from '@/components/Button';
+import UnifiedAnalyzer from "@/components/elocator/UnifiedAnalyzer";
 
 
 export default function Home() {
-  // State to manage which component to show, default is ChessBoardManager
-  const [analysisType, setAnalysisType] = useState('singlePosition');
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-4">
       <title>Elocator: Chess Complexity Calculator</title>
       <p className="text-4xl font-bold">Elocator: Chess Complexity Calculator</p>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '16px' }}>
-        <ChessButton
-          text="Single Position"
-          onClick={() => setAnalysisType('singlePosition')}
-        />
-        <ChessButton
-          text="Full Game"
-          onClick={() => setAnalysisType('fullGame')}
-        />
-      </div>
-      <br />
-      {/* Conditional rendering based on analysisType */}
-      {analysisType === 'singlePosition' ? <ChessBoardManager /> : <AnalyzeGame />}
+      <UnifiedAnalyzer />
       <br />
       <br></br>
       <p className="text-2xl font-bold ">What is this? How does it work?</p>
