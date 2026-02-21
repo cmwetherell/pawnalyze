@@ -24,8 +24,8 @@ export default async function Home() {
             Chess Analytics & Predictions
           </p>
           <h1 className="font-heading text-4xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] mb-4">
-            Data-driven insights for{' '}
-            <span className="gold-gradient-text">elite chess</span>
+            Predictive analytics for{' '}
+            <span className="gold-gradient-text">championship chess</span>
           </h1>
           <p className="text-lg sm:text-xl text-[var(--text-secondary)] max-w-2xl mx-auto mb-8">
             Monte Carlo tournament simulations, interactive scenario building,
