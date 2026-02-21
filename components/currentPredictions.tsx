@@ -8,6 +8,7 @@ import { Chart } from 'chart.js';
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
 import { Game } from '@/types';
 import { buildPlayerColorMap } from '@/lib/playerData';
+import { fetchSimulationData } from '@/lib/actions';
 
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
@@ -130,25 +131,9 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         return;
       }
 
-      const requestBody = {
-        gameFilters: gameFilters,
-        limitSims: nsims,
-        eventTable: eventTable,
-      };
-
       try {
-        const response = await fetch('/api/sims', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          processData(data);
-        } else {
-          console.error('Server responded with an error:', response.status);
-        }
+        const data = await fetchSimulationData(gameFilters, nsims, eventTable);
+        processData(data);
       } catch (error) {
         console.error('Failed to fetch:', error);
       } finally {
