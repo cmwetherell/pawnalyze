@@ -35,7 +35,6 @@ export default function ScenarioBuilder({
   const [activeRound, setActiveRound] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
 
-  // Filter to incomplete rounds only
   const isRoundCompleted = (games: Game[]) =>
     games.every(g => g.hasOwnProperty('outcome') && g.outcome !== null);
 
@@ -44,14 +43,12 @@ export default function ScenarioBuilder({
     [initialGames],
   );
 
-  // Set default active round
   useEffect(() => {
     if (activeRound === null && incompleteRounds.length > 0) {
       setActiveRound(incompleteRounds[0].round);
     }
   }, [incompleteRounds, activeRound]);
 
-  // Propagate changes
   useEffect(() => {
     onGameFilterChange(gamesWithOutcomes);
   }, [gamesWithOutcomes, onGameFilterChange]);
@@ -73,15 +70,12 @@ export default function ScenarioBuilder({
     });
   };
 
-  // Count selections
   const totalSelections = gamesWithOutcomes.length;
   const roundsWithSelections = new Set(gamesWithOutcomes.map(g => g.round)).size;
 
-  // Which rounds have at least one selection?
   const roundHasSelection = (round: number) =>
     gamesWithOutcomes.some(g => g.round === round);
 
-  // Get outcome for a specific game
   const getOutcome = (gameId: string) =>
     gamesWithOutcomes.find(g => g.id === gameId)?.outcome as
       | 'white'
@@ -95,7 +89,7 @@ export default function ScenarioBuilder({
     setGamesWithOutcomes([]);
   };
 
-  // ── Round tab scrolling + drag ──
+  // Round tab scrolling + drag
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -123,13 +117,11 @@ export default function ScenarioBuilder({
     };
   }, [updateScrollArrows, incompleteRounds]);
 
-  // Drag handlers — use refs (not state) so mouse events stay in sync
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
 
     const onMouseDown = (e: MouseEvent) => {
-      // Only handle left-click on the container itself or gaps, not buttons
       dragging.current = true;
       didDrag.current = false;
       dragStart.current = { x: e.clientX, scrollLeft: el.scrollLeft };
@@ -160,19 +152,19 @@ export default function ScenarioBuilder({
     <div className="flex flex-col h-full">
       {/* Mobile collapse toggle */}
       <button
-        className="lg:hidden flex items-center justify-between w-full px-4 py-3 bg-gray-50 border-b border-gray-200"
+        className="lg:hidden flex items-center justify-between w-full px-4 py-3 bg-[var(--bg-surface-2)] border-b border-[var(--border)]"
         onClick={() => setCollapsed(c => !c)}
       >
-        <span className="font-semibold text-gray-700 text-sm">
+        <span className="font-semibold text-[var(--text-secondary)] text-sm">
           Scenario Builder
           {totalSelections > 0 && (
-            <span className="ml-2 text-xs text-gray-400">
+            <span className="ml-2 text-xs text-[var(--text-muted)]">
               {totalSelections} selected
             </span>
           )}
         </span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform ${collapsed ? '' : 'rotate-180'}`}
+          className={`w-4 h-4 text-[var(--text-muted)] transition-transform ${collapsed ? '' : 'rotate-180'}`}
           fill="none" viewBox="0 0 24 24" stroke="currentColor"
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -182,21 +174,20 @@ export default function ScenarioBuilder({
       <div className={`flex flex-col flex-1 ${collapsed ? 'hidden lg:flex' : 'flex'}`}>
         {/* Header */}
         <div className="px-4 pt-4 pb-2">
-          <h3 className="text-lg font-bold text-gray-900">Scenario Builder</h3>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h3 className="text-lg font-heading text-[var(--text-primary)]">Scenario Builder</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">
             Select game outcomes to simulate custom scenarios
           </p>
         </div>
 
-        {/* Round tabs with arrow buttons + drag scroll */}
+        {/* Round tabs */}
         <div className="flex items-center gap-1 px-2 pb-2">
-          {/* Left arrow */}
           <button
             onClick={() => scrollBy(-1)}
             className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full transition-colors ${
               canScrollLeft
-                ? 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-                : 'text-gray-200 cursor-default'
+                ? 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)]'
+                : 'text-[var(--border)] cursor-default'
             }`}
             disabled={!canScrollLeft}
             aria-label="Scroll rounds left"
@@ -206,7 +197,6 @@ export default function ScenarioBuilder({
             </svg>
           </button>
 
-          {/* Scrollable + draggable tab strip */}
           <div
             ref={scrollRef}
             className="flex gap-1 overflow-x-auto scrollbar-none py-1 flex-1 select-none cursor-grab active:cursor-grabbing"
@@ -220,26 +210,27 @@ export default function ScenarioBuilder({
                   onClick={() => { if (!didDrag.current) setActiveRound(r.round); }}
                   className={`relative shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors select-none ${
                     isActive
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700'
+                      ? 'bg-chess-gold text-chess-dark'
+                      : hasSel
+                        ? 'bg-[var(--bg-surface-2)] text-[var(--text-secondary)] border border-chess-gold/30'
+                        : 'bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
                   }`}
                 >
                   R{r.round}
                   {hasSel && !isActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-chess-gold" />
                   )}
                 </button>
               );
             })}
           </div>
 
-          {/* Right arrow */}
           <button
             onClick={() => scrollBy(1)}
             className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full transition-colors ${
               canScrollRight
-                ? 'text-gray-500 hover:bg-gray-200 hover:text-gray-700'
-                : 'text-gray-200 cursor-default'
+                ? 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)]'
+                : 'text-[var(--border)] cursor-default'
             }`}
             disabled={!canScrollRight}
             aria-label="Scroll rounds right"
@@ -265,8 +256,8 @@ export default function ScenarioBuilder({
 
         {/* Selection summary */}
         {totalSelections > 0 && (
-          <div className="px-4 py-2 border-t border-gray-100">
-            <p className="text-xs text-gray-400">
+          <div className="px-4 py-2 border-t border-[var(--border)]">
+            <p className="text-xs text-[var(--text-muted)]">
               {totalSelections} game{totalSelections !== 1 ? 's' : ''} selected
               {roundsWithSelections > 1 && ` across ${roundsWithSelections} rounds`}
             </p>
@@ -274,20 +265,25 @@ export default function ScenarioBuilder({
         )}
 
         {/* Action bar */}
-        <div className="px-4 py-3 border-t border-gray-100 flex gap-2 mt-auto">
+        <div className="px-4 py-3 border-t border-[var(--border)] flex gap-2 mt-auto">
           <button
             onClick={onSubmit}
             disabled={loading}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition-all ${
               loading
-                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-gray-900 text-white hover:bg-gray-800 active:bg-gray-950'
+                ? 'bg-[var(--bg-surface-3)] text-[var(--text-muted)] cursor-not-allowed'
+                : 'bg-chess-gold text-chess-dark hover:bg-chess-gold-light hover:shadow-gold active:bg-chess-gold-dark'
             }`}
           >
-            {loading && (
+            {loading ? (
               <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             )}
             {loading ? 'Simulating...' : 'Simulate'}
@@ -296,7 +292,7 @@ export default function ScenarioBuilder({
             <button
               onClick={handleReset}
               disabled={loading}
-              className="px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
+              className="px-3 py-2.5 rounded-lg text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-2)] transition-colors disabled:opacity-50"
             >
               Reset
             </button>

@@ -3,22 +3,74 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --bg-base: #ffffff;
+  --bg-surface-1: #f8f9fa;
+  --bg-surface-2: #f0f1f3;
+  --bg-surface-3: #e5e7eb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #9ca3af;
+  --border: #e5e7eb;
+  --chart-grid: #f3f4f6;
+
+  /* Chart-specific */
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
+  --chart-tooltip-border: #e5e7eb;
+  --chart-line-white: #475569;
+  --chart-line-black: #1e293b;
+
+  /* Tournament header banner */
+  --header-from: #e5e7eb;
+  --header-to: #f8f9fa;
+  --header-text: #111827;
+  --header-text-muted: #6b7280;
+  --header-pill-bg: rgba(0, 0, 0, 0.06);
+  --header-pill-text: #4b5563;
+  --header-pill-border: rgba(0, 0, 0, 0.08);
+  --header-pattern-color: #000;
+  --header-avatar-ring: #e5e7eb;
+
+  /* Chessboard squares */
+  --board-light: #F0D9B5;
+  --board-dark: #B58863;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+.dark {
+  --bg-base: #0F1116;
+  --bg-surface-1: #1a1d23;
+  --bg-surface-2: #22262e;
+  --bg-surface-3: #2a2f38;
+  --text-primary: #f0f2f5;
+  --text-secondary: #c9d1d9;
+  --text-muted: #8b949e;
+  --border: #2d333b;
+  --chart-grid: #1f2937;
+
+  /* Chart-specific */
+  --chart-tooltip-bg: rgba(26, 29, 35, 0.95);
+  --chart-tooltip-border: #2d333b;
+  --chart-line-white: #E5E7EB;
+  --chart-line-black: #6B7280;
+
+  /* Tournament header banner */
+  --header-from: #0F1116;
+  --header-to: #1a1d23;
+  --header-text: #ffffff;
+  --header-text-muted: #9ca3af;
+  --header-pill-bg: rgba(255, 255, 255, 0.1);
+  --header-pill-text: #d1d5db;
+  --header-pill-border: rgba(255, 255, 255, 0.1);
+  --header-pattern-color: white;
+  --header-avatar-ring: #0F1116;
+
+  /* Chessboard squares */
+  --board-light: #F0D9B5;
+  --board-dark: #B58863;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: white;
+  color: var(--text-secondary);
+  background: var(--bg-base);
 }
 
 @layer utilities {
@@ -34,25 +86,34 @@ body {
   }
 }
 
+@layer components {
+  .surface-card {
+    @apply bg-[var(--bg-surface-1)] border border-[var(--border)] rounded-xl;
+  }
+  .gold-gradient-text {
+    @apply bg-gradient-to-r from-chess-gold to-chess-gold-light bg-clip-text text-transparent;
+  }
+}
+
 /*---------------------------------------------------------------------------------------*/
 /*- Original image of flags and code below from chess-results.com ---*/
 /*---------------------------------------------------------------------------------------*/
-.tn_ACF, .tn_AFG, .tn_AHO, .tn_ALB, .tn_ALG, .tn_AME, .tn_AND, .tn_ANG, .tn_ANT, .tn_ARG, .tn_ARM, .tn_ARU, .tn_AUS, .tn_AUT, 
-.tn_AZE, .tn_BAH, .tn_BAN, .tn_BAR, .tn_BDI, .tn_BEL, .tn_BEN, .tn_BER, .tn_BERKS, .tn_BHU, .tn_BIH, .tn_BIZ, .tn_BLR, .tn_BOL, .tn_BOT, 
-.tn_BRA, .tn_BRN, .tn_BRU, .tn_BUL, .tn_BUR, .tn_CAM, .tn_CAN, .tn_CAR, .tn_CAT, .tn_CAY, .tn_CCA, .tn_CFR, .tn_CHA, .tn_CHES, .tn_CHI, 
-.tn_CHN, .tn_CIV, .tn_CMR, .tn_COD, .tn_COL, .tn_COM, .tn_CPV, .tn_CRC, .tn_CRO, .tn_CUB, .tn_CYP, .tn_CZE, .tn_DEN, .tn_DJI, .tn_DMA, 
-.tn_DOM, .tn_ECU, .tn_ECX, .tn_EGY, .tn_ENG, .tn_ERI, .tn_ESA, .tn_ESP, .tn_ESSEX, .tn_EST, .tn_ETH, .tn_EU, .tn_EUR, .tn_FAI, .tn_FID, 
-.tn_FIJ, .tn_FIN, .tn_FRA, .tn_GAB, .tn_GAM, .tn_GCI, .tn_GEO, .tn_GEQ, .tn_GER, .tn_GHA, .tn_GIB, .tn_GLP, .tn_GMAN, .tn_GRB, .tn_GRE, 
-.tn_GRL, .tn_GRN, .tn_GUA, .tn_GUM, .tn_GUY, .tn_HAI, .tn_HANTS, .tn_HKG, .tn_HON, .tn_HUN, .tn_IBC, .tn_ICC, .tn_ICS, .tn_INA, .tn_IND, 
-.tn_INT, .tn_IOM, .tn_IPC, .tn_IRI, .tn_IRL, .tn_IRQ, .tn_ISL, .tn_ISR, .tn_ISV, .tn_ITA, .tn_IVB, .tn_JAM, .tn_JCI, .tn_JOR, .tn_JPN, 
-.tn_KAZ, .tn_KEN, .tn_KENT, .tn_KGZ, .tn_KOR, .tn_KOS, .tn_KSA, .tn_KUW, .tn_LAO, .tn_LAT, .tn_LBA, .tn_LBN, .tn_LBR, .tn_LCA, .tn_LEICS, 
-.tn_LES, .tn_LIE, .tn_LTU, .tn_LUX, .tn_MAC, .tn_MAD, .tn_MAL, .tn_MAR, .tn_MAS, .tn_MAU, .tn_MAW, .tn_MDA, .tn_MDV, .tn_MERS, .tn_MEX, 
-.tn_MGL, .tn_MIDDX, .tn_MKD, .tn_MLI, .tn_MLT, .tn_MNC, .tn_MNE, .tn_MOZ, .tn_MRI, .tn_MTN, .tn_MYA, .tn_NAM, .tn_NCA, .tn_NED, .tn_NEP, 
-.tn_NGR, .tn_NIG, .tn_NIR, .tn_NO, .tn_NOR, .tn_NORTHD, .tn_NRU, .tn_NZL, .tn_OMA, .tn_ONL, .tn_OXON, .tn_PAK, .tn_PAN, .tn_PAR, .tn_PER, 
-.tn_PHI, .tn_PLE, .tn_PLW, .tn_PNG, .tn_POL, .tn_POR, .tn_PUR, .tn_QAT, .tn_REF, .tn_ROU, .tn_RSA, .tn_RUS, .tn_RWA, .tn_SCG, .tn_SCO, 
-.tn_SEN, .tn_SEY, .tn_SGP, .tn_SIL, .tn_SIN, .tn_SKN, .tn_SLE, .tn_SLO, .tn_SMR, .tn_SOL, .tn_SOM, .tn_SRB, .tn_SRI, .tn_SSD, .tn_STAFFS, 
-.tn_STP, .tn_SUD, .tn_SUI, .tn_SUR, .tn_SURRY, .tn_SUSSX, .tn_SVK, .tn_SWE, .tn_SWZ, .tn_SYR, .tn_TAJ, .tn_TAN, .tn_THA, .tn_TJK, .tn_TKM, 
-.tn_TLS, .tn_TOG, .tn_TPE, .tn_TTO, .tn_TUN, .tn_TUR, .tn_UAE, .tn_UGA, .tn_UKR, .tn_URU, .tn_USA, .tn_UZB, .tn_VAN, .tn_VEN, .tn_VIE, 
+.tn_ACF, .tn_AFG, .tn_AHO, .tn_ALB, .tn_ALG, .tn_AME, .tn_AND, .tn_ANG, .tn_ANT, .tn_ARG, .tn_ARM, .tn_ARU, .tn_AUS, .tn_AUT,
+.tn_AZE, .tn_BAH, .tn_BAN, .tn_BAR, .tn_BDI, .tn_BEL, .tn_BEN, .tn_BER, .tn_BERKS, .tn_BHU, .tn_BIH, .tn_BIZ, .tn_BLR, .tn_BOL, .tn_BOT,
+.tn_BRA, .tn_BRN, .tn_BRU, .tn_BUL, .tn_BUR, .tn_CAM, .tn_CAN, .tn_CAR, .tn_CAT, .tn_CAY, .tn_CCA, .tn_CFR, .tn_CHA, .tn_CHES, .tn_CHI,
+.tn_CHN, .tn_CIV, .tn_CMR, .tn_COD, .tn_COL, .tn_COM, .tn_CPV, .tn_CRC, .tn_CRO, .tn_CUB, .tn_CYP, .tn_CZE, .tn_DEN, .tn_DJI, .tn_DMA,
+.tn_DOM, .tn_ECU, .tn_ECX, .tn_EGY, .tn_ENG, .tn_ERI, .tn_ESA, .tn_ESP, .tn_ESSEX, .tn_EST, .tn_ETH, .tn_EU, .tn_EUR, .tn_FAI, .tn_FID,
+.tn_FIJ, .tn_FIN, .tn_FRA, .tn_GAB, .tn_GAM, .tn_GCI, .tn_GEO, .tn_GEQ, .tn_GER, .tn_GHA, .tn_GIB, .tn_GLP, .tn_GMAN, .tn_GRB, .tn_GRE,
+.tn_GRL, .tn_GRN, .tn_GUA, .tn_GUM, .tn_GUY, .tn_HAI, .tn_HANTS, .tn_HKG, .tn_HON, .tn_HUN, .tn_IBC, .tn_ICC, .tn_ICS, .tn_INA, .tn_IND,
+.tn_INT, .tn_IOM, .tn_IPC, .tn_IRI, .tn_IRL, .tn_IRQ, .tn_ISL, .tn_ISR, .tn_ISV, .tn_ITA, .tn_IVB, .tn_JAM, .tn_JCI, .tn_JOR, .tn_JPN,
+.tn_KAZ, .tn_KEN, .tn_KENT, .tn_KGZ, .tn_KOR, .tn_KOS, .tn_KSA, .tn_KUW, .tn_LAO, .tn_LAT, .tn_LBA, .tn_LBN, .tn_LBR, .tn_LCA, .tn_LEICS,
+.tn_LES, .tn_LIE, .tn_LTU, .tn_LUX, .tn_MAC, .tn_MAD, .tn_MAL, .tn_MAR, .tn_MAS, .tn_MAU, .tn_MAW, .tn_MDA, .tn_MDV, .tn_MERS, .tn_MEX,
+.tn_MGL, .tn_MIDDX, .tn_MKD, .tn_MLI, .tn_MLT, .tn_MNC, .tn_MNE, .tn_MOZ, .tn_MRI, .tn_MTN, .tn_MYA, .tn_NAM, .tn_NCA, .tn_NED, .tn_NEP,
+.tn_NGR, .tn_NIG, .tn_NIR, .tn_NO, .tn_NOR, .tn_NORTHD, .tn_NRU, .tn_NZL, .tn_OMA, .tn_ONL, .tn_OXON, .tn_PAK, .tn_PAN, .tn_PAR, .tn_PER,
+.tn_PHI, .tn_PLE, .tn_PLW, .tn_PNG, .tn_POL, .tn_POR, .tn_PUR, .tn_QAT, .tn_REF, .tn_ROU, .tn_RSA, .tn_RUS, .tn_RWA, .tn_SCG, .tn_SCO,
+.tn_SEN, .tn_SEY, .tn_SGP, .tn_SIL, .tn_SIN, .tn_SKN, .tn_SLE, .tn_SLO, .tn_SMR, .tn_SOL, .tn_SOM, .tn_SRB, .tn_SRI, .tn_SSD, .tn_STAFFS,
+.tn_STP, .tn_SUD, .tn_SUI, .tn_SUR, .tn_SURRY, .tn_SUSSX, .tn_SVK, .tn_SWE, .tn_SWZ, .tn_SYR, .tn_TAJ, .tn_TAN, .tn_THA, .tn_TJK, .tn_TKM,
+.tn_TLS, .tn_TOG, .tn_TPE, .tn_TTO, .tn_TUN, .tn_TUR, .tn_UAE, .tn_UGA, .tn_UKR, .tn_URU, .tn_USA, .tn_UZB, .tn_VAN, .tn_VEN, .tn_VIE,
 .tn_VIN, .tn_WARKS, .tn_WLS, .tn_WORCS, .tn_XXX, .tn_YEM, .tn_YORKS, .tn_YUG, .tn_ZAM, .tn_ZIM, .tn_ZZZ, .tn_xxx
 { width:30px;height:20px;background-image: url(/img/flag30V.png); float:Left;}
 

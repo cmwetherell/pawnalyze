@@ -1,5 +1,5 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, } from 'recharts';
+import React, { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface PositionAnalysis {
   fen: string;
@@ -11,82 +11,129 @@ interface DisplayEvalProps {
   positionAnalysis: PositionAnalysis[];
 }
 
+function useChartColors() {
+  const [colors, setColors] = useState({
+    grid: '',
+    axisText: '',
+    whiteComplexity: '',
+    blackComplexity: '',
+    tooltipBg: '',
+    tooltipBorder: '',
+    tooltipText: '',
+  });
+
+  useEffect(() => {
+    const update = () => {
+      const s = getComputedStyle(document.documentElement);
+      setColors({
+        grid: s.getPropertyValue('--chart-grid').trim(),
+        axisText: s.getPropertyValue('--text-muted').trim(),
+        whiteComplexity: s.getPropertyValue('--chart-line-white').trim(),
+        blackComplexity: s.getPropertyValue('--chart-line-black').trim(),
+        tooltipBg: s.getPropertyValue('--chart-tooltip-bg').trim(),
+        tooltipBorder: s.getPropertyValue('--chart-tooltip-border').trim(),
+        tooltipText: s.getPropertyValue('--text-secondary').trim(),
+      });
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  return colors;
+}
+
 const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
-  // Prepare separate data for white and black complexities
+  const colors = useChartColors();
+  const tooltipStyle = {
+    backgroundColor: colors.tooltipBg,
+    border: `1px solid ${colors.tooltipBorder}`,
+    borderRadius: '8px',
+    color: colors.tooltipText,
+  };
   const dataForWhite = positionAnalysis
-    .filter((_, index) => index % 2 === 0) // White's moves
+    .filter((_, index) => index % 2 === 0)
     .map((position, index) => ({
-      Move: index * 2 + 1, // Adjust move number for display
+      Move: index * 2 + 1,
       WhiteComplexity: position.complexity,
     }));
 
   const dataForBlack = positionAnalysis
-    .filter((_, index) => index % 2 !== 0) // Black's moves
+    .filter((_, index) => index % 2 !== 0)
     .map((position, index) => ({
-      Move: index * 2 + 2, // Adjust move number for display
+      Move: index * 2 + 2,
       BlackComplexity: position.complexity,
     }));
-
-  const evaluationData = positionAnalysis.map((position, index) => ({
-    Move: index + 1,
-    Evaluation: position.evaluation,
-  }));
 
   const evaluationDataCapped = positionAnalysis.map((position, index) => ({
     Move: index + 1,
     Evaluation: Math.max(Math.min(position.evaluation, 1000), -1000),
   }));
 
-  const whiteGameComplexitySum = dataForWhite.reduce((sum, position) => sum + position.WhiteComplexity, 0);
-  const whiteGameComplexityAvg = whiteGameComplexitySum / dataForWhite.length;
-  
-  const blackGameComplexitySum = dataForBlack.reduce((sum, position) => sum + position.BlackComplexity, 0);
-  const blackGameComplexityAvg = blackGameComplexitySum / dataForBlack.length;
+  const whiteGameComplexityAvg = dataForWhite.reduce((sum, p) => sum + p.WhiteComplexity, 0) / dataForWhite.length;
+  const blackGameComplexityAvg = dataForBlack.reduce((sum, p) => sum + p.BlackComplexity, 0) / dataForBlack.length;
 
   return (
-    <>
-      <h2>Game Evaluation</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={evaluationDataCapped} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="Evaluation" stroke="#8884d8" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <h2>White Position Complexity</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={dataForWhite} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="WhiteComplexity" stroke="#82ca9d" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-
-      <h2>Black Position Complexity</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={dataForBlack} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="Move" />
-          <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="BlackComplexity" stroke="#8884d8" dot={false} />
-        </LineChart>
-      </ResponsiveContainer>
-      <div>
-        <h3>White Average Complexity: {whiteGameComplexityAvg.toFixed(2)}</h3>
-        <h3>Black Average Complexity: {blackGameComplexityAvg.toFixed(2)}</h3>
+    <div className="space-y-6">
+      {/* Evaluation */}
+      <div className="surface-card p-4">
+        <h3 className="text-sm font-heading text-[var(--text-primary)] mb-4">Game Evaluation</h3>
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={evaluationDataCapped} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+            <XAxis dataKey="Move" stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+            <YAxis stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Legend wrapperStyle={{ color: colors.axisText, fontSize: 12 }} />
+            <Line type="monotone" dataKey="Evaluation" stroke="#C9A84C" dot={false} strokeWidth={2} />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
-    
-      
-    </>
+
+      {/* Complexity side by side */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="surface-card p-4">
+          <h3 className="text-sm font-heading text-[var(--text-primary)] mb-4">White Complexity</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={dataForWhite} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+              <XAxis dataKey="Move" stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Line type="monotone" dataKey="WhiteComplexity" stroke={colors.whiteComplexity} dot={false} strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="surface-card p-4">
+          <h3 className="text-sm font-heading text-[var(--text-primary)] mb-4">Black Complexity</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={dataForBlack} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
+              <XAxis dataKey="Move" stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Line type="monotone" dataKey="BlackComplexity" stroke={colors.blackComplexity} dot={false} strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Average stats */}
+      <div className="surface-card p-4">
+        <div className="grid grid-cols-2 gap-4 text-center">
+          <div>
+            <p className="text-xs text-[var(--text-muted)]">White Avg Complexity</p>
+            <p className="text-xl font-heading text-[var(--text-primary)]">{whiteGameComplexityAvg.toFixed(2)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--text-muted)]">Black Avg Complexity</p>
+            <p className="text-xl font-heading text-[var(--text-primary)]">{blackGameComplexityAvg.toFixed(2)}</p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

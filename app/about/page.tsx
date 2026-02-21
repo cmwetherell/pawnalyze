@@ -1,53 +1,108 @@
-'use client';
-
 import Image from "next/image";
 import Link from "next/link";
-//multiline tsx text string
-
-import styled from 'styled-components';
-
-// bold text
-//hex code for neon green: #39ff14
-const StyledLink = styled.a`
-    font-weight: bold;
-    text-decoration: none;
-    &:hover {
-        text-decoration: underline;
-    }
-`;
-
-
 
 const About = () => {
     return (
-        <main className="flex-1 flex flex-col mt-3">
-        {/* <div className="flex-1 flex flex-col bg-white p-8 justify-center"> */}
-          <h1 className="text-6xl font-bold text-center text-black mb-2 mt-4">About</h1>
-          <Image
-            src="/img/selfie.jpeg"
-            alt="Caleb Wetherell"
-            width={300}
-            height={300}
-            className="rounded-xl justify-center mx-auto mt-2"
-            />
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <p className="text-base  mb-4">Welcome to Pawnalyze, a haven for chess enthusiasts and data lovers alike! My name is Caleb Wetherell, a Seattle-based data scientist with a penchant for chess, albeit not mastering it just yet. As a serial hobbyist, I dive into intriguing projects that blend my love for data and my array of interests, with chess taking center stage on Pawnalyze.</p>
-                <p className="text-base  mb-4">Pawnalyze is the culmination of my passion for data science and chess. I simulate  and make predictions for chess tournaments, and recently started analyzing the complexity of chess positions. This project reflects my journey in learning and entertainment, and I am thrilled to share it with you. For the curious minds, the code that powers these simulations is 
-                <Link href="https://www.github.com/cmwetherell/cmwetherell.github.io" passHref={true}><StyledLink> available on my GitHub</StyledLink></Link>.</p>
+        <main className="flex-1 flex flex-col">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 pb-16 w-full">
+                <h1 className="font-heading text-4xl text-[var(--text-primary)] mb-8 text-center">About</h1>
 
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Elocator: Unveiling the Complexity of Chess Positions</h3>
-                <p className="text-base  mb-4">In my continuous exploration of chess through data, I&apos;ve launched a groundbreaking project named Elocator. This open-source tool is designed to predict the complexity of chess positions for humans, providing a unique lens to understand what makes a position challenging. By defining complexity as the expected change in win percentage after a move, Elocator offers a novel perspective on the game&apos;s intricate dynamics.</p>
-                <p className="text-base  mb-4">Elocator operates on a dataset of FENs, analyzing the loss in win percentage when a grandmaster makes a move. Underpinned by a neural network trained on over 100,000 chess moves by grandmasters, it assigns a complexity score to positions, aiming to deepen our understanding of chess strategy. This tool not only serves as a bridge between human intuition and computational analysis but also opens new avenues for research and discussion within the chess community.</p>
+                {/* Photo with gold accent */}
+                <div className="flex justify-center mb-8">
+                    <div className="relative">
+                        <div className="absolute -inset-1 bg-gradient-to-br from-chess-gold/30 to-chess-gold/10 rounded-xl blur-sm" />
+                        <Image
+                            src="/img/selfie.jpeg"
+                            alt="Caleb Wetherell"
+                            width={280}
+                            height={280}
+                            className="relative rounded-xl"
+                        />
+                    </div>
+                </div>
 
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Recognition</h3>
-                <p className="text-base  mb-4">The journey with Pawnalyze and Elocator has led to significant recognition. My analysis of the Hans Niemann chess cheating scandal caught the attention of major media outlets, including The New York Times and NPR. These features underscore the impact of our work, bridging the gap between chess analysis and broader discussions on integrity and performance in the sport.</p>
+                {/* Bio */}
+                <div className="space-y-4 text-[var(--text-secondary)] leading-relaxed">
+                    <p>
+                        Welcome to Pawnalyze, a haven for chess enthusiasts and data lovers alike! My name is Caleb Wetherell,
+                        a Seattle-based data scientist with a penchant for chess, albeit not mastering it just yet. As a serial
+                        hobbyist, I dive into intriguing projects that blend my love for data and my array of interests, with
+                        chess taking center stage on Pawnalyze.
+                    </p>
+                    <p>
+                        Pawnalyze is the culmination of my passion for data science and chess. I simulate and make predictions
+                        for chess tournaments, and recently started analyzing the complexity of chess positions. This project
+                        reflects my journey in learning and entertainment, and I am thrilled to share it with you. For the
+                        curious minds, the code that powers these simulations is{' '}
+                        <Link
+                            href="https://www.github.com/cmwetherell/cmwetherell.github.io"
+                            className="text-chess-gold hover:text-chess-gold-light font-semibold transition-colors"
+                        >
+                            available on GitHub
+                        </Link>.
+                    </p>
 
-                <h3 className="text-xl font-semibold text-gray-800 mb-3">Join The Journey</h3>
-                <p className="text-base  mb-4">As Pawnalyze continues to evolve, so does my commitment to enhancing the chess community&apos;s understanding and appreciation of the game. Whether through the analytical insights from simulated tournaments or the groundbreaking analysis provided by Elocator, our mission remains to enrich the chess experience for players and enthusiasts around the world.</p>
-                <p className="text-base  mb-4">I invite you to explore the depths of chess analytics with me and delve into the intricacies of Elocator.</p>
-                <p className="text-base ">Thank you for visiting Pawnalyze. You can <Link href="https://www.twitter.com/pawnalyze/" passHref={true}><StyledLink> follow me on X/Twitter.</StyledLink></Link></p>
+                    <h3 className="font-heading text-xl text-[var(--text-primary)] pt-4">
+                        Elocator: Unveiling Chess Complexity
+                    </h3>
+                    <p>
+                        In my continuous exploration of chess through data, I&apos;ve launched a groundbreaking project named
+                        Elocator. This open-source tool is designed to predict the complexity of chess positions for humans,
+                        providing a unique lens to understand what makes a position challenging. By defining complexity as the
+                        expected change in win percentage after a move, Elocator offers a novel perspective on the game&apos;s
+                        intricate dynamics.
+                    </p>
+                    <p>
+                        Elocator operates on a dataset of FENs, analyzing the loss in win percentage when a grandmaster makes
+                        a move. Underpinned by a neural network trained on over 100,000 chess moves by grandmasters, it assigns
+                        a complexity score to positions, aiming to deepen our understanding of chess strategy.
+                    </p>
+
+                    <h3 className="font-heading text-xl text-[var(--text-primary)] pt-4">Recognition</h3>
+
+                    {/* Feature cards */}
+                    <div className="grid sm:grid-cols-2 gap-4 py-2">
+                        <div className="surface-card p-4">
+                            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">The New York Times</p>
+                            <p className="text-sm text-[var(--text-muted)]">
+                                Featured Pawnalyze&apos;s analysis of the Hans Niemann chess cheating scandal.
+                            </p>
+                        </div>
+                        <div className="surface-card p-4">
+                            <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">NPR</p>
+                            <p className="text-sm text-[var(--text-muted)]">
+                                Highlighted Pawnalyze&apos;s data-driven approach to chess analytics.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 className="font-heading text-xl text-[var(--text-primary)] pt-4">Join The Journey</h3>
+                    <p>
+                        As Pawnalyze continues to evolve, so does my commitment to enhancing the chess community&apos;s
+                        understanding and appreciation of the game. Whether through the analytical insights from simulated
+                        tournaments or the groundbreaking analysis provided by Elocator, our mission remains to enrich the
+                        chess experience for players and enthusiasts around the world.
+                    </p>
+                    <p>I invite you to explore the depths of chess analytics with me.</p>
+
+                    {/* Social CTAs */}
+                    <div className="flex items-center gap-3 pt-4">
+                        <Link
+                            href="https://www.twitter.com/pawnalyze/"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium text-[var(--text-secondary)] hover:text-chess-gold hover:border-chess-gold/30 transition-colors"
+                        >
+                            Follow on X/Twitter
+                        </Link>
+                        <Link
+                            href="https://www.github.com/cmwetherell/pawnalyze"
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--border)] text-sm font-medium text-[var(--text-secondary)] hover:text-chess-gold hover:border-chess-gold/30 transition-colors"
+                        >
+                            View on GitHub
+                        </Link>
+                    </div>
+                </div>
             </div>
-          </main>
+        </main>
     );
 }
 

@@ -17,13 +17,47 @@ import ChartSkeleton from './ChartSkeleton';
 
 Chart.register(ChartDataLabels);
 
+function useChartTheme() {
+  const [theme, setTheme] = useState({
+    gridColor: '#1f293740',
+    textColor: '#8b949e',
+    textPrimary: '#f0f2f5',
+    tooltipBg: '#1a1d23',
+    tooltipBorder: '#2d333b',
+    tooltipText: '#f0f2f5',
+    tooltipBody: '#c9d1d9',
+  });
+
+  useEffect(() => {
+    const update = () => {
+      const s = getComputedStyle(document.documentElement);
+      setTheme({
+        gridColor: s.getPropertyValue('--chart-grid').trim() + '40',
+        textColor: s.getPropertyValue('--text-muted').trim(),
+        textPrimary: s.getPropertyValue('--text-primary').trim(),
+        tooltipBg: s.getPropertyValue('--chart-tooltip-bg').trim(),
+        tooltipBorder: s.getPropertyValue('--chart-tooltip-border').trim(),
+        tooltipText: s.getPropertyValue('--text-primary').trim(),
+        tooltipBody: s.getPropertyValue('--text-secondary').trim(),
+      });
+    };
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
+}
+
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 
-const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadingChange }: CurrentPredictionsProps) => {
+const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadingChange, initialData }: CurrentPredictionsProps) => {
   const [isClient, setIsClient] = useState(false);
   const [playerWinPercentagesByRound, setPlayerWinPercentagesByRound] = useState<Record<string, PercentageData[]>>({});
   const [totalGames, setTotalGames] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState('');
+  const chartTheme = useChartTheme();
 
   let initialGames: { round: number; games: Game[] }[] = [];
 
@@ -41,10 +75,61 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
     console.log(e);
   }
 
+  const processData = (data: any[]) => {
+    const transformedData = data.reduce((acc: Record<string, any>, curr: any) => {
+      const { Round, winner, win_count } = curr;
+      if (!acc[Round]) {
+        acc[Round] = { totalGames: 0, winnerPercentages: {} };
+      }
+      acc[Round].winnerPercentages[winner] = parseFloat(win_count);
+      acc[Round].totalGames += parseFloat(win_count);
+      return acc;
+    }, {});
+
+    const chartData: Record<string, PercentageData[]> = {};
+    customOrder = [];
+    for (const round in transformedData) {
+      customOrder.push(round);
+      const roundData = transformedData[round];
+      const percentagesArray: PercentageData[] = Object.entries(
+        roundData.winnerPercentages,
+      ).map(([name, value]) => ({
+        name,
+        value: Math.floor(10 * ((value as number) / roundData.totalGames * 100)) / 10,
+      }));
+      chartData[round] = percentagesArray;
+    }
+
+    const roundOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
+    customOrder.sort((a, b) => {
+      const indexA = roundOrder.indexOf(a);
+      const indexB = roundOrder.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
+    });
+
+    setPlayerWinPercentagesByRound(chartData);
+
+    const simulatedRound = transformedData['Simulated'];
+    setTotalGames(simulatedRound ? simulatedRound.totalGames : 0);
+  };
+
   useEffect(() => {
     setIsClient(true);
     const fetchData = async () => {
       onLoadingChange?.(true);
+
+      const noFilters = !gameFilters || gameFilters.length === 0;
+
+      // Use server-cached initial data when no filters are applied
+      if (noFilters && initialData) {
+        processData(initialData);
+        onLoadingChange?.(false);
+        return;
+      }
+
       const requestBody = {
         gameFilters: gameFilters,
         limitSims: nsims,
@@ -60,45 +145,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
 
         if (response.ok) {
           const data = await response.json();
-
-          const transformedData = data.reduce((acc: Record<string, any>, curr: any) => {
-            const { Round, winner, win_count } = curr;
-            if (!acc[Round]) {
-              acc[Round] = { totalGames: 0, winnerPercentages: {} };
-            }
-            acc[Round].winnerPercentages[winner] = parseFloat(win_count);
-            acc[Round].totalGames += parseFloat(win_count);
-            return acc;
-          }, {});
-
-          const chartData: Record<string, PercentageData[]> = {};
-          customOrder = [];
-          for (const round in transformedData) {
-            customOrder.push(round);
-            const roundData = transformedData[round];
-            const percentagesArray: PercentageData[] = Object.entries(
-              roundData.winnerPercentages,
-            ).map(([name, value]) => ({
-              name,
-              value: Math.floor(10 * ((value as number) / roundData.totalGames * 100)) / 10,
-            }));
-            chartData[round] = percentagesArray;
-          }
-
-          const roundOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
-          customOrder.sort((a, b) => {
-            const indexA = roundOrder.indexOf(a);
-            const indexB = roundOrder.indexOf(b);
-            if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-            if (indexA === -1) return 1;
-            if (indexB === -1) return -1;
-            return indexA - indexB;
-          });
-
-          setPlayerWinPercentagesByRound(chartData);
-
-          const simulatedRound = transformedData['Simulated'];
-          setTotalGames(simulatedRound ? simulatedRound.totalGames : 0);
+          processData(data);
         } else {
           console.error('Server responded with an error:', response.status);
         }
@@ -112,7 +159,6 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
     fetchData();
   }, [updateTrigger]);
 
-  // Player names from JSON data
   const playerNames: string[] = Array.from(
     new Set(
       initialGames.reduce((players: string[], round) => {
@@ -124,7 +170,6 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
     ),
   );
 
-  // Use consistent colors from playerData
   const playerColorsMap = buildPlayerColorMap(playerNames);
 
   const availableRounds = customOrder.filter(label =>
@@ -146,7 +191,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
 
   playerPercentages.sort((a, b) => a.percentage - b.percentage);
 
-  // ── Bar chart (pre-tournament / single-round) ──
+  // Bar chart
   const barPlayerPercentages = [...playerPercentages].sort((a, b) => b.percentage - a.percentage);
   const barData = {
     labels: barPlayerPercentages.map(p => p.name),
@@ -156,7 +201,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         backgroundColor: barPlayerPercentages.map(p => playerColorsMap[p.name]),
         borderColor: barPlayerPercentages.map(p => playerColorsMap[p.name]),
         borderWidth: 0,
-        borderRadius: 6,
+        borderRadius: 8,
         barPercentage: 0.65,
       },
     ],
@@ -167,9 +212,11 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleColor: '#f9fafb',
-        bodyColor: '#d1d5db',
+        backgroundColor: chartTheme.tooltipBg,
+        titleColor: chartTheme.tooltipText,
+        bodyColor: chartTheme.tooltipBody,
+        borderColor: chartTheme.tooltipBorder,
+        borderWidth: 1,
         cornerRadius: 8,
         padding: 10,
         callbacks: {
@@ -180,7 +227,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         anchor: 'end' as const,
         align: 'end' as const,
         offset: 4,
-        color: '#6b7280',
+        color: chartTheme.textColor,
         font: { size: 12, weight: 'bold' as const },
         formatter: (value: number) => `${value.toFixed(1)}%`,
       },
@@ -194,7 +241,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
       y: {
         grid: { display: false },
         ticks: {
-          color: '#374151',
+          color: chartTheme.textColor,
           font: { size: 13, weight: 'bold' as const },
         },
       },
@@ -202,7 +249,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
     maintainAspectRatio: false,
   };
 
-  // ── Line chart (multi-round) ──
+  // Line chart
   const data = {
     labels: availableRounds,
     datasets: playerPercentages.map(({ name, percentage }) => {
@@ -231,7 +278,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         position: 'top' as const,
         align: 'start' as const,
         labels: {
-          color: '#374151',
+          color: chartTheme.textColor,
           usePointStyle: true,
           pointStyle: 'circle',
           padding: 16,
@@ -239,9 +286,11 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         },
       },
       tooltip: {
-        backgroundColor: '#1f2937',
-        titleColor: '#f9fafb',
-        bodyColor: '#d1d5db',
+        backgroundColor: chartTheme.tooltipBg,
+        titleColor: chartTheme.tooltipText,
+        bodyColor: chartTheme.tooltipBody,
+        borderColor: chartTheme.tooltipBorder,
+        borderWidth: 1,
         cornerRadius: 8,
         padding: 10,
         callbacks: {
@@ -260,31 +309,31 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         title: {
           display: true,
           text: 'Round',
-          color: '#6b7280',
+          color: chartTheme.textColor,
           font: { size: 12 },
         },
         grid: {
-          color: '#f3f4f6',
+          color: chartTheme.gridColor,
           drawBorder: false,
         },
-        ticks: { color: '#6b7280' },
+        ticks: { color: chartTheme.textColor },
       },
       y: {
         title: {
           display: true,
           text: 'Win %',
-          color: '#6b7280',
+          color: chartTheme.textColor,
           font: { size: 12 },
         },
         stacked: false,
         min: 0,
         max: 100,
         grid: {
-          color: '#f3f4f6',
+          color: chartTheme.gridColor,
           borderDash: [4, 4],
           drawBorder: false,
         },
-        ticks: { color: '#6b7280' },
+        ticks: { color: chartTheme.textColor },
       },
     },
     maintainAspectRatio: false,
@@ -293,7 +342,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
   return (
     <div>
       {isClient && showBarChart && hasSimulated && (
-        <p className="text-xs text-center text-amber-600 bg-amber-50 rounded-md px-3 py-1.5 mb-3">
+        <p className="text-xs text-center text-chess-gold bg-chess-gold/10 border border-chess-gold/20 rounded-md px-3 py-1.5 mb-3">
           Predictions updated to reflect your scenario selections
         </p>
       )}
@@ -311,7 +360,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         )}
       </div>
       {isClient && totalGames > 0 && (
-        <p className="text-xs text-gray-400 text-center mt-2 mb-0">
+        <p className="text-xs text-[var(--text-muted)] text-center mt-2 mb-0">
           Based on {totalGames.toLocaleString()} simulations
         </p>
       )}

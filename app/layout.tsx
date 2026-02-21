@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
 import { Inter as FontSans } from "next/font/google";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Footer from "@/components/Footer";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -21,14 +21,10 @@ const fontHeading = localFont({
   variable: "--font-heading",
 });
 
-interface RootLayoutProps {
-  children: React.ReactNode;
-}
-
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F1116" },
   ],
 };
 
@@ -74,12 +70,6 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    // apple: [
-    //   {
-    //     url: "/apple-touch-icon.png",
-    //     sizes: "180x180",
-    //   },
-    // ],
   },
   manifest: `${siteConfig.url}/site.webmanifest`,
   metadataBase: new URL(siteConfig.metadataBase),
@@ -87,19 +77,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.theme==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
+      </head>
       <body
         className={cn(
-          "min-h-screen bg-white font-sans antialiased text-black",
+          "min-h-screen bg-[var(--bg-base)] font-sans antialiased text-[var(--text-secondary)]",
           fontSans.variable,
           fontHeading.variable
         )}
       >
-        <Analytics />
-        <GoogleAnalytics gaId="G-59WSL645R4" />
-        <Navbar />
-        <div className="flex flex-col bg-white min-h-screen container mx-auto">{children}</div>
-        <Footer />
+        <ThemeProvider>
+          <Analytics />
+          <GoogleAnalytics gaId="G-59WSL645R4" />
+          <Navbar />
+          <div className="flex flex-col min-h-screen">{children}</div>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

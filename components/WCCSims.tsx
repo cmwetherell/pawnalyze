@@ -14,12 +14,12 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   const [isClient, setIsClient] = useState(false);
   const [WCCData, setWCCData] = useState<any>(null);
   const [nSims, setNSims] = useState<number>(0);
-  const [maxRound, setMaxRound] = useState<number>(0); // Initialize to 0
-  const [filteredGames, setFilteredGames] = useState<Game[]>([]); // Track user-selected game outcomes
+  const [maxRound, setMaxRound] = useState<number>(0);
+  const [filteredGames, setFilteredGames] = useState<Game[]>([]);
 
   const generateFilters = () =>
     filteredGames
-      .filter((game) => game.outcome) // Exclude games without outcomes
+      .filter((game) => game.outcome)
       .map(
         (game) =>
           `${game.whitePlayer.substring(0, 3)}|${game.blackPlayer.substring(0, 3)}|${game.round}|${
@@ -31,10 +31,8 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     try {
       const response = await fetch('/api/sims/wcc', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filters }), // Send the filters to the API
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filters }),
       });
 
       if (response.ok) {
@@ -57,10 +55,9 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
 
   useEffect(() => {
     setIsClient(true);
-    fetchSimulations([]); // Initial fetch with no filters
-  }, []); // Only run on mount
+    fetchSimulations([]);
+  }, []);
 
-  // Define sampleGamesData inside the component and slice it based on maxRound
   const sampleGamesData = React.useMemo(() => {
     const totalRounds = 14;
     let gamesData = Array.from({ length: totalRounds }, (_, index) => ({
@@ -76,7 +73,6 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
       ],
     }));
 
-    // Remove games from round 1 to maxRound
     return gamesData.slice(maxRound);
   }, [maxRound]);
 
@@ -84,14 +80,11 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
     return <ChartSkeleton variant="line" />;
   }
 
-  // Consistent player order based on the first round's data
   const players = WCCData.byRound[0].winPercentages.map((wp: any) => wp.winner);
 
-  // Process data for the chart
   const labels = WCCData.byRound.map((round: any) => `Round ${round.round}`);
   const datasets = players.map((playerName: string, index: number) => {
     const data = WCCData.byRound.map((round: any) => {
-      // Find the percentage for this specific player in each round
       const playerData = round.winPercentages.find((wp: any) => wp.winner === playerName);
       return parseFloat(playerData?.percentage || 0);
     });
@@ -103,14 +96,11 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
       borderColor: COLORS_PALETTE[index % COLORS_PALETTE.length],
       fill: false,
       pointRadius: 3,
-      tension: 0.2, // Smooth line
+      tension: 0.2,
     };
   });
 
-  const data = {
-    labels,
-    datasets,
-  };
+  const data = { labels, datasets };
 
   const options = {
     plugins: {
@@ -118,10 +108,16 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
         display: true,
         position: 'right' as const,
         labels: {
-          color: 'black',
+          color: 'var(--text-secondary)',
         },
       },
       tooltip: {
+        backgroundColor: 'rgba(26, 29, 35, 0.95)',
+        titleColor: '#f0f2f5',
+        bodyColor: '#c9d1d9',
+        borderColor: '#2d333b',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: (context: any) => {
             const value = context.raw || 0;
@@ -135,17 +131,21 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
         title: {
           display: true,
           text: 'Round',
-          color: 'black',
+          color: 'var(--text-muted)',
         },
+        ticks: { color: 'var(--text-muted)' },
+        grid: { color: 'var(--chart-grid)' },
       },
       y: {
         title: {
           display: true,
           text: 'Win % by Player',
-          color: 'black',
+          color: 'var(--text-muted)',
         },
         min: 0,
         max: 100,
+        ticks: { color: 'var(--text-muted)' },
+        grid: { color: 'var(--chart-grid)', borderDash: [4, 4] },
       },
     },
     maintainAspectRatio: false,
@@ -154,11 +154,11 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   if (justGraph) {
     return (
       <div className="max-w-7xl mx-auto p-4 space-y-6">
-        <div className="bg-white shadow-lg rounded-lg p-6">
+        <div className="surface-card p-6">
           <div style={{ height: '500px' }}>
             <Line data={data} options={options} />
           </div>
-          <p className="text-center mt-4 text-gray-600">
+          <p className="text-center mt-4 text-[var(--text-muted)] text-sm">
             Based on {nSims} simulations after round {maxRound}.
           </p>
         </div>
@@ -167,16 +167,16 @@ const WCCSims: React.FC<{ justGraph: boolean }> = ({ justGraph }) => {
   } else {
     return (
       <div className="max-w-7xl mx-auto p-4 space-y-6">
-        <h1 className="text-3xl font-bold text-center text-gray-800">Simulated Results by Round</h1>
-        <div className="bg-white shadow-lg rounded-lg p-6">
+        <h1 className="text-3xl font-heading text-center text-[var(--text-primary)]">Simulated Results by Round</h1>
+        <div className="surface-card p-6">
           <div style={{ height: '500px' }}>
             <Line data={data} options={options} />
           </div>
-          <p className="text-center mt-4 text-gray-600">
+          <p className="text-center mt-4 text-[var(--text-muted)] text-sm">
             Based on {nSims} simulations after round {maxRound}.
           </p>
         </div>
-        <div className="bg-gray-50 shadow-md rounded-lg p-4">
+        <div className="surface-card p-4">
           <div className="flex justify-center mb-4">
             <ChessButton text="Update Simulations" onClick={handleUpdateSimulations} />
           </div>

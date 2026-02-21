@@ -5,7 +5,7 @@ import type { JSX } from "react";
 
 export default function Broadcast(): JSX.Element {
     return (
-        <main className="flex-1 flex flex-col min-h-screen bg-white">
+        <main className="flex-1 flex flex-col min-h-screen bg-[var(--bg-base)]">
             <div>
                 <p>Info</p>
                 <BroadcastRoundComponent 

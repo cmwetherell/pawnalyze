@@ -10,18 +10,17 @@ export default function OutcomeToggle({ selected, onChange }: OutcomeToggleProps
     onChange(selected === value ? null : value);
   };
 
-  const base = 'flex items-center justify-center font-bold text-sm transition-all duration-150 cursor-pointer select-none h-8';
-  const ring = 'ring-2 ring-gray-900 ring-inset z-10';
+  const base = 'flex-1 flex items-center justify-center font-bold text-sm transition-all duration-150 cursor-pointer select-none h-8';
 
   return (
-    <div className="inline-flex rounded-lg overflow-hidden shrink-0 bg-gray-100" style={{ width: 108 }}>
+    <div className="inline-flex rounded-lg overflow-hidden shrink-0 bg-[var(--bg-surface-1)] border border-[var(--border)]" style={{ width: 108 }}>
       {/* White wins (1) */}
       <button
         onClick={() => handleClick('white')}
-        className={`${base} w-9 rounded-l-lg ${
+        className={`${base} rounded-l-md ${
           selected === 'white'
-            ? `bg-white text-gray-900 ${ring}`
-            : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+            ? 'bg-gray-200 text-gray-900'
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
         }`}
         title="White wins"
         aria-label="White wins"
@@ -29,13 +28,13 @@ export default function OutcomeToggle({ selected, onChange }: OutcomeToggleProps
         1
       </button>
 
-      {/* Draw (½) */}
+      {/* Draw (=) */}
       <button
         onClick={() => handleClick('draw')}
-        className={`${base} w-[30px] ${
+        className={`${base} border-x border-[var(--border)] ${
           selected === 'draw'
-            ? `bg-gray-500 text-white ${ring}`
-            : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+            ? 'bg-chess-gold/20 text-chess-gold'
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
         }`}
         title="Draw"
         aria-label="Draw"
@@ -46,10 +45,10 @@ export default function OutcomeToggle({ selected, onChange }: OutcomeToggleProps
       {/* Black wins (0) */}
       <button
         onClick={() => handleClick('black')}
-        className={`${base} w-9 rounded-r-lg ${
+        className={`${base} rounded-r-md ${
           selected === 'black'
-            ? `bg-gray-900 text-white ${ring}`
-            : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+            ? 'bg-gray-800 text-white'
+            : 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
         }`}
         title="Black wins"
         aria-label="Black wins"

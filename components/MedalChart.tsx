@@ -113,6 +113,7 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
           backgroundColor: topCountries.map((item) => colorMap[item.country] || '#CCCCCC'), // Use the color map
           borderColor: topCountries.map((item) => colorMap[item.country] || '#CCCCCC'),
           borderWidth: 1,
+          borderRadius: 6,
         },
       ],
     };
@@ -195,10 +196,16 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
               lineWidth: 1,
             }));
           },
-          color: 'black',
+          color: 'var(--text-secondary)',
         },
       },
       tooltip: {
+        backgroundColor: 'var(--chart-tooltip-bg)',
+        titleColor: 'var(--text-primary)',
+        bodyColor: 'var(--text-secondary)',
+        borderColor: 'var(--chart-tooltip-border)',
+        borderWidth: 1,
+        cornerRadius: 8,
         callbacks: {
           label: function (context: any) {
             const label = context.dataset.label || '';
@@ -213,23 +220,27 @@ const MedalChart: React.FC<MedalChartProps> = ({ medalData, maxRound, topN, clas
         title: {
           display: true,
           text: maxRound === 0 ? 'Country' : 'Round',
-          color: 'black',
+          color: 'var(--text-muted)',
           font: {
             size: 12,
           },
         },
+        ticks: { color: 'var(--text-muted)' },
+        grid: { color: 'var(--chart-grid)' },
       },
       y: {
         title: {
           display: true,
           text: 'Win Gold %',
-          color: 'black',
+          color: 'var(--text-muted)',
           font: {
             size: 12,
           },
         },
         min: 0,
         suggestedMax: 50,
+        ticks: { color: 'var(--text-muted)' },
+        grid: { color: 'var(--chart-grid)', borderDash: [4, 4] },
       },
     },
   };

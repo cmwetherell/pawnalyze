@@ -1,46 +1,60 @@
 import OlympiadSims from "@/components/OlympiadSims";
-import SimulationResults from "@/components/SimulationResults";
-import TournamentInfo from "@/components/TournamentInfo";
-import Link from "next/link";
+import TournamentHeader from "@/components/simulation/TournamentHeader";
 
 const Sims: any = () => {
     return (
-        <main className="flex-1 flex flex-col min-h-screen bg-white">
-            <div>
-                <h2>Congrats to India for winning Gold in both the Open and Womens event!</h2>
-                <TournamentInfo
-                    name="Chess Olympiad Budapest 2024"
-                    website="https://chessolympiad2024.fide.com/"
-                    description="Country's battle it out 4v4 to find the best chess nation."
-                    format="11 rounds of 4v4 team battles"
-                />
+        <main className="flex-1 flex flex-col min-h-screen">
+            <TournamentHeader
+                name="Chess Olympiad Budapest 2024"
+                website="https://chessolympiad2024.fide.com/"
+                description="Countries battle it out 4v4 to find the best chess nation."
+                format="11 rounds of 4v4 team battles"
+            />
+
+            {/* Victory banner */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 w-full">
+                <div className="surface-card p-4 border-chess-gold/30">
+                    <div className="flex items-center gap-3">
+                        <span className="text-2xl">🏆</span>
+                        <p className="text-sm text-[var(--text-primary)] font-medium">
+                            Congrats to India for winning Gold in both the Open and Women&apos;s event!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
                 <OlympiadSims />
             </div>
-            <div>
-                <p className='pt-4 pb-2 font-bold text-2xl text-center'>What am I looking at?</p>
-                <p>
-                    Before the Olympiad kicked off, I ran 5,000 simulations of the tournament to come up 
-                    with a prediction for the probabilities that each country wins (or gets silver/bronze). 
-                    Then, after each round, I run new simulations based on the current results. My simulations 
-                    also take into account the official FIDE pairing logic.
-                </p>
-                <br></br>
-                <p>
-                    In case you are wondering, yes, it was a nightmare to program. And its not quite perfect. 
-                    For example, Im tracking how many whites each country has played. So when two teams face off, 
-                    whoever has had white on board one more times will get the black pieces on board one. But when they have played white 
-                    the same amount of times, then the white pieces should go to whoever had white less recently. 
-                    Right now, I just randomize who gets white - its a small detail, not materially impacting 
-                    these predictions. But its a good example of the complexities of the Olympiad pairing algorithm.
-                </p>
-                <br></br>
-                <p>
-                    That was a little bit of an introduction to the simulations for this particular event, and 
-                    you can read <a className="text-green-500" href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html">more technical details here</a> about the underlying model, method, and simulations. 
-                    You can also find the code <a className="text-green-500" href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py">on GitHub.</a>
-                </p>
-                <br></br>
-                <p><strong>Note: </strong>If a country is on the list above, it means they at least won Bronze one time in one simulation, even if it says 0.0. Countries that never win a medal in current simulations will not be in the table above.</p>
+
+            {/* Methodology */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 w-full">
+                <div className="max-w-3xl">
+                    <div className="border-t border-[var(--border)] pt-8">
+                        <h2 className="text-lg font-heading text-[var(--text-primary)] mb-4">How it works</h2>
+                        <div className="space-y-4 text-sm text-[var(--text-muted)] leading-relaxed">
+                            <p>
+                                Before the Olympiad kicked off, we ran 5,000 simulations of the tournament to predict
+                                the probabilities that each country wins gold, silver, or bronze. After each round,
+                                new simulations were run based on the current results, accounting for the official
+                                FIDE pairing logic.
+                            </p>
+                            <p>
+                                Read{' '}
+                                <a className="text-chess-gold hover:text-chess-gold-light transition-colors" href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html">
+                                    more about the methodology
+                                </a>{' '}
+                                or view the{' '}
+                                <a className="text-chess-gold hover:text-chess-gold-light transition-colors" href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py">
+                                    code on GitHub
+                                </a>.
+                            </p>
+                            <p className="text-xs text-[var(--text-muted)]">
+                                <strong>Note:</strong> If a country appears in the table, it won at least one medal in at least one simulation, even if the percentage shows 0.0%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     );

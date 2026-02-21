@@ -5,7 +5,7 @@ import GetPredictions from '@/components/currentPredictions';
 import ScenarioBuilder from '@/components/simulation/ScenarioBuilder';
 import { Game } from '@/types';
 
-const SimulationResults = ({ eventTable }: { eventTable: string }) => {
+const SimulationResults = ({ eventTable, initialData }: { eventTable: string; initialData?: any[] }) => {
   const [nsims] = useState<number>(10000);
   const [gameFilters, setGameFilters] = useState<Game[]>([]);
   const [updateTrigger, setUpdateTrigger] = useState(0);
@@ -20,12 +20,12 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
       <div className="lg:grid lg:grid-cols-5 lg:gap-8">
         {/* Chart panel */}
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Simulation Results</h2>
+          <div className="surface-card p-4 sm:p-6">
+            <h2 className="text-xl font-heading text-[var(--text-primary)] mb-1">Simulation Results</h2>
             <div className={`transition-all duration-300 ${loading ? 'opacity-40 blur-sm pointer-events-none' : ''}`}>
               <GetPredictions
                 nsims={nsims}
@@ -33,6 +33,7 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
                 updateTrigger={updateTrigger}
                 eventTable={eventTable}
                 onLoadingChange={setLoading}
+                initialData={initialData}
               />
             </div>
           </div>
@@ -40,7 +41,7 @@ const SimulationResults = ({ eventTable }: { eventTable: string }) => {
 
         {/* Scenario builder sidebar */}
         <div className="lg:col-span-2 mt-6 lg:mt-0">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden lg:sticky lg:top-4">
+          <div className="surface-card overflow-hidden lg:sticky lg:top-20">
             <ScenarioBuilder
               eventTable={eventTable}
               onGameFilterChange={handleGameFilterChange}

@@ -10,23 +10,19 @@ interface GamePickerCardProps {
   onOutcomeChange: (outcome: 'white' | 'draw' | 'black' | null) => void;
 }
 
-/** Chess piece icon — small inline SVG */
 function PieceIcon({ side }: { side: 'white' | 'black' }) {
-  // Simple king silhouette
   return (
     <span
       className={`inline-block w-3.5 h-3.5 rounded-sm shrink-0 ${
-        side === 'white' ? 'bg-white border border-gray-300' : 'bg-gray-800'
+        side === 'white' ? 'bg-gray-200 border border-gray-400' : 'bg-gray-700'
       }`}
       title={side === 'white' ? 'White pieces' : 'Black pieces'}
     />
   );
 }
 
-/** Get short display name: "Last, First" → "Last" */
 function displayName(name: string): string {
   if (name.includes(',')) return name.split(',')[0].trim();
-  // Handle "Praggnanandhaa R" style
   const parts = name.split(' ');
   return parts.length > 1 && parts[parts.length - 1].length <= 2
     ? parts.slice(0, -1).join(' ')
@@ -45,13 +41,13 @@ export default function GamePickerCard({
     <div
       className={`flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors ${
         hasSelection
-          ? 'bg-gray-50 ring-1 ring-gray-200'
-          : 'bg-white hover:bg-gray-50/50'
+          ? 'bg-[var(--bg-surface-2)] ring-1 ring-chess-gold/30'
+          : 'bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)]'
       }`}
     >
       {/* White player */}
       <div className="flex items-center gap-1.5 min-w-0 flex-1 justify-end">
-        <span className="text-sm font-medium text-gray-800 truncate text-right">
+        <span className="text-sm font-medium text-[var(--text-primary)] truncate text-right">
           {displayName(whitePlayer)}
         </span>
         <PlayerAvatar name={whitePlayer} size="sm" />
@@ -65,7 +61,7 @@ export default function GamePickerCard({
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
         <PieceIcon side="black" />
         <PlayerAvatar name={blackPlayer} size="sm" />
-        <span className="text-sm font-medium text-gray-800 truncate">
+        <span className="text-sm font-medium text-[var(--text-primary)] truncate">
           {displayName(blackPlayer)}
         </span>
       </div>

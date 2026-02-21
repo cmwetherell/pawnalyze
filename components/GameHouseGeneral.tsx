@@ -55,8 +55,8 @@ const GameHouseGeneral: React.FC<GameHouseProps> = ({ onGameFilterChange, eventT
     games.every((game) => game.hasOwnProperty('outcome') && game.outcome !== null);
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-4">
-      <h2 className="text-2xl font-bold mb-2 text-center">Pick Game Outcomes</h2>
+    <div className="surface-card p-4">
+      <h2 className="text-2xl font-heading text-[var(--text-primary)] mb-2 text-center">Pick Game Outcomes</h2>
       {initialGames.map((round, index) => {
         const roundCompleted = isRoundCompleted(round.games);
 

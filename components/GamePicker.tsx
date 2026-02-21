@@ -33,11 +33,11 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
 
   // Adjusted for responsive design and max-width constraints
   const baseClassName =
-    'border-2 border-black text-black font-bold rounded transition duration-300 ease-in-out text-center'; // Common base styles
-  const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`; // Max width for player buttons
-  const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`; // Max width for draw button
-  const selectedClassName = 'bg-black text-white';
-  const defaultClassName = 'bg-primary';
+    'border border-[var(--border)] text-[var(--text-primary)] font-bold rounded transition duration-300 ease-in-out text-center';
+  const playerButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[250px]`;
+  const drawButtonClassName = `${baseClassName} flex-1 min-w-0 max-w-[150px]`;
+  const selectedClassName = 'bg-chess-gold text-chess-dark border-chess-gold';
+  const defaultClassName = 'bg-[var(--bg-surface-2)]';
 
   const getButtonClassName = (outcome: 'white' | 'draw' | 'black') => {
     let specificClassName = outcome === 'draw' ? drawButtonClassName : playerButtonClassName;
@@ -51,7 +51,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
   };
 
   return (
-    <div className="bg-white p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
+    <div className="bg-[var(--bg-surface-1)] p-2 flex justify-center items-center flex-wrap"> {/* Added flex-wrap for responsiveness */}
       <button
         style={{ overflowX: 'hidden' }}
         className={getButtonClassName('white')}
@@ -76,7 +76,7 @@ const GamePicker = ({ whitePlayer, blackPlayer, onOutcomeChange, gameDetails }: 
 
       {/* Optional section to display additional game details */}
       {gameDetails && (
-        <div className="text-sm text-gray-600 mt-2">
+        <div className="text-sm text-[var(--text-muted)] mt-2">
           {Object.entries(gameDetails).map(([key, value]) => (
             <p key={key} className="truncate">
               <strong>{key}:</strong> {value}

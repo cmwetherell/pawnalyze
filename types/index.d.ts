@@ -33,6 +33,7 @@ export type CurrentPredictionsProps = {
     updateTrigger?: number; // Add an optional updateTrigger prop
     eventTable: string;
     onLoadingChange?: (loading: boolean) => void;
+    initialData?: any[];
   };
 
   export type eventTableProps = {
