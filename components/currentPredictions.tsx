@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -59,6 +59,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
   const [totalGames, setTotalGames] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const chartTheme = useChartTheme();
+  const resultCache = useRef<Map<string, any[]>>(new Map());
 
   let initialGames: { round: number; games: Game[] }[] = [];
 
@@ -131,8 +132,19 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         return;
       }
 
+      const cacheKey = JSON.stringify(
+        gameFilters.map(g => g.id + ':' + g.outcome).sort()
+      );
+
+      if (resultCache.current.has(cacheKey)) {
+        processData(resultCache.current.get(cacheKey)!);
+        onLoadingChange?.(false);
+        return;
+      }
+
       try {
         const data = await fetchSimulationData(gameFilters, nsims, eventTable);
+        resultCache.current.set(cacheKey, data);
         processData(data);
       } catch (error) {
         console.error('Failed to fetch:', error);

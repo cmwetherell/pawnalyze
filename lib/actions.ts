@@ -32,6 +32,7 @@ export async function fetchSimulationData(
   if (limitSims > 10000) limitSims = 10000
 
   const convertedFilters = gameFilters.map(convertGame)
+  convertedFilters.sort((a, b) => a.gameKey.localeCompare(b.gameKey))
 
   const history = await getBaseSimulationData(eventTable as EventTable, limitSims)
   const simulated = await getSimulatedRoundData(eventTable as EventTable, convertedFilters, limitSims)
