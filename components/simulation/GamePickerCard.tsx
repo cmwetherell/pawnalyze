@@ -39,7 +39,7 @@ export default function GamePickerCard({
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors ${
+      className={`flex items-center gap-1.5 px-3 py-2.5 rounded-lg transition-colors overflow-hidden ${
         hasSelection
           ? 'bg-[var(--bg-surface-2)] ring-1 ring-chess-gold/30'
           : 'bg-[var(--bg-surface-2)]/50 hover:bg-[var(--bg-surface-2)]'

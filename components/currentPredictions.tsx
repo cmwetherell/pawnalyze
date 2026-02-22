@@ -331,7 +331,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
           Predictions updated to reflect your scenario selections
         </p>
       )}
-      <div style={{ height: '500px' }}>
+      <div className="overflow-x-auto min-w-0" style={{ height: '500px' }}>
         {!isClient || Object.keys(playerWinPercentagesByRound).length === 0 ? (
           <ChartSkeleton variant="bar" height="100%" />
         ) : (

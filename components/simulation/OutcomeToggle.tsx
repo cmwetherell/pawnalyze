@@ -13,7 +13,7 @@ export default function OutcomeToggle({ selected, onChange }: OutcomeToggleProps
   const base = 'flex-1 flex items-center justify-center font-bold text-sm transition-all duration-150 cursor-pointer select-none h-8';
 
   return (
-    <div className="inline-flex rounded-lg overflow-hidden shrink-0 bg-[var(--bg-surface-1)] border border-[var(--border)]" style={{ width: 108 }}>
+    <div className="inline-flex rounded-lg overflow-hidden shrink-0 bg-[var(--bg-surface-1)] border border-[var(--border)] w-[96px] sm:w-[108px]">
       {/* White wins (1) */}
       <button
         onClick={() => handleClick('white')}
