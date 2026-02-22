@@ -87,7 +87,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body
         className={cn(
-          "min-h-screen bg-[var(--bg-base)] font-sans antialiased text-[var(--text-secondary)]",
+          "min-h-screen bg-[var(--bg-base)] font-sans antialiased text-[var(--text-secondary)] overflow-x-hidden",
           fontSans.variable,
           fontHeading.variable
         )}

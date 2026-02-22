@@ -20,7 +20,7 @@ const SimulationResults = ({ eventTable, initialData }: { eventTable: string; in
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 overflow-x-hidden">
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 overflow-hidden">
       <div className="lg:grid lg:grid-cols-5 lg:gap-8">
         {/* Chart panel */}
         <div className="lg:col-span-3">
