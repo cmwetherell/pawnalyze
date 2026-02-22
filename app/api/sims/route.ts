@@ -1,46 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Game } from "@/types";
 import { getBaseSimulationData, getSimulatedRoundData, type EventTable, type SimulationFilter } from "@/lib/simulations";
 
-function convertGame(game: Game): SimulationFilter {
-    let outcome: number;
-    switch (game.outcome) {
-        case 'black':
-            outcome = 0.0;
-            break;
-        case 'white':
-            outcome = 1.0;
-            break;
-        case 'draw':
-            outcome = 0.5;
-            break;
-        default:
-            outcome = 0.0;
-    }
-    return {
-        gameKey: game.whitePlayer.slice(0, 3) + "|" + game.blackPlayer.slice(0, 3),
-        outcome: outcome,
-    };
-}
+const VALID_TABLES = new Set(['candidates_2024', 'womens_candidates_2024', 'candidates_2026', 'womens_candidates_2026']);
 
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const body = await req.json();
-        let { gameFilters, limitSims, eventTable } = body;
+        const { searchParams } = req.nextUrl;
+        const eventTable = searchParams.get('eventTable');
+        const filtersParam = searchParams.get('filters');
+        let limitSims = parseInt(searchParams.get('limit') || '10000', 10);
 
-        if (limitSims > 10000) {
-            limitSims = 10000;
+        if (!eventTable || !VALID_TABLES.has(eventTable)) {
+            return NextResponse.json({ error: "Invalid eventTable" }, { status: 400 });
         }
 
-        const convertedFilters: SimulationFilter[] = gameFilters.map(convertGame);
+        if (limitSims > 10000) limitSims = 10000;
 
-        // Both calls are cached — identical arguments return cached results
+        // Parse filters from "gameKey:outcome,gameKey:outcome" format (already sorted by client)
+        const filters: SimulationFilter[] = [];
+        if (filtersParam) {
+            for (const pair of filtersParam.split(',')) {
+                const lastColon = pair.lastIndexOf(':');
+                if (lastColon === -1) continue;
+                filters.push({
+                    gameKey: pair.slice(0, lastColon),
+                    outcome: parseFloat(pair.slice(lastColon + 1)),
+                });
+            }
+        }
+
         const history = await getBaseSimulationData(eventTable as EventTable, limitSims);
-        const simulated = await getSimulatedRoundData(eventTable as EventTable, convertedFilters, limitSims);
+        const simulated = await getSimulatedRoundData(eventTable as EventTable, filters, limitSims);
 
-        const predictions = [...history, ...simulated];
-
-        return NextResponse.json(predictions);
+        return NextResponse.json([...history, ...simulated], {
+            headers: {
+                'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+            },
+        });
     } catch (e: any) {
         console.error(e);
         return NextResponse.json(

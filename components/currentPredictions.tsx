@@ -8,7 +8,6 @@ import { Chart } from 'chart.js';
 import { PercentageData, CurrentPredictionsProps, PlayerColorsMap } from '@/types';
 import { Game } from '@/types';
 import { buildPlayerColorMap } from '@/lib/playerData';
-import { fetchSimulationData } from '@/lib/actions';
 
 import candResByRound from '@/public/candResByRound.json';
 import womensCandByRound from '@/public/womensCandByRound.json';
@@ -132,19 +131,25 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         return;
       }
 
-      const cacheKey = JSON.stringify(
-        gameFilters.map(g => g.id + ':' + g.outcome).sort()
-      );
+      // Build deterministic filter string sorted by gameKey for cache-friendly URLs
+      const filterPairs = gameFilters.map(g => {
+        const gameKey = g.whitePlayer.slice(0, 3) + '|' + g.blackPlayer.slice(0, 3);
+        const outcome = g.outcome === 'white' ? 1 : g.outcome === 'draw' ? 0.5 : 0;
+        return `${gameKey}:${outcome}`;
+      }).sort();
+      const filtersParam = filterPairs.join(',');
 
-      if (resultCache.current.has(cacheKey)) {
-        processData(resultCache.current.get(cacheKey)!);
+      if (resultCache.current.has(filtersParam)) {
+        processData(resultCache.current.get(filtersParam)!);
         onLoadingChange?.(false);
         return;
       }
 
       try {
-        const data = await fetchSimulationData(gameFilters, nsims, eventTable);
-        resultCache.current.set(cacheKey, data);
+        const url = `/api/sims?eventTable=${eventTable}&limit=${nsims}&filters=${encodeURIComponent(filtersParam)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        resultCache.current.set(filtersParam, data);
         processData(data);
       } catch (error) {
         console.error('Failed to fetch:', error);
