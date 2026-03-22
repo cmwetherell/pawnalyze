@@ -199,7 +199,7 @@ const UnifiedAnalyzer: React.FC = () => {
                                 <div>
                                     <p className="text-sm text-[var(--text-muted)] mb-1">Complexity Score</p>
                                     <p className="text-4xl font-heading text-[var(--text-primary)]">
-                                        {complexityScore} <span className="text-lg text-[var(--text-muted)]">/ 10</span>
+                                        {complexityScore} <span className="text-lg text-[var(--text-muted)]">/ 100</span>
                                     </p>
                                 </div>
                                 <ComplexityBar score={Number(complexityScore)} />
@@ -254,7 +254,7 @@ const UnifiedAnalyzer: React.FC = () => {
                             <div>
                                 <p className="text-xs text-[var(--text-muted)]">Complexity</p>
                                 <p className="text-lg font-heading text-[var(--text-primary)]">
-                                    {analysisData?.positionAnalysis[currentIndex]?.complexity?.toFixed(1) || "N/A"}
+                                    {analysisData?.positionAnalysis[currentIndex]?.complexity || "N/A"}
                                 </p>
                             </div>
                             <div>

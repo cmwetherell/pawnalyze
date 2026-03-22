@@ -99,7 +99,7 @@ const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
             <LineChart data={dataForWhite} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
               <XAxis dataKey="Move" stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
-              <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
               <Tooltip contentStyle={tooltipStyle} />
               <Line type="monotone" dataKey="WhiteComplexity" stroke={colors.whiteComplexity} dot={false} strokeWidth={2} />
             </LineChart>
@@ -112,7 +112,7 @@ const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
             <LineChart data={dataForBlack} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
               <XAxis dataKey="Move" stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
-              <YAxis domain={[0, 10]} ticks={[0, 2, 4, 6, 8, 10]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
+              <YAxis domain={[0, 100]} ticks={[0, 20, 40, 60, 80, 100]} stroke={colors.axisText} tick={{ fill: colors.axisText, fontSize: 11 }} />
               <Tooltip contentStyle={tooltipStyle} />
               <Line type="monotone" dataKey="BlackComplexity" stroke={colors.blackComplexity} dot={false} strokeWidth={2} />
             </LineChart>
