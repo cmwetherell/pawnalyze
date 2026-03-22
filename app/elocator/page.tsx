@@ -101,9 +101,9 @@ export default function ElocatorPage() {
         <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Example positions</h2>
         <div className="space-y-2">
           {[
-            { label: "Low", badgeClass: "bg-emerald-500/10 text-emerald-400", fen: "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3" },
-            { label: "Med", badgeClass: "bg-amber-500/10 text-amber-400", fen: "4rk2/ppp1qppp/3p2R1/8/4P3/2Q1R2P/PPP2PP1/6K1 b - - 0 1" },
-            { label: "High", badgeClass: "bg-red-500/10 text-red-400", fen: "2kr3r/ppqb4/3p1b1p/2pPnpp1/NPP1p1nP/6PB/PB2PPN1/2RQ1RK1 w - - 0 1" },
+            { label: "Low", badgeClass: "bg-emerald-500/10 text-emerald-400", fen: "r1bq1rk1/pp3ppp/1bn2n2/3p4/1P6/P1NBPN2/5PPP/R1BQ1RK1 w - - 1 12" },
+            { label: "Med", badgeClass: "bg-amber-500/10 text-amber-400", fen: "r1bq1nk1/4r2p/pp2pNpQ/2ppP3/8/2PB4/PP3PPP/R3R1K1 b - - 2 21" },
+            { label: "High", badgeClass: "bg-red-500/10 text-red-400", fen: "rn1qk2r/p3bp2/b1p1p1pp/3nP3/Pp1PN1QP/2p5/1P1N1PP1/R1B1KB1R w KQkq - 0 14" },
           ].map(({ label, badgeClass, fen }) => (
             <div key={label} className="surface-card p-3 flex items-center gap-3">
               <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeClass}`}>{label}</span>
