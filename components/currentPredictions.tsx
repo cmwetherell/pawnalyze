@@ -266,7 +266,7 @@ const GetPredictions = ({ nsims, gameFilters, updateTrigger, eventTable, onLoadi
         borderWidth: 2.5,
         fill: false,
         tension: 0,
-        pointRadius: 4,
+        pointRadius: 3,
         pointHoverRadius: 5,
         pointHoverBackgroundColor: playerColorsMap[name],
       };
