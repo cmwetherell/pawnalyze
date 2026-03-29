@@ -32,7 +32,7 @@ export const PLAYER_DATA: Record<string, PlayerInfo> = {
 
   // ── Candidates 2026 (Women's) ──
   'Goryachkina, Aleksandra': { color: PLAYER_COLORS[0], shortName: 'Goryachkina', initials: 'AG', federation: 'FID', photo: 'goryachkina.webp' },
-  'Koneru, Humpy':           { color: PLAYER_COLORS[1], shortName: 'Koneru',       initials: 'HK', federation: 'IND', photo: 'koneru.jpg' },
+  'Muzychuk, Anna':          { color: PLAYER_COLORS[1], shortName: 'Muzychuk',     initials: 'AM', federation: 'UKR', photo: 'muzychuk.webp' },
   'Tan, Zhongyi':            { color: PLAYER_COLORS[2], shortName: 'Tan',          initials: 'TZ', federation: 'CHN', photo: 'tan-zhongyi.webp' },
   'Lagno, Kateryna':         { color: PLAYER_COLORS[3], shortName: 'Lagno',        initials: 'KL', federation: 'FID', photo: 'lagno.webp' },
   'Rameshbabu, Vaishali':    { color: PLAYER_COLORS[4], shortName: 'Vaishali',     initials: 'RV', federation: 'IND', photo: 'vaishali.webp' },

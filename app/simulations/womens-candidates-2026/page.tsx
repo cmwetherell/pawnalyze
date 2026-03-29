@@ -3,7 +3,7 @@ import TournamentHeader from "@/components/simulation/TournamentHeader";
 import { getBaseSimulationData } from "@/lib/simulations";
 
 const players = [
-  "Goryachkina, Aleksandra", "Koneru, Humpy", "Tan, Zhongyi", "Lagno, Kateryna",
+  "Goryachkina, Aleksandra", "Muzychuk, Anna", "Tan, Zhongyi", "Lagno, Kateryna",
   "Rameshbabu, Vaishali", "Assaubayeva, Bibisara", "Zhu, Jiner", "Deshmukh, Divya"
 ];
 
