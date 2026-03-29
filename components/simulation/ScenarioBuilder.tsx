@@ -38,6 +38,11 @@ export default function ScenarioBuilder({
   const isRoundCompleted = (games: Game[]) =>
     games.every(g => g.hasOwnProperty('outcome') && g.outcome !== null);
 
+  const completedRounds = useMemo(
+    () => initialGames.filter(r => isRoundCompleted(r.games)),
+    [initialGames],
+  );
+
   const incompleteRounds = useMemo(
     () => initialGames.filter(r => !isRoundCompleted(r.games)),
     [initialGames],
@@ -179,6 +184,39 @@ export default function ScenarioBuilder({
             Select game outcomes to simulate custom scenarios
           </p>
         </div>
+
+        {/* Completed rounds */}
+        {completedRounds.length > 0 && (
+          <div className="px-4 pb-2">
+            {completedRounds.map(r => (
+              <details key={r.round} className="group">
+                <summary className="flex items-center gap-2 cursor-pointer text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-secondary)] py-1">
+                  <svg className="w-3 h-3 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Round {r.round} — Completed
+                </summary>
+                <div className="space-y-0.5 pb-2 pl-1">
+                  {r.games.map(game => {
+                    const label = game.outcome === 'white' ? '1-0'
+                      : game.outcome === 'black' ? '0-1' : '½-½';
+                    return (
+                      <div key={game.id} className="flex items-center text-xs py-0.5 text-[var(--text-muted)]">
+                        <span className={`flex-1 text-right pr-1 truncate ${game.outcome === 'white' ? 'text-chess-gold font-semibold' : ''}`}>
+                          {game.whitePlayer.split(',')[0]}
+                        </span>
+                        <span className="px-2 font-mono text-[10px]">{label}</span>
+                        <span className={`flex-1 pl-1 truncate ${game.outcome === 'black' ? 'text-chess-gold font-semibold' : ''}`}>
+                          {game.blackPlayer.split(',')[0]}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
 
         {/* Round tabs */}
         <div className="flex items-center gap-1 px-2 pb-2">

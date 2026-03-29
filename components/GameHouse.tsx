@@ -57,28 +57,46 @@ const GameHouse = ({ onGameFilterChange, eventTable }: { onGameFilterChange: (ga
     <div className="surface-card p-4">
       <h2 className="text-2xl font-heading text-[var(--text-primary)] mb-2 text-center">Pick Game Outcomes</h2>
       {initialGames.map((round, index) => {
-        // Check if the round is completed
         const roundCompleted = isRoundCompleted(round.games);
 
-        // Render the round only if it's not completed
-        if (!roundCompleted) {
+        if (roundCompleted) {
           return (
-            <div key={`round-${index}`} className="mb-8">
-              <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
-              {round.games.map((game) => (
-                <GamePicker
-                  key={game.id}
-                  whitePlayer={game.whitePlayer}
-                  blackPlayer={game.blackPlayer}
-                  onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
-                />
-              ))}
+            <div key={`round-${index}`} className="mb-8 opacity-70">
+              <h3 className="text-xl font-semibold mb-4 text-center text-[var(--text-muted)]">Round {round.round} — Completed</h3>
+              {round.games.map((game) => {
+                const outcomeLabel = game.outcome === 'white' ? '1 - 0'
+                  : game.outcome === 'black' ? '0 - 1' : '½ - ½';
+                return (
+                  <div key={game.id} className="bg-[var(--bg-surface-1)] p-2 flex justify-center items-center">
+                    <span className={`flex-1 min-w-0 max-w-[250px] text-center font-bold rounded px-2 py-1 ${game.outcome === 'white' ? 'text-chess-gold' : 'text-[var(--text-secondary)]'}`}>
+                      {game.whitePlayer}
+                    </span>
+                    <span className="flex-1 min-w-0 max-w-[150px] text-center font-semibold text-[var(--text-muted)] px-2 py-1">
+                      {outcomeLabel}
+                    </span>
+                    <span className={`flex-1 min-w-0 max-w-[250px] text-center font-bold rounded px-2 py-1 ${game.outcome === 'black' ? 'text-chess-gold' : 'text-[var(--text-secondary)]'}`}>
+                      {game.blackPlayer}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           );
         }
 
-        // Return null if the round is completed to hide it
-        return null;
+        return (
+          <div key={`round-${index}`} className="mb-8">
+            <h3 className="text-xl font-semibold mb-4 text-center">Round {round.round}</h3>
+            {round.games.map((game) => (
+              <GamePicker
+                key={game.id}
+                whitePlayer={game.whitePlayer}
+                blackPlayer={game.blackPlayer}
+                onOutcomeChange={(outcome) => handleOutcomeChange(game.id, outcome)}
+              />
+            ))}
+          </div>
+        );
       })}
     </div>
   );
