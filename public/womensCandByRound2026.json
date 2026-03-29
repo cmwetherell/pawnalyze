@@ -3,24 +3,28 @@
     "round": 1,
     "games": [
       {
-        "id": "Des|Kon",
+        "id": "Des|Muz",
         "whitePlayer": "Deshmukh, Divya",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna",
+        "outcome": "draw"
       },
       {
         "id": "Ram|Ass",
         "whitePlayer": "Rameshbabu, Vaishali",
-        "blackPlayer": "Assaubayeva, Bibisara"
+        "blackPlayer": "Assaubayeva, Bibisara",
+        "outcome": "draw"
       },
       {
         "id": "Gor|Lag",
         "whitePlayer": "Goryachkina, Aleksandra",
-        "blackPlayer": "Lagno, Kateryna"
+        "blackPlayer": "Lagno, Kateryna",
+        "outcome": "draw"
       },
       {
         "id": "Zhu|Tan",
         "whitePlayer": "Zhu, Jiner",
-        "blackPlayer": "Tan, Zhongyi"
+        "blackPlayer": "Tan, Zhongyi",
+        "outcome": "draw"
       }
     ]
   },
@@ -28,8 +32,8 @@
     "round": 2,
     "games": [
       {
-        "id": "Kon|Tan",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Tan",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Tan, Zhongyi"
       },
       {
@@ -53,9 +57,9 @@
     "round": 3,
     "games": [
       {
-        "id": "Ram|Kon",
+        "id": "Ram|Muz",
         "whitePlayer": "Rameshbabu, Vaishali",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Gor|Des",
@@ -78,8 +82,8 @@
     "round": 4,
     "games": [
       {
-        "id": "Kon|Lag",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Lag",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Lagno, Kateryna"
       },
       {
@@ -103,9 +107,9 @@
     "round": 5,
     "games": [
       {
-        "id": "Gor|Kon",
+        "id": "Gor|Muz",
         "whitePlayer": "Goryachkina, Aleksandra",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Zhu|Ram",
@@ -128,9 +132,9 @@
     "round": 6,
     "games": [
       {
-        "id": "Zhu|Kon",
+        "id": "Zhu|Muz",
         "whitePlayer": "Zhu, Jiner",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Tan|Gor",
@@ -153,8 +157,8 @@
     "round": 7,
     "games": [
       {
-        "id": "Kon|Ass",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Ass",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Assaubayeva, Bibisara"
       },
       {
@@ -178,8 +182,8 @@
     "round": 8,
     "games": [
       {
-        "id": "Kon|Des",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Des",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Deshmukh, Divya"
       },
       {
@@ -203,9 +207,9 @@
     "round": 9,
     "games": [
       {
-        "id": "Tan|Kon",
+        "id": "Tan|Muz",
         "whitePlayer": "Tan, Zhongyi",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Zhu|Lag",
@@ -228,8 +232,8 @@
     "round": 10,
     "games": [
       {
-        "id": "Kon|Ram",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Ram",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Rameshbabu, Vaishali"
       },
       {
@@ -253,9 +257,9 @@
     "round": 11,
     "games": [
       {
-        "id": "Lag|Kon",
+        "id": "Lag|Muz",
         "whitePlayer": "Lagno, Kateryna",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Tan|Ass",
@@ -278,8 +282,8 @@
     "round": 12,
     "games": [
       {
-        "id": "Kon|Gor",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Gor",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Goryachkina, Aleksandra"
       },
       {
@@ -303,9 +307,9 @@
     "round": 13,
     "games": [
       {
-        "id": "Ass|Kon",
+        "id": "Ass|Muz",
         "whitePlayer": "Assaubayeva, Bibisara",
-        "blackPlayer": "Koneru, Humpy"
+        "blackPlayer": "Muzychuk, Anna"
       },
       {
         "id": "Lag|Des",
@@ -328,8 +332,8 @@
     "round": 14,
     "games": [
       {
-        "id": "Kon|Zhu",
-        "whitePlayer": "Koneru, Humpy",
+        "id": "Muz|Zhu",
+        "whitePlayer": "Muzychuk, Anna",
         "blackPlayer": "Zhu, Jiner"
       },
       {
