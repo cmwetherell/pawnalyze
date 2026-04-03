@@ -17,7 +17,7 @@ interface GameHeaders {
 interface PositionAnalysis {
     fen: string;
     complexity: number;
-    evaluation: number;
+    // evaluation: number;  // Stockfish eval removed for performance
 }
 
 interface GameAnalysisResponse {
@@ -307,19 +307,14 @@ const UnifiedAnalyzer: React.FC = () => {
                     {/* Stats panel */}
                     {analysisData && (
                     <div className="surface-card p-4">
-                        <div className="grid grid-cols-3 gap-4 text-center">
+                        <div className="grid grid-cols-2 gap-4 text-center">
                             <div>
                                 <p className="text-xs text-[var(--text-muted)]">Complexity</p>
                                 <p className="text-lg font-heading text-[var(--text-primary)]">
                                     {analysisData.positionAnalysis[currentIndex]?.complexity ?? "N/A"}
                                 </p>
                             </div>
-                            <div>
-                                <p className="text-xs text-[var(--text-muted)]">Evaluation</p>
-                                <p className="text-lg font-heading text-[var(--text-primary)]">
-                                    {analysisData.positionAnalysis[currentIndex]?.evaluation ?? "N/A"}
-                                </p>
-                            </div>
+                            {/* Evaluation removed — Stockfish eval disabled for performance */}
                             <div>
                                 <p className="text-xs text-[var(--text-muted)]">Move</p>
                                 <p className="text-lg font-heading text-[var(--text-primary)]">

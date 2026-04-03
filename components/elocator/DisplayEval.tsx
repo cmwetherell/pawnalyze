@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 interface PositionAnalysis {
   fen: string;
   complexity: number;
-  evaluation: number;
+  // evaluation: number;  // Stockfish eval removed for performance
 }
 
 interface DisplayEvalProps {
@@ -66,18 +66,19 @@ const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
       BlackComplexity: position.complexity,
     }));
 
-  const evaluationDataCapped = positionAnalysis.map((position, index) => ({
-    Move: index + 1,
-    Evaluation: Math.max(Math.min(position.evaluation, 1000), -1000),
-  }));
+  // Stockfish eval chart removed for performance — uncomment to restore
+  // const evaluationDataCapped = positionAnalysis.map((position, index) => ({
+  //   Move: index + 1,
+  //   Evaluation: Math.max(Math.min(position.evaluation, 1000), -1000),
+  // }));
 
   const whiteGameComplexityAvg = dataForWhite.reduce((sum, p) => sum + p.WhiteComplexity, 0) / dataForWhite.length;
   const blackGameComplexityAvg = dataForBlack.reduce((sum, p) => sum + p.BlackComplexity, 0) / dataForBlack.length;
 
   return (
     <div className="space-y-6">
-      {/* Evaluation */}
-      <div className="surface-card p-4">
+      {/* Stockfish eval chart removed for performance — uncomment to restore */}
+      {/* <div className="surface-card p-4">
         <h3 className="text-sm font-heading text-[var(--text-primary)] mb-4">Game Evaluation</h3>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={evaluationDataCapped} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
@@ -89,7 +90,7 @@ const DisplayEval: React.FC<DisplayEvalProps> = ({ positionAnalysis }) => {
             <Line type="monotone" dataKey="Evaluation" stroke="#C9A84C" dot={false} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
-      </div>
+      </div> */}
 
       {/* Complexity side by side */}
       <div className="grid md:grid-cols-2 gap-4">
