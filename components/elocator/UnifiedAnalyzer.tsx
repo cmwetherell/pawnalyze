@@ -1,5 +1,6 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { Chess } from 'chess.js';
 import ChessBoard from './ChessBoard';
 import ComplexityBar from './ComplexityBar';
 import DisplayEval from './DisplayEval';
@@ -44,6 +45,23 @@ function detectInputType(input: string): 'fen' | 'pgn' | 'error' {
     return 'error';
 }
 
+function parsePgnToFens(pgn: string): string[] {
+    try {
+        const game = new Chess();
+        game.loadPgn(pgn);
+        const moves = game.history();
+        const replay = new Chess();
+        const fens = [replay.fen()];
+        for (const move of moves) {
+            replay.move(move);
+            fens.push(replay.fen());
+        }
+        return fens;
+    } catch {
+        return [];
+    }
+}
+
 const UnifiedAnalyzer: React.FC = () => {
     const startingFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -58,6 +76,38 @@ const UnifiedAnalyzer: React.FC = () => {
     const [currentFEN, setCurrentFEN] = useState('');
     const [currentIndex, setCurrentIndex] = useState(0);
     const [analysisData, setAnalysisData] = useState<GameAnalysisResponse | null>(null);
+
+    // Preview state: positions parsed client-side before analysis
+    const [previewFens, setPreviewFens] = useState<string[]>([]);
+
+    const handleInputChange = useCallback((value: string) => {
+        setInput(value);
+        setErrorMessage('');
+
+        const detected = detectInputType(value);
+        if (value.trim() === '') {
+            setInputType(null);
+            setPreviewFens([]);
+            setFen(startingFEN);
+            return;
+        }
+
+        if (detected === 'fen') {
+            const fenStr = value.trim().split('\n')[0].trim();
+            setInputType('fen');
+            setFen(fenStr);
+            setPreviewFens([]);
+            setAnalysisData(null);
+        } else if (detected === 'pgn') {
+            const fens = parsePgnToFens(value);
+            if (fens.length > 0) {
+                setInputType('pgn');
+                setPreviewFens(fens);
+                setCurrentFEN(fens[0]);
+                setCurrentIndex(0);
+            }
+        }
+    }, [startingFEN]);
 
     const fetchComplexityScore = async (fenStr: string) => {
         const url = 'https://elocator.fly.dev/complexity/';
@@ -110,9 +160,9 @@ const UnifiedAnalyzer: React.FC = () => {
     const handleAnalyze = async () => {
         setErrorMessage('');
         const detected = detectInputType(input);
-        setInputType(detected);
 
         if (detected === 'error') {
+            setInputType('error');
             setErrorMessage('Could not detect input format. Please enter a valid FEN string or PGN game.');
             return;
         }
@@ -120,7 +170,6 @@ const UnifiedAnalyzer: React.FC = () => {
         setIsAnalyzing(true);
         if (detected === 'fen') {
             const fenStr = input.trim().split('\n')[0].trim();
-            setFen(fenStr);
             await fetchComplexityScore(fenStr);
         } else {
             await fetchGameAnalysis(input);
@@ -129,11 +178,14 @@ const UnifiedAnalyzer: React.FC = () => {
     };
 
     const moveToPosition = (index: number) => {
-        if (analysisData) {
-            const newIndex = Math.min(Math.max(index, 0), analysisData.positionAnalysis.length - 1);
-            setCurrentIndex(newIndex);
-            setCurrentFEN(analysisData.positionAnalysis[newIndex].fen);
-        }
+        // Use analysis data if available, otherwise use preview fens
+        const positions = analysisData?.positionAnalysis;
+        const totalPositions = positions ? positions.length : previewFens.length;
+        if (totalPositions === 0) return;
+
+        const newIndex = Math.min(Math.max(index, 0), totalPositions - 1);
+        setCurrentIndex(newIndex);
+        setCurrentFEN(positions ? positions[newIndex].fen : previewFens[newIndex]);
     };
 
     const navBtnClass = "w-10 h-10 flex items-center justify-center rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-chess-gold hover:border-chess-gold/30 transition-colors font-bold text-sm";
@@ -149,7 +201,7 @@ const UnifiedAnalyzer: React.FC = () => {
                     className="w-full h-32 p-4 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] text-[var(--text-primary)] font-mono text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-chess-gold/40 focus:border-chess-gold/40 transition-colors"
                     placeholder="Paste a FEN or PGN here..."
                     value={input}
-                    onChange={(e) => { setInput(e.target.value); setErrorMessage(''); }}
+                    onChange={(e) => handleInputChange(e.target.value)}
                 />
             </div>
 
@@ -205,7 +257,7 @@ const UnifiedAnalyzer: React.FC = () => {
                                 <ComplexityBar score={Number(complexityScore)} />
                             </>
                         ) : (
-                            <p className="text-[var(--text-muted)]">Complexity score not available</p>
+                            <p className="text-[var(--text-muted)]">Click Analyze to get the complexity score</p>
                         )}
                         <div>
                             <p className="text-xs text-[var(--text-muted)]">FEN</p>
@@ -216,7 +268,9 @@ const UnifiedAnalyzer: React.FC = () => {
             )}
 
             {/* PGN result */}
-            {inputType === 'pgn' && (
+            {inputType === 'pgn' && (() => {
+                const totalPositions = analysisData?.positionAnalysis.length || previewFens.length;
+                return (
                 <div className="space-y-6">
                     {/* Game header info */}
                     {analysisData?.gameHeaders && (
@@ -241,26 +295,27 @@ const UnifiedAnalyzer: React.FC = () => {
                             <button className={navBtnClass} onClick={() => moveToPosition(0)}>&laquo;</button>
                             <button className={navBtnClass} onClick={() => moveToPosition(currentIndex - 1)}>&lsaquo;</button>
                             <span className="px-3 text-sm text-[var(--text-muted)]">
-                                {currentIndex + 1} / {analysisData?.positionAnalysis.length || 0}
+                                {currentIndex + 1} / {totalPositions}
                             </span>
                             <button className={navBtnClass} onClick={() => moveToPosition(currentIndex + 1)}>&rsaquo;</button>
-                            <button className={navBtnClass} onClick={() => moveToPosition(analysisData ? analysisData.positionAnalysis.length - 1 : 0)}>&raquo;</button>
+                            <button className={navBtnClass} onClick={() => moveToPosition(totalPositions - 1)}>&raquo;</button>
                         </div>
                     </div>
 
                     {/* Stats panel */}
+                    {analysisData && (
                     <div className="surface-card p-4">
                         <div className="grid grid-cols-3 gap-4 text-center">
                             <div>
                                 <p className="text-xs text-[var(--text-muted)]">Complexity</p>
                                 <p className="text-lg font-heading text-[var(--text-primary)]">
-                                    {analysisData?.positionAnalysis[currentIndex]?.complexity || "N/A"}
+                                    {analysisData.positionAnalysis[currentIndex]?.complexity ?? "N/A"}
                                 </p>
                             </div>
                             <div>
                                 <p className="text-xs text-[var(--text-muted)]">Evaluation</p>
                                 <p className="text-lg font-heading text-[var(--text-primary)]">
-                                    {analysisData?.positionAnalysis[currentIndex]?.evaluation || "N/A"}
+                                    {analysisData.positionAnalysis[currentIndex]?.evaluation ?? "N/A"}
                                 </p>
                             </div>
                             <div>
@@ -271,11 +326,13 @@ const UnifiedAnalyzer: React.FC = () => {
                             </div>
                         </div>
                     </div>
+                    )}
 
                     {/* Charts */}
                     {analysisData && <DisplayEval positionAnalysis={analysisData.positionAnalysis} />}
                 </div>
-            )}
+                );
+            })()}
         </div>
     );
 };

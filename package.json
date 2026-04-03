@@ -16,6 +16,7 @@
     "@vercel/postgres-kysely": "^0.7.2",
     "chart.js": "^4.4.1",
     "chartjs-plugin-datalabels": "^2.2.0",
+    "chess.js": "^1.4.0",
     "mongodb": "^6.3.0",
     "next": "16.1.6",
     "next-sitemap": "^4.2.3",
