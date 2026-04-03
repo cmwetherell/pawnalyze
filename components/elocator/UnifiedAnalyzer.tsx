@@ -47,8 +47,10 @@ function detectInputType(input: string): 'fen' | 'pgn' | 'error' {
 
 function parsePgnToFens(pgn: string): string[] {
     try {
+        // Strip comments ({...}) and NAG annotations (??, ?!, ?, !, !!)
+        const cleaned = pgn.replace(/\{[^}]*\}/g, '').replace(/[?!]+/g, '');
         const game = new Chess();
-        game.loadPgn(pgn);
+        game.loadPgn(cleaned);
         const moves = game.history();
         const replay = new Chess();
         const fens = [replay.fen()];
