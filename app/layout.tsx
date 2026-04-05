@@ -96,9 +96,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Analytics />
           <GoogleAnalytics gaId="G-59WSL645R4" />
           <Navbar />
-          <div className="w-full bg-amber-500/15 border-b border-amber-500/30 px-4 py-3 text-center text-sm text-amber-300">
-            We found a bug and are currently repopulating simulated results into the database. Some data may be temporarily unavailable or incomplete.
-          </div>
           <div className="flex flex-col min-h-screen">{children}</div>
           <Footer />
         </ThemeProvider>
