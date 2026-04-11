@@ -295,22 +295,26 @@
       {
         "id": "Lag|Muz",
         "whitePlayer": "Lagno, Kateryna",
-        "blackPlayer": "Muzychuk, Anna"
+        "blackPlayer": "Muzychuk, Anna",
+        "outcome": "draw"
       },
       {
         "id": "Tan|Ass",
         "whitePlayer": "Tan, Zhongyi",
-        "blackPlayer": "Assaubayeva, Bibisara"
+        "blackPlayer": "Assaubayeva, Bibisara",
+        "outcome": "draw"
       },
       {
         "id": "Zhu|Des",
         "whitePlayer": "Zhu, Jiner",
-        "blackPlayer": "Deshmukh, Divya"
+        "blackPlayer": "Deshmukh, Divya",
+        "outcome": "draw"
       },
       {
         "id": "Gor|Ram",
         "whitePlayer": "Goryachkina, Aleksandra",
-        "blackPlayer": "Rameshbabu, Vaishali"
+        "blackPlayer": "Rameshbabu, Vaishali",
+        "outcome": "black"
       }
     ]
   },
