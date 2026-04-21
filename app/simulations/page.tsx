@@ -11,34 +11,26 @@ export default function SimPage() {
         </p>
       </div>
 
-      {/* Active Tournaments */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse-live" />
-          <h2 className="font-heading text-xl text-[var(--text-primary)]">Active Tournaments</h2>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          <TournamentCard
-            name="2026 Candidates Tournament"
-            href="/simulations/candidates-2026"
-            description="The Candidates Tournament determines the challenger for the World Chess Championship, who will face D. Gukesh."
-            format="8-player double round-robin"
-            status="live"
-          />
-          <TournamentCard
-            name="2026 Women's Candidates Tournament"
-            href="/simulations/womens-candidates-2026"
-            description="The Women's Candidates Tournament determines the challenger for the World Chess Championship, who will face Ju Wenjun."
-            format="8-player double round-robin"
-            status="live"
-          />
-        </div>
-      </div>
-
       {/* Past Tournaments */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-16 w-full">
         <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Past Tournaments</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <TournamentCard
+            name="2026 Candidates Tournament"
+            href="/simulations/candidates-2026"
+            description="Determined the challenger for the World Chess Championship, who will face Gukesh D."
+            format="8-player double round-robin"
+            status="completed"
+            winner="Sindarov, Javokhir"
+          />
+          <TournamentCard
+            name="2026 Women's Candidates Tournament"
+            href="/simulations/womens-candidates-2026"
+            description="Determined the challenger for the Women's World Chess Championship, who will face Ju Wenjun."
+            format="8-player double round-robin"
+            status="completed"
+            winner="Rameshbabu, Vaishali"
+          />
           <TournamentCard
             name="FIDE World Championship 2024"
             href="/simulations/fide-world-championship-singapore-2024"

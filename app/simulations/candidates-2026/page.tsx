@@ -14,7 +14,7 @@ export default async function Sims() {
             <TournamentHeader
                 name="2026 Candidates Tournament"
                 website="https://candidates.fide.com/"
-                description="The Candidates Tournament determines the challenger for the World Chess Championship, who will face D. Gukesh."
+                description="The Candidates Tournament determined the challenger for the World Chess Championship, who will face Gukesh D."
                 format="8-player double round-robin"
                 players={players}
             />
@@ -22,9 +22,9 @@ export default async function Sims() {
             {/* Intro */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-2">
                 <p className="text-[var(--text-secondary)] text-sm sm:text-base leading-relaxed max-w-3xl">
-                    Who will challenge Gukesh for the crown? We ran <strong className="text-chess-gold">over one million Monte Carlo
-                    simulations</strong> of the Candidates Tournament to find out. Use the <span className="text-[var(--text-primary)] font-medium">Scenario
-                    Builder</span> to set game outcomes and see how the probabilities shift in real time.
+                    <strong className="text-chess-gold">Javokhir Sindarov</strong> won the 2026 Candidates Tournament and will face Gukesh D for the World Championship. We ran <strong className="text-chess-gold">over one million Monte Carlo
+                    simulations</strong> throughout the event &mdash; use the <span className="text-[var(--text-primary)] font-medium">Scenario
+                    Builder</span> to replay alternate histories.
                 </p>
             </div>
 
@@ -61,8 +61,8 @@ export default async function Sims() {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                                     </svg>
                                 </div>
-                                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Live Tracking</h3>
-                                <p className="text-xs text-[var(--text-muted)]">Actual results baked in automatically as rounds complete.</p>
+                                <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Round-by-Round Tracking</h3>
+                                <p className="text-xs text-[var(--text-muted)]">Actual results were baked in round by round as games completed &mdash; the final simulated round reflects the tournament as played.</p>
                             </div>
                         </div>
 

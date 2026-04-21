@@ -1,10 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import GetPredictions from "@/components/currentPredictions";
-import { getBaseSimulationData } from "@/lib/simulations";
+import TournamentCard from "@/components/TournamentCard";
 
-export default async function Home() {
-  const initialData = await getBaseSimulationData('candidates_2026');
+export default function Home() {
   return (
     <main className="flex-1 flex flex-col">
       {/* Hero */}
@@ -93,33 +91,28 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Featured Predictions */}
+      {/* Recent Results */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 w-full pb-16">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-red-400">
-            <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse-live" />
-            Live
-          </span>
-          <h2 className="font-heading text-2xl text-[var(--text-primary)]">
-            2026 Candidates Tournament
-          </h2>
-        </div>
-        <div className="surface-card p-4 sm:p-6">
-          <GetPredictions
-            nsims={10000}
-            gameFilters={[]}
-            updateTrigger={0}
-            eventTable="candidates_2026"
-            initialData={initialData}
-          />
-        </div>
-        <div className="mt-4 text-right">
-          <Link
+        <h2 className="font-heading text-2xl text-[var(--text-primary)] mb-6">
+          Recent Results
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <TournamentCard
+            name="2026 Candidates Tournament"
             href="/simulations/candidates-2026"
-            className="text-sm text-chess-gold hover:text-chess-gold-light transition-colors"
-          >
-            Full simulation with Scenario Builder &rarr;
-          </Link>
+            description="Determined the challenger for the World Chess Championship, who will face Gukesh D."
+            format="8-player double round-robin"
+            status="completed"
+            winner="Sindarov, Javokhir"
+          />
+          <TournamentCard
+            name="2026 Women's Candidates Tournament"
+            href="/simulations/womens-candidates-2026"
+            description="Determined the challenger for the Women's World Chess Championship, who will face Ju Wenjun."
+            format="8-player double round-robin"
+            status="completed"
+            winner="Rameshbabu, Vaishali"
+          />
         </div>
       </section>
 

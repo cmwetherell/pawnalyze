@@ -34,9 +34,9 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Active Tournaments */}
+          {/* Recent Tournaments */}
           <div>
-            <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">Active Tournaments</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">Recent Tournaments</p>
             <div className="space-y-2">
               <Link href="/simulations/candidates-2026" className="block text-sm text-[var(--text-muted)] hover:text-chess-gold transition-colors">
                 2026 Candidates

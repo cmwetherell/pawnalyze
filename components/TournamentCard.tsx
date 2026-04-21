@@ -6,9 +6,15 @@ interface TournamentCardProps {
   description: string;
   format: string;
   status: 'live' | 'completed';
+  winner?: string;
 }
 
-export default function TournamentCard({ name, href, description, format, status }: TournamentCardProps) {
+function formatName(name: string) {
+  const [last, first] = name.split(',').map(s => s.trim());
+  return first ? `${first} ${last}` : last;
+}
+
+export default function TournamentCard({ name, href, description, format, status, winner }: TournamentCardProps) {
   return (
     <Link
       href={href}
@@ -30,6 +36,13 @@ export default function TournamentCard({ name, href, description, format, status
       <h3 className="font-heading text-lg text-[var(--text-primary)] mb-2 group-hover:text-chess-gold transition-colors">
         {name}
       </h3>
+
+      {winner && (
+        <p className="text-sm mb-2">
+          <span className="text-[var(--text-muted)]">Winner: </span>
+          <span className="text-chess-gold font-semibold">{formatName(winner)}</span>
+        </p>
+      )}
 
       <p className="text-sm text-[var(--text-muted)] mb-3">{description}</p>
 
