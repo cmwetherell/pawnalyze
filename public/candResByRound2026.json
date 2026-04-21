@@ -382,22 +382,26 @@
       {
         "id": "Esi|Car",
         "whitePlayer": "Esipenko, Andrey",
-        "blackPlayer": "Caruana, Fabiano"
+        "blackPlayer": "Caruana, Fabiano",
+        "outcome": "black"
       },
       {
         "id": "Pra|Nak",
         "whitePlayer": "Praggnanandhaa R",
-        "blackPlayer": "Nakamura, Hikaru"
+        "blackPlayer": "Nakamura, Hikaru",
+        "outcome": "draw"
       },
       {
         "id": "Blu|Gir",
         "whitePlayer": "Bluebaum, Matthias",
-        "blackPlayer": "Giri, Anish"
+        "blackPlayer": "Giri, Anish",
+        "outcome": "black"
       },
       {
         "id": "Sin|Wei",
         "whitePlayer": "Sindarov, Javokhir",
-        "blackPlayer": "Wei, Yi"
+        "blackPlayer": "Wei, Yi",
+        "outcome": "draw"
       }
     ]
   }
