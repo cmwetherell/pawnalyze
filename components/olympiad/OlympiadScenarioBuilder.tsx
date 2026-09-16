@@ -128,7 +128,7 @@ export default function OlympiadScenarioBuilder({
 
   const activeState = states.get(activeRound) ?? 'unpaired';
 
-  const stateGlyph = (s: RoundState) => (s === 'complete' ? '✓' : s === 'paired' ? '●' : '○');
+  const stateGlyph = (s: RoundState) => (s === 'complete' ? '✓' : s === 'paired' ? '●' : s === 'projected' ? '◐' : '○');
 
   return (
     <div className="flex flex-col h-full">
@@ -197,7 +197,7 @@ export default function OlympiadScenarioBuilder({
                       key={r}
                       type="button"
                       onClick={() => { if (!didDrag.current) { setActiveRound(r); setLimit(INITIAL_MATCHES); setQuery(''); } }}
-                      title={s === 'complete' ? `Round ${r} · complete` : s === 'paired' ? `Round ${r} · pairings published` : `Round ${r} · pairings not yet published`}
+                      title={s === 'complete' ? `Round ${r} · complete` : s === 'paired' ? `Round ${r} · pairings published` : s === 'projected' ? `Round ${r} · projected pairings` : `Round ${r} · pairings not yet published`}
                       className={`relative shrink-0 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors select-none inline-flex items-center gap-1 ${
                         isActive
                           ? 'bg-chess-gold text-chess-dark'
@@ -208,7 +208,7 @@ export default function OlympiadScenarioBuilder({
                               : 'bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
                       }`}
                     >
-                      <span className={`text-[9px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : ''}`}>{stateGlyph(s)}</span>
+                      <span className={`text-[9px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : s === 'projected' ? 'text-chess-gold' : ''}`}>{stateGlyph(s)}</span>
                       R{r}
                       {hasSel && !isActive && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-chess-gold" />}
                     </button>
@@ -234,8 +234,13 @@ export default function OlympiadScenarioBuilder({
                 <CompletedRoundList round={activeRound} matches={matches} teamsById={teamsById} />
               )}
 
-              {activeState === 'paired' && (
+              {(activeState === 'paired' || activeState === 'projected') && (
                 <div className="space-y-1.5">
+                  {activeState === 'projected' && (
+                    <div className="rounded-md bg-chess-gold/10 border border-chess-gold/25 px-2.5 py-1.5 text-[11px] text-[var(--text-secondary)]">
+                      <span className="font-semibold text-chess-gold">Projected pairings.</span> Official round {activeRound} pairings aren&apos;t out yet; these come from our Swiss pairing engine and may differ slightly.
+                    </div>
+                  )}
                   <div className="flex items-center justify-between gap-2 pb-1">
                     <p className="text-xs text-[var(--text-muted)]">
                       <span className="text-[var(--text-secondary)] font-medium">Tap the team you think wins</span>, or <span className="font-bold">=</span> for a drawn match.
@@ -341,6 +346,7 @@ export default function OlympiadScenarioBuilder({
                           <>
                             <Flag code={opp.fedCode} size="xs" />
                             <span className="truncate text-[var(--text-secondary)]">{opp.name}</span>
+                            {entry?.projected && <span className="text-[9px] uppercase tracking-wider text-chess-gold shrink-0">proj.</span>}
                           </>
                         ) : entry && entry.opponentId === null ? (
                           <span className="text-[var(--text-muted)] italic">bye</span>

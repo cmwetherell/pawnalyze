@@ -85,6 +85,7 @@ export interface TeamRoundEntry {
   oppScore: number | null;
   status: Match['status'];
   outcome: Outcome | null;
+  projected: boolean;
 }
 
 export function teamRoundHistory(matches: Match[], teamId: number): TeamRoundEntry[] {
@@ -103,6 +104,7 @@ export function teamRoundHistory(matches: Match[], teamId: number): TeamRoundEnt
       oppScore,
       status: m.status,
       outcome: m.team2Id === null ? 'w' : outcomeFromScores(score, oppScore),
+      projected: m.projected === true,
     });
   }
   return entries.sort((a, b) => a.round - b.round);

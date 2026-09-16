@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import Flag from '@/components/ui/Flag';
 import { formatPct } from '@/components/ui/ProbBar';
+import LikelyOpponents from './LikelyOpponents';
 import { formatMp, ordinal } from '@/lib/olympiad/odds';
 import { formatMatchScore, teamRoundHistory } from '@/lib/olympiad/standings';
 import type { Match, OlympiadEvent, Player, Run, Team, TeamDetail as TeamDetailData, TeamOdds } from '@/lib/olympiad/types';
@@ -58,7 +59,7 @@ export default function TeamDetail({
   const maxN = Math.max(1, ...bucketed.map(b => b.n));
 
   return (
-    <div className="px-4 sm:px-6 py-4 grid gap-6 md:grid-cols-3 text-sm">
+    <div className="px-4 sm:px-6 py-4 grid gap-6 md:grid-cols-2 text-sm">
       {/* Roster */}
       <div>
         <div className="flex items-center gap-2 mb-2">
@@ -116,7 +117,7 @@ export default function TeamDetail({
                     {opp && <span className="text-[10px] text-[var(--text-muted)]"> #{opp.teamId}</span>}
                   </span>
                   <span className={`font-mono ${tone}`}>
-                    {h.status === 'scheduled' ? 'sched.' : h.status === 'live' ? 'live' : formatMatchScore(h.score, h.oppScore)}
+                    {h.projected ? 'proj.' : h.status === 'scheduled' ? 'sched.' : h.status === 'live' ? 'live' : formatMatchScore(h.score, h.oppScore)}
                   </span>
                 </li>
               );
@@ -189,6 +190,15 @@ export default function TeamDetail({
           </>
         )}
       </div>
+      {/* Likely opponents */}
+      <LikelyOpponents
+        event={event}
+        run={run}
+        team={team}
+        teamsById={teamsById}
+        filtersKey={filtersKey}
+        isScenario={isScenario}
+      />
     </div>
   );
 }

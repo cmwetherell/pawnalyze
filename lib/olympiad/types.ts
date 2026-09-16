@@ -30,6 +30,8 @@ export interface Match {
   team1Score: number | null;
   team2Score: number | null;
   status: MatchStatus;
+  /** True when the pairing comes from the simulation engine, not chess-results */
+  projected?: boolean;
 }
 
 export interface Run {
@@ -95,6 +97,25 @@ export interface TeamDetail {
   total: number;
   rankDist: { rank: number; n: number }[];
   roundOdds: { round: number; w: number; d: number; l: number }[];
+}
+
+export interface OpponentShare {
+  teamId: number;
+  n: number;
+}
+
+export interface TeamOpponents {
+  /** False when the current run has no round_opps data */
+  available: boolean;
+  total: number;
+  nextRound: number | null;
+  /** Opponent distribution in nextRound (deterministic once pairings are fixed) */
+  next: OpponentShare[];
+  followingRound: number | null;
+  /** Opponent distribution in followingRound, overall and split by the team's result in nextRound */
+  following: { all: OpponentShare[]; w: OpponentShare[]; d: OpponentShare[]; l: OpponentShare[] };
+  /** How many matched sims fall in each nextRound outcome */
+  outcomeCounts: { w: number; d: number; l: number };
 }
 
 export interface DerivedStanding {

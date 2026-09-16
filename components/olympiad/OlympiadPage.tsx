@@ -5,6 +5,7 @@ import { N_ROUNDS, OLYMPIAD_EVENTS } from '@/lib/olympiad/config';
 import {
   getOlympiadMatches,
   getOlympiadPlayers,
+  getOlympiadProjectedPairings,
   getOlympiadRun,
   getOlympiadStatus,
   getOlympiadSummary,
@@ -22,9 +23,16 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
     getOlympiadMatches(event),
     getOlympiadStatus(event),
   ]);
-  const [summary, history] = run
-    ? await Promise.all([getOlympiadSummary(event, run.runId), getOlympiadSummaryHistory(event)])
-    : [[], []];
+  const nextRound = run ? run.roundsCompleted + 1 : 0;
+  const needProjected = run !== null && nextRound <= N_ROUNDS && !matches.some(m => m.round === nextRound);
+  const [summary, history, projected] = run
+    ? await Promise.all([
+        getOlympiadSummary(event, run.runId),
+        getOlympiadSummaryHistory(event),
+        needProjected ? getOlympiadProjectedPairings(event, run.runId, nextRound, run.nTeams) : Promise.resolve([]),
+      ])
+    : [[], [], []];
+  const allMatches = projected.length ? [...matches, ...projected] : matches;
 
   const topSeeds = teams.slice(0, 8).map(t => ({ code: t.fedCode, title: t.name }));
   const finished = status.lastFinalRound >= N_ROUNDS;
@@ -71,7 +79,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
           run={run}
           teams={teams}
           players={players}
-          matches={matches}
+          matches={allMatches}
           summary={summary}
           history={history}
           lastFinalRound={status.lastFinalRound}

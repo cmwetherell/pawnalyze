@@ -132,6 +132,11 @@ export default function MatchPickerCard({
           state={side('l')} onClick={() => toggle('l')}
         />
       </div>
+      {match.projected && !isFinal && !isLive && (
+        <div className="flex items-center justify-center gap-1 px-3 py-0.5 text-[9px] uppercase tracking-wider text-chess-gold/80 border-t border-[var(--border)]">
+          Projected pairing
+        </div>
+      )}
       {(isFinal || isLive) && (
         <div className={`flex items-center justify-center gap-2 px-3 py-1 text-[10px] border-t border-[var(--border)] ${
           isLive ? 'text-red-400' : 'text-[var(--text-muted)]'

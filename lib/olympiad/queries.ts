@@ -8,6 +8,7 @@ import type {
   HistoryPoint,
   Match,
   OlympiadEvent,
+  OpponentShare,
   OlympiadStatus,
   Pick,
   Player,
@@ -15,6 +16,7 @@ import type {
   ScenarioResult,
   Team,
   TeamDetail,
+  TeamOpponents,
   TeamSummary,
 } from './types';
 
@@ -35,6 +37,7 @@ interface RunsTable {
 interface SimsTable {
   run_id: number; sim_id: number; gold: number; silver: number; bronze: number;
   top10: number[]; final_rank: number[]; match_points: number[]; game_points: number[]; round_scores: number[][];
+  round_opps: number[][] | null;
 }
 interface TeamSummaryTable {
   run_id: number; event: string; team_id: number; p_gold: number; p_silver: number; p_bronze: number;
@@ -352,5 +355,103 @@ export async function getOlympiadTeamDetail(
     total: row?.total ?? 0,
     rankDist: (row?.rank_dist ?? []).map(d => ({ rank: Number(d.rank), n: d.n })),
     roundOdds: (row?.round_odds ?? []).map(o => ({ round: Number(o.round), w: o.w, d: o.d, l: o.l })),
+  };
+}
+
+/**
+ * The engine's pairing for `round` when it is identical across every simulation (the round right after
+ * rounds_completed, before chess-results publishes it). Returns [] when round_opps is missing or varies.
+ */
+export async function getOlympiadProjectedPairings(
+  event: OlympiadEvent,
+  runId: number,
+  round: number,
+  nTeams: number,
+): Promise<Match[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.sims(event));
+  if (round < 1 || round > N_ROUNDS) return [];
+  const r = sql.lit(round);
+  const n = sql.lit(nTeams);
+  const { rows } = await sql<{ distinct_pairings: number; opps: number[][] | null }>`
+    SELECT (SELECT count(DISTINCT round_opps[${r}:${r}][1:${n}])::int
+              FROM olympiad_2026_sims WHERE run_id = ${runId} AND sim_id < 500) AS distinct_pairings,
+           (SELECT round_opps[${r}:${r}][1:${n}] FROM olympiad_2026_sims
+              WHERE run_id = ${runId} AND round_opps IS NOT NULL ORDER BY sim_id LIMIT 1) AS opps
+  `.execute(db());
+  const row = rows[0];
+  const opps = row?.opps?.[0];
+  if (!row || row.distinct_pairings !== 1 || !opps) return [];
+  const matches: Match[] = [];
+  opps.forEach((opp, i) => {
+    const teamId = i + 1;
+    if (opp > 0 && teamId < opp) {
+      matches.push({
+        round, boardNo: matches.length + 1, team1Id: teamId, team2Id: opp,
+        team1Score: null, team2Score: null, status: 'scheduled', projected: true,
+      });
+    }
+  });
+  return matches;
+}
+
+/** Likely opponents for one team: next round, and the round after split by the next-round result. */
+export async function getOlympiadTeamOpponents(
+  event: OlympiadEvent,
+  runId: number,
+  teamId: number,
+  nextRound: number,
+  picks: Pick[],
+): Promise<TeamOpponents> {
+  'use cache';
+  cacheLife('days');
+  cacheTag(tags.scenario(event));
+
+  const empty: TeamOpponents = {
+    available: false, total: 0, nextRound: null, next: [], followingRound: null,
+    following: { all: [], w: [], d: [], l: [] }, outcomeCounts: { w: 0, d: 0, l: 0 },
+  };
+  if (nextRound < 1 || nextRound > N_ROUNDS) return empty;
+
+  const where = picks.length ? sql`AND ${sql.join(predicates(picks), sql` AND `)}` : sql``;
+  const t = sql.lit(teamId);
+  const r0 = sql.lit(nextRound);
+  const hasFollowing = nextRound + 1 <= N_ROUNDS;
+  const o1 = hasFollowing ? sql`round_opps[${sql.lit(nextRound + 1)}][${t}]` : sql`0`;
+
+  const { rows } = await sql<{ o0: number; s0: number; o1: number; n: number }>`
+    SELECT round_opps[${r0}][${t}] AS o0, round_scores[${r0}][${t}] AS s0, ${o1} AS o1, count(*)::int AS n
+    FROM olympiad_2026_sims
+    WHERE run_id = ${runId} AND round_opps IS NOT NULL ${where}
+    GROUP BY 1, 2, 3
+  `.execute(db());
+  if (rows.length === 0) return empty;
+
+  const add = (map: Map<number, number>, id: number, n: number) => map.set(id, (map.get(id) ?? 0) + n);
+  const toShares = (map: Map<number, number>): OpponentShare[] =>
+    Array.from(map.entries()).map(([teamId, n]) => ({ teamId, n })).sort((a, b) => b.n - a.n);
+
+  const next = new Map<number, number>();
+  const all = new Map<number, number>();
+  const byOutcome = { w: new Map<number, number>(), d: new Map<number, number>(), l: new Map<number, number>() };
+  const outcomeCounts = { w: 0, d: 0, l: 0 };
+  let total = 0;
+  for (const row of rows) {
+    total += row.n;
+    add(next, row.o0, row.n);
+    if (hasFollowing) add(all, row.o1, row.n);
+    const key = row.s0 > 4 ? 'w' : row.s0 === 4 ? 'd' : 'l';
+    outcomeCounts[key] += row.n;
+    if (hasFollowing) add(byOutcome[key], row.o1, row.n);
+  }
+  return {
+    available: true,
+    total,
+    nextRound,
+    next: toShares(next),
+    followingRound: hasFollowing ? nextRound + 1 : null,
+    following: { all: toShares(all), w: toShares(byOutcome.w), d: toShares(byOutcome.d), l: toShares(byOutcome.l) },
+    outcomeCounts,
   };
 }

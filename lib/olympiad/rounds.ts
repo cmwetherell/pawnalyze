@@ -2,16 +2,19 @@ import { N_ROUNDS } from './config';
 import type { Match, Run } from './types';
 
 /**
- * complete – results baked into the current run (round <= rounds_completed)
- * paired   – pairings published (maybe even played) but not yet in the run; picks allowed
- * unpaired – no pairings yet; only team-path picks
+ * complete  – results baked into the current run (round <= rounds_completed)
+ * paired    – pairings published (maybe even played) but not yet in the run; picks allowed
+ * projected – pairings not published, but the engine's next-round pairing is fixed; picks allowed
+ * unpaired  – no pairings yet; only team-path picks
  */
-export type RoundState = 'complete' | 'paired' | 'unpaired';
+export type RoundState = 'complete' | 'paired' | 'projected' | 'unpaired';
 
 export function roundState(round: number, run: Run | null, matches: Match[]): RoundState {
   const completed = run?.roundsCompleted ?? 0;
   if (round <= completed) return 'complete';
-  return matches.some(m => m.round === round) ? 'paired' : 'unpaired';
+  const inRound = matches.filter(m => m.round === round);
+  if (inRound.length === 0) return 'unpaired';
+  return inRound.every(m => m.projected) ? 'projected' : 'paired';
 }
 
 export function allRounds(): number[] {
