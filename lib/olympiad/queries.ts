@@ -191,7 +191,11 @@ async function summaryFromSims(event: OlympiadEvent, runId: number): Promise<Tea
   return Array.from(map.values()).sort((a, b) => b.pGold - a.pGold);
 }
 
-/** Latest pipeline run per rounds_completed, joined to its summary — for the odds-over-time chart. */
+/**
+ * Latest pipeline run per rounds_completed, joined to its summary — for the odds-over-time chart.
+ * Only runs with the same n_teams as the current run are included: chess-results renumbers seeds
+ * when a team withdraws, so team_ids from runs with a different field size refer to different teams.
+ */
 export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<HistoryPoint[]> {
   'use cache';
   cacheLife('hours');
@@ -203,6 +207,7 @@ export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<H
       SELECT DISTINCT ON (rounds_completed) run_id, rounds_completed
       FROM olympiad_2026_runs
       WHERE event = ${event} AND source = 'pipeline'
+        AND n_teams = (SELECT n_teams FROM olympiad_2026_runs WHERE event = ${event} AND is_current)
       ORDER BY rounds_completed, created_at DESC
     )
     SELECT l.run_id, l.rounds_completed, s.team_id, s.p_gold, s.p_medal, s.p_top10

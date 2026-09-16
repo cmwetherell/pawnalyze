@@ -4,12 +4,14 @@ import Flag from '@/components/ui/Flag';
 import { formatPct } from '@/components/ui/ProbBar';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import { getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadTeams } from '@/lib/olympiad/queries';
+import { teamsInRun } from '@/lib/olympiad/standings';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 async function GoldPanel({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
   const href = eventHref(event);
-  const [run, teams, status] = await Promise.all([getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event)]);
+  const [run, allTeams, status] = await Promise.all([getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event)]);
+  const teams = teamsInRun(allTeams, run);
   const summary = run ? await getOlympiadSummary(event, run.runId) : [];
   const teamsById = new Map(teams.map(t => [t.teamId, t]));
   const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 5);

@@ -2,11 +2,13 @@ import TournamentCard from '@/components/TournamentCard';
 import Flag from '@/components/ui/Flag';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import { getOlympiadStatus, getOlympiadTeams } from '@/lib/olympiad/queries';
+import { teamsInRun } from '@/lib/olympiad/standings';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 async function OlympiadCard({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
-  const [status, teams] = await Promise.all([getOlympiadStatus(event), getOlympiadTeams(event)]);
+  const [status, allTeams] = await Promise.all([getOlympiadStatus(event), getOlympiadTeams(event)]);
+  const teams = teamsInRun(allTeams, status.run);
   const cardStatus =
     status.lastFinalRound >= N_ROUNDS ? 'completed'
       : status.lastFinalRound > 0 || status.anyLive ? 'live'

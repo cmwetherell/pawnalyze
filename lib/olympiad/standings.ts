@@ -1,4 +1,4 @@
-import type { DerivedStanding, Match, Outcome, Team } from './types';
+import type { DerivedStanding, Match, Outcome, Run, Team } from './types';
 
 export function matchPointsFor(score: number | null, oppScore: number | null): number {
   if (score === null || oppScore === null) return 0;
@@ -140,4 +140,13 @@ export function roundsWithPairings(matches: Match[]): Set<number> {
 export function roundIsFinal(matches: Match[], round: number): boolean {
   const inRound = matches.filter(m => m.round === round);
   return inRound.length > 0 && inRound.every(m => m.status === 'final');
+}
+
+/**
+ * Teams that exist in the current run's numbering. chess-results renumbers seeds when a team
+ * withdraws, and the pipeline upserts by team_id, so rows above run.n_teams are stale leftovers.
+ */
+export function teamsInRun(teams: Team[], run: Run | null): Team[] {
+  if (!run) return teams;
+  return teams.filter(t => t.teamId <= run.nTeams);
 }

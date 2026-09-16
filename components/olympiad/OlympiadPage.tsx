@@ -12,17 +12,19 @@ import {
   getOlympiadSummaryHistory,
   getOlympiadTeams,
 } from '@/lib/olympiad/queries';
+import { teamsInRun } from '@/lib/olympiad/standings';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 export default async function OlympiadPage({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
-  const [run, teams, players, matches, status] = await Promise.all([
+  const [run, allTeams, players, matches, status] = await Promise.all([
     getOlympiadRun(event),
     getOlympiadTeams(event),
     getOlympiadPlayers(event),
     getOlympiadMatches(event),
     getOlympiadStatus(event),
   ]);
+  const teams = teamsInRun(allTeams, run);
   const nextRound = run ? run.roundsCompleted + 1 : 0;
   const needProjected = run !== null && nextRound <= N_ROUNDS && !matches.some(m => m.round === nextRound);
   const [summary, history, projected] = run
