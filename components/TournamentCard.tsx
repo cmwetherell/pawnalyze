@@ -5,8 +5,12 @@ interface TournamentCardProps {
   href: string;
   description: string;
   format: string;
-  status: 'live' | 'completed';
+  status: 'live' | 'completed' | 'upcoming';
   winner?: string;
+  /** Small secondary line, e.g. "Round 4 of 11 · 10,000 sims" */
+  meta?: string;
+  /** Optional decorative element rendered under the title (e.g. a flag stack). */
+  decoration?: React.ReactNode;
 }
 
 function formatName(name: string) {
@@ -14,7 +18,7 @@ function formatName(name: string) {
   return first ? `${first} ${last}` : last;
 }
 
-export default function TournamentCard({ name, href, description, format, status, winner }: TournamentCardProps) {
+export default function TournamentCard({ name, href, description, format, status, winner, meta, decoration }: TournamentCardProps) {
   return (
     <Link
       href={href}
@@ -26,16 +30,24 @@ export default function TournamentCard({ name, href, description, format, status
             <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse-live" />
             Live
           </span>
+        ) : status === 'upcoming' ? (
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-chess-gold">
+            <span className="w-1.5 h-1.5 rounded-full bg-chess-gold" />
+            Upcoming
+          </span>
         ) : (
           <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
             Completed
           </span>
         )}
+        {meta && <span className="text-xs text-[var(--text-muted)]">· {meta}</span>}
       </div>
 
       <h3 className="font-heading text-lg text-[var(--text-primary)] mb-2 group-hover:text-chess-gold transition-colors">
         {name}
       </h3>
+
+      {decoration && <div className="mb-3">{decoration}</div>}
 
       {winner && (
         <p className="text-sm mb-2">

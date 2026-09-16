@@ -14,41 +14,9 @@ import womensCandByRound from '@/public/womensCandByRound.json';
 import candResByRound2026 from '@/public/candResByRound2026.json';
 import womensCandByRound2026 from '@/public/womensCandByRound2026.json';
 import ChartSkeleton from './ChartSkeleton';
+import { useChartTheme } from '@/hooks/useChartTheme';
 
 Chart.register(ChartDataLabels);
-
-function useChartTheme() {
-  const [theme, setTheme] = useState({
-    gridColor: '#1f293740',
-    textColor: '#8b949e',
-    textPrimary: '#f0f2f5',
-    tooltipBg: '#1a1d23',
-    tooltipBorder: '#2d333b',
-    tooltipText: '#f0f2f5',
-    tooltipBody: '#c9d1d9',
-  });
-
-  useEffect(() => {
-    const update = () => {
-      const s = getComputedStyle(document.documentElement);
-      setTheme({
-        gridColor: s.getPropertyValue('--chart-grid').trim() + '40',
-        textColor: s.getPropertyValue('--text-muted').trim(),
-        textPrimary: s.getPropertyValue('--text-primary').trim(),
-        tooltipBg: s.getPropertyValue('--chart-tooltip-bg').trim(),
-        tooltipBorder: s.getPropertyValue('--chart-tooltip-border').trim(),
-        tooltipText: s.getPropertyValue('--text-primary').trim(),
-        tooltipBody: s.getPropertyValue('--text-secondary').trim(),
-      });
-    };
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  return theme;
-}
 
 let customOrder = ['Pre', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Simulated'];
 

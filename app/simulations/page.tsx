@@ -1,6 +1,7 @@
 import TournamentCard from '@/components/TournamentCard';
+import OlympiadCards from '@/components/olympiad/OlympiadCards';
 
-export default function SimPage() {
+export default async function SimPage() {
   return (
     <main className="flex-1 flex flex-col min-h-screen">
       {/* Page header */}
@@ -9,6 +10,14 @@ export default function SimPage() {
         <p className="mt-2 text-[var(--text-muted)]">
           Monte Carlo tournament simulations with interactive scenario building.
         </p>
+      </div>
+
+      {/* Live / upcoming */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
+        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Chess Olympiad 2026</h2>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <OlympiadCards />
+        </div>
       </div>
 
       {/* Past Tournaments */}

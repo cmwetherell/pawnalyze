@@ -1,11 +1,17 @@
 import PlayerAvatar from './PlayerAvatar';
+import Flag from '@/components/ui/Flag';
 
 interface TournamentHeaderProps {
   name: string;
   description: string;
   format: string;
   website: string;
+  websiteLabel?: string;
   players?: string[];
+  /** Federation codes rendered as a flag stack (used instead of player avatars). */
+  flags?: { code: string; title?: string }[];
+  /** Small status pill, e.g. "Round 4 of 11" */
+  statusPill?: { text: string; live?: boolean };
 }
 
 export default function TournamentHeader({
@@ -13,8 +19,17 @@ export default function TournamentHeader({
   description,
   format,
   website,
+  websiteLabel = 'FIDE',
   players,
+  flags,
+  statusPill,
 }: TournamentHeaderProps) {
+  const pillStyle = {
+    backgroundColor: 'var(--header-pill-bg)',
+    color: 'var(--header-pill-text)',
+    border: '1px solid var(--header-pill-border)',
+  } as const;
+
   return (
     <div className="relative px-6 py-8 sm:px-8 sm:py-10 overflow-hidden" style={{
       background: `linear-gradient(to bottom, var(--header-from), var(--header-to))`,
@@ -41,11 +56,18 @@ export default function TournamentHeader({
         </h1>
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style={{
-            backgroundColor: 'var(--header-pill-bg)',
-            color: 'var(--header-pill-text)',
-            border: '1px solid var(--header-pill-border)',
-          }}>
+          {statusPill && (
+            <span
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+              style={statusPill.live
+                ? { backgroundColor: 'rgba(248,113,113,0.12)', color: '#f87171', border: '1px solid rgba(248,113,113,0.3)' }
+                : pillStyle}
+            >
+              {statusPill.live && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse-live" />}
+              {statusPill.text}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style={pillStyle}>
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
@@ -56,13 +78,9 @@ export default function TournamentHeader({
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium hover:text-chess-gold hover:border-chess-gold/30 transition-colors"
-            style={{
-              backgroundColor: 'var(--header-pill-bg)',
-              color: 'var(--header-pill-text)',
-              border: '1px solid var(--header-pill-border)',
-            }}
+            style={pillStyle}
           >
-            FIDE
+            {websiteLabel}
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
@@ -86,6 +104,15 @@ export default function TournamentHeader({
                 />
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Flag stack */}
+        {flags && flags.length > 0 && (
+          <div className="mt-4 flex items-center gap-1.5 flex-wrap">
+            {flags.map((f, i) => (
+              <Flag key={`${f.code}-${i}`} code={f.code} title={f.title} size="lg" className="!ring-2 !ring-[var(--header-avatar-ring)]" />
+            ))}
           </div>
         )}
       </div>

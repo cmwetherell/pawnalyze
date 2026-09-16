@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "flag-icons/css/flag-icons.min.css";
 import Navbar from "@/components/navbar";
 import { Inter as FontSans } from "next/font/google";
 import localFont from "next/font/local";

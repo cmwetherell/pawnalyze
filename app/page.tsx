@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import TournamentCard from "@/components/TournamentCard";
+import OlympiadGoldSummary from "@/components/olympiad/OlympiadGoldSummary";
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="flex-1 flex flex-col">
       {/* Hero */}
@@ -17,7 +18,7 @@ export default function Home() {
         {/* Gold gradient orb */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-chess-gold/5 blur-3xl" />
 
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center">
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-14 sm:pt-28 sm:pb-16 text-center">
           <p className="text-chess-gold-dark dark:text-chess-gold text-sm font-semibold tracking-widest uppercase mb-4">
             Chess Analytics & Predictions
           </p>
@@ -47,10 +48,32 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* As featured in */}
-          <div className="mt-14 text-[var(--text-secondary)]">
-            <p className="text-xs uppercase tracking-wider text-center mb-5">As seen in</p>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
+        </div>
+      </section>
+
+      {/* Live now */}
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 w-full pb-14">
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <h2 className="font-heading text-2xl text-[var(--text-primary)] flex items-center gap-3">
+              Chess Olympiad 2026
+              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse-live" />
+            </h2>
+            <p className="text-sm text-[var(--text-muted)] mt-1">
+              Live gold-medal odds from 10,000 simulations, updated after every round in Samarkand.
+            </p>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <OlympiadGoldSummary />
+        </div>
+      </section>
+
+      {/* As seen in */}
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 w-full pb-16">
+        <div className="text-[var(--text-secondary)]">
+          <p className="text-xs uppercase tracking-wider text-center mb-5">As seen in</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4">
               <Image
                 src="/img/nyt-logo.svg"
                 alt="The New York Times"
@@ -86,7 +109,6 @@ export default function Home() {
                 height={40}
                 className="h-5 w-auto dark:invert dark:opacity-60"
               />
-            </div>
           </div>
         </div>
       </section>
