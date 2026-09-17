@@ -12,6 +12,29 @@ import type { OlympiadEvent } from './types';
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
+/**
+ * OG images are prerendered at build time, so a transient database error must not fail
+ * the deploy. Render the card; on any failure log it and fall back to a plain title card.
+ */
+export async function safeOg(title: string, render: () => Promise<ImageResponse>): Promise<ImageResponse> {
+  try {
+    return await render();
+  } catch (err) {
+    const detail = err instanceof Error ? `${err.name}: ${err.message}` : JSON.stringify(err);
+    console.error(`[og] ${title} failed, using fallback card: ${detail}`);
+    return new ImageResponse(
+      (
+        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '56px', background: 'linear-gradient(135deg, #0F1116 0%, #1a1d23 100%)', color: '#f0f2f5', fontFamily: 'sans-serif' }}>
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', color: '#C9A84C' }}>Pawnalyze</div>
+          <div style={{ display: 'flex', fontSize: 56, fontWeight: 700, marginTop: 8 }}>{title}</div>
+          <div style={{ display: 'flex', fontSize: 26, color: '#8b949e', marginTop: 16 }}>Live odds and board-prize race, updated after every round</div>
+        </div>
+      ),
+      { ...OG_SIZE },
+    );
+  }
+}
+
 /** Inline a flag from the installed flag-icons package (no network during prerender). */
 function flagDataUri(iso: string | null): string | null {
   if (!iso) return null;
@@ -24,7 +47,11 @@ function flagDataUri(iso: string | null): string | null {
 }
 
 /** Social card: top-5 gold odds with flags. Falls back to a title card before the first run. */
-export async function olympiadOgImage(event: OlympiadEvent) {
+export function olympiadOgImage(event: OlympiadEvent) {
+  return safeOg(OLYMPIAD_EVENTS[event].shortTitle, () => renderOlympiadOg(event));
+}
+
+async function renderOlympiadOg(event: OlympiadEvent) {
   const cfg = OLYMPIAD_EVENTS[event];
   const [run, allTeams, status] = await Promise.all([getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event)]);
   const teams = teamsInRun(allTeams, run);
@@ -102,7 +129,11 @@ function clip(text: string, max: number): string {
 }
 
 /** Social card for the board-prize race: the current podium on each of the five boards. */
-export async function boardRaceOgImage(event: OlympiadEvent) {
+export function boardRaceOgImage(event: OlympiadEvent) {
+  return safeOg(`${OLYMPIAD_EVENTS[event].shortTitle} board prizes`, () => renderBoardRaceOg(event));
+}
+
+async function renderBoardRaceOg(event: OlympiadEvent) {
   const cfg = OLYMPIAD_EVENTS[event];
   const race = await getOlympiadBoardRace(event);
   const stage = race.lastRound >= N_ROUNDS ? 'Final' : race.lastRound > 0 ? `After round ${race.lastRound} of ${N_ROUNDS}` : 'Before round 1';
@@ -168,7 +199,11 @@ export async function boardRaceOgImage(event: OlympiadEvent) {
 const PIP = { 1: '#10b981', 0.5: '#8b949e', 0: '#f43f5e' } as const;
 
 /** Social card for one player in the board-prize race. */
-export async function playerOgImage(event: OlympiadEvent, fideId: number) {
+export function playerOgImage(event: OlympiadEvent, fideId: number) {
+  return safeOg(`${OLYMPIAD_EVENTS[event].shortTitle} board prizes`, () => renderPlayerOg(event, fideId));
+}
+
+async function renderPlayerOg(event: OlympiadEvent, fideId: number) {
   const cfg = OLYMPIAD_EVENTS[event];
   const race = await getOlympiadBoardRace(event);
   const p = race.boards.flat().find(r => r.fideId === fideId);
