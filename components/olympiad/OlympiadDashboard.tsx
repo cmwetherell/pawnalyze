@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import BottomSheet from '@/components/ui/BottomSheet';
 import HeroPanel from './HeroPanel';
 import OlympiadScenarioBuilder from './OlympiadScenarioBuilder';
 import ScenarioSummary from './ScenarioSummary';
@@ -57,6 +58,7 @@ export default function OlympiadDashboard({
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [order, setOrder] = useState<number[]>([]);
   const [appliedResults, setAppliedResults] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const spotlightRef = useRef<HTMLDivElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const cache = useRef<Map<string, ScenarioResult>>(new Map());
@@ -168,7 +170,11 @@ export default function OlympiadDashboard({
     });
   };
 
-  const handleSimulate = () => { if (dirty && picks.size > 0) simulateKey(picksKey); };
+  const handleSimulate = () => {
+    if (!(dirty && picks.size > 0)) return;
+    setSheetOpen(false);
+    simulateKey(picksKey);
+  };
 
   const handleReset = () => {
     setPicks(new Map());
@@ -247,7 +253,7 @@ export default function OlympiadDashboard({
   }, [isScenario, scenario, picks, matches, teamsById, odds, baseline]);
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-6 space-y-6">
       <div aria-live="polite" className="space-y-3">
         {staleRun && (
           <div className="rounded-lg border border-chess-gold/40 bg-chess-gold/10 px-4 py-3 text-sm text-[var(--text-primary)] flex flex-wrap items-center gap-3">
@@ -335,7 +341,7 @@ export default function OlympiadDashboard({
           </div>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="hidden lg:block lg:col-span-2">
           <div className="surface-card overflow-hidden lg:sticky lg:top-20">
             <OlympiadScenarioBuilder
               run={run}
@@ -355,6 +361,60 @@ export default function OlympiadDashboard({
           </div>
         </div>
       </div>
+
+      {/* Mobile: sticky action bar + builder in a bottom sheet */}
+      <div
+        className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg-surface-1)]/95 backdrop-blur"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className="flex-1 h-11 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] px-3 text-sm font-semibold text-[var(--text-primary)] flex items-center justify-between gap-2"
+            aria-haspopup="dialog"
+            aria-expanded={sheetOpen}
+          >
+            <span className="inline-flex items-center gap-2">
+              <svg className="w-4 h-4 text-gold-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
+              Scenario Builder
+            </span>
+            <span className="text-xs font-normal text-[var(--text-muted)]">
+              {picks.size === 0 ? 'no picks' : `${picks.size} pick${picks.size === 1 ? '' : 's'}${dirty ? ' · new' : ''}`}
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={handleSimulate}
+            disabled={!(dirty && picks.size > 0) || loading}
+            className={`h-11 px-4 rounded-lg text-sm font-semibold transition-colors ${
+              dirty && picks.size > 0 && !loading
+                ? 'bg-chess-gold text-chess-dark hover:bg-chess-gold-light'
+                : 'bg-[var(--bg-surface-3)] text-[var(--text-muted)]'
+            }`}
+          >
+            {loading ? 'Simulating…' : 'Simulate'}
+          </button>
+        </div>
+      </div>
+      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Scenario Builder">
+        <OlympiadScenarioBuilder
+          run={run}
+          teams={participants}
+          teamsById={teamsById}
+          matches={matches}
+          standings={standings}
+          picks={picks}
+          onSetPick={handleSetPick}
+          onSimulate={handleSimulate}
+          onReset={handleReset}
+          loading={loading}
+          dirty={dirty}
+          roundOdds={roundOdds}
+          applyResults={applyResults}
+          inSheet
+        />
+      </BottomSheet>
     </div>
   );
 }

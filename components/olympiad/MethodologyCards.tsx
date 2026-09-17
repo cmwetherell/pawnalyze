@@ -8,7 +8,7 @@ export default function MethodologyCards({ nonParticipants = [] }: { nonParticip
           <div className="grid sm:grid-cols-3 gap-4 mb-8">
             <div className="surface-card p-4">
               <div className="w-8 h-8 rounded-lg bg-chess-gold/10 flex items-center justify-center mb-3">
-                <svg className="w-4 h-4 text-chess-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-gold-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
@@ -19,7 +19,7 @@ export default function MethodologyCards({ nonParticipants = [] }: { nonParticip
             </div>
             <div className="surface-card p-4">
               <div className="w-8 h-8 rounded-lg bg-chess-gold/10 flex items-center justify-center mb-3">
-                <svg className="w-4 h-4 text-chess-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-gold-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4 7h16M4 12h10M4 17h6" />
                 </svg>
               </div>
@@ -30,7 +30,7 @@ export default function MethodologyCards({ nonParticipants = [] }: { nonParticip
             </div>
             <div className="surface-card p-4">
               <div className="w-8 h-8 rounded-lg bg-chess-gold/10 flex items-center justify-center mb-3">
-                <svg className="w-4 h-4 text-chess-gold" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-4 h-4 text-gold-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                 </svg>
               </div>
@@ -46,7 +46,7 @@ export default function MethodologyCards({ nonParticipants = [] }: { nonParticip
             the official tiebreaks. For the model details see{' '}
             <a
               href="https://github.com/cmwetherell/cmwetherell.github.io/blob/main/chessSim/simOlympiad.py"
-              className="text-chess-gold hover:text-chess-gold-light underline decoration-chess-gold/30 hover:decoration-chess-gold/60 transition-colors"
+              className="text-gold-ink hover:text-chess-gold-light underline decoration-chess-gold/30 hover:decoration-chess-gold/60 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -55,7 +55,7 @@ export default function MethodologyCards({ nonParticipants = [] }: { nonParticip
             and{' '}
             <a
               href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html"
-              className="text-chess-gold hover:text-chess-gold-light underline decoration-chess-gold/30 hover:decoration-chess-gold/60 transition-colors"
+              className="text-gold-ink hover:text-chess-gold-light underline decoration-chess-gold/30 hover:decoration-chess-gold/60 transition-colors"
               target="_blank"
               rel="noopener noreferrer"
             >

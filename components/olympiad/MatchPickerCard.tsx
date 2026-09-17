@@ -143,7 +143,7 @@ export default function MatchPickerCard({
             className={`shrink-0 w-10 h-10 rounded-md text-sm font-bold transition-colors flex flex-col items-center justify-center leading-none ${
               selected === 'd'
                 ? 'bg-chess-gold text-chess-dark'
-                : 'bg-[var(--bg-surface-1)] border border-[var(--border)] text-[var(--text-muted)] hover:text-chess-gold hover:border-chess-gold/40'
+                : 'bg-[var(--bg-surface-1)] border border-[var(--border)] text-[var(--text-muted)] hover:text-gold-ink hover:border-chess-gold/40'
             }`}
           >
             =
@@ -163,7 +163,7 @@ export default function MatchPickerCard({
         </div>
       )}
       {match.projected && !isFinal && !isLive && (
-        <div className="flex items-center justify-center gap-1 px-3 py-0.5 text-[10px] uppercase tracking-wider text-chess-gold/80 border-t border-[var(--border)]">
+        <div className="flex items-center justify-center gap-1 px-3 py-0.5 text-[10px] uppercase tracking-wider text-gold-ink/80 border-t border-[var(--border)]">
           Projected pairing
         </div>
       )}

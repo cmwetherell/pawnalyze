@@ -64,7 +64,7 @@ export default function ProbBar({
         />
       </div>
       {showLabel && (
-        <span className={`tabular-nums text-right shrink-0 ${emphasis ? 'text-sm font-semibold text-chess-gold w-[3.5rem]' : 'text-xs text-[var(--text-primary)] w-[3.25rem]'}`}>
+        <span className={`tabular-nums text-right shrink-0 ${emphasis ? 'text-sm font-semibold text-gold-ink w-[3.5rem]' : 'text-xs text-[var(--text-primary)] w-[3.25rem]'}`}>
           {formatPct(value)}
         </span>
       )}

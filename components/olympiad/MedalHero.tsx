@@ -63,7 +63,7 @@ export default function MedalHero({ rows, baseline, teamsById, isScenario, selec
                       {delta && (
                         <span className={`text-[10px] font-semibold ${up ? 'text-emerald-500' : 'text-rose-400'}`}>{up ? '▲' : '▼'} {delta.replace(/^[+−]/, '')}</span>
                       )}
-                      <span className="text-base font-heading text-chess-gold">{formatPct(row.pGold)}</span>
+                      <span className="text-base font-heading text-gold-ink">{formatPct(row.pGold)}</span>
                       <span className="text-[10px] text-[var(--text-muted)] hidden sm:inline">podium {formatPct(row.pMedal)}</span>
                     </span>
                   </span>

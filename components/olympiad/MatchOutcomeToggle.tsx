@@ -42,7 +42,7 @@ export default function MatchOutcomeToggle({ selected, onChange, labels, disable
       <button
         type="button"
         onClick={() => handle('d')}
-        className={`${base} border-x border-[var(--border)] ${selected === 'd' ? 'bg-chess-gold/20 text-chess-gold' : idle}`}
+        className={`${base} border-x border-[var(--border)] ${selected === 'd' ? 'bg-chess-gold/20 text-gold-ink' : idle}`}
         title={labels?.d ?? 'Draw'}
         aria-label={labels?.d ?? 'Draw'}
         aria-pressed={selected === 'd'}

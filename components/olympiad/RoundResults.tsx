@@ -41,7 +41,7 @@ function Side({ team, gold, align, onSelect, won }: {
       <span className="min-w-0">
         <span className={`block text-sm truncate ${won ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{shortTeamName(team.name)}</span>
         {gold !== undefined && gold >= 0.001 && (
-          <span className="block text-[10px] text-chess-gold tabular-nums">gold {formatPct(gold)}</span>
+          <span className="block text-[10px] text-gold-ink tabular-nums">gold {formatPct(gold)}</span>
         )}
       </span>
     </button>
@@ -164,7 +164,7 @@ export default function RoundResults({
         })}
       </ul>
       {rows.length > limit && (
-        <button type="button" onClick={() => setLimit(l => l + PAGE)} className="w-full text-xs text-chess-gold hover:text-chess-gold-light py-2">
+        <button type="button" onClick={() => setLimit(l => l + PAGE)} className="w-full text-xs text-gold-ink hover:text-chess-gold-light py-2">
           Show {Math.min(PAGE, rows.length - limit)} more of {rows.length}
         </button>
       )}

@@ -9,9 +9,10 @@
   --bg-surface-3: #e5e7eb;
   --text-primary: #111827;
   --text-secondary: #4b5563;
-  --text-muted: #9ca3af;
+  --text-muted: #6b7280;
   --border: #e5e7eb;
   --chart-grid: #f3f4f6;
+  --gold-ink-rgb: 166 133 44;
 
   /* Chart-specific */
   --chart-tooltip-bg: rgba(255, 255, 255, 0.95);
@@ -45,6 +46,7 @@
   --text-muted: #8b949e;
   --border: #2d333b;
   --chart-grid: #1f2937;
+  --gold-ink-rgb: 201 168 76;
 
   /* Chart-specific */
   --chart-tooltip-bg: rgba(26, 29, 35, 0.95);

@@ -112,7 +112,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
               {(['all', 'w', 'd', 'l'] as Split[]).map(k => {
                 const count = k === 'all' ? data.total : data.outcomeCounts[k];
                 const active = split === k;
-                const tone = k === 'w' ? 'text-emerald-500' : k === 'd' ? 'text-chess-gold' : k === 'l' ? 'text-rose-400' : 'text-[var(--text-primary)]';
+                const tone = k === 'w' ? 'text-emerald-500' : k === 'd' ? 'text-gold-ink' : k === 'l' ? 'text-rose-400' : 'text-[var(--text-primary)]';
                 return (
                   <button
                     key={k}

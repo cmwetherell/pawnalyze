@@ -164,7 +164,7 @@ export default function TeamSpotlight({
             {anyPlayed && standing && (
               <> · <span className="text-[var(--text-secondary)]">{ordinal(standing.rank)} of {participants}</span> on {standing.mp} MP (unofficial)</>
             )}
-            {isScenario && <span className="text-chess-gold"> · scenario odds</span>}
+            {isScenario && <span className="text-gold-ink"> · scenario odds</span>}
           </div>
         </div>
         {trend.length >= 2 && (
@@ -189,7 +189,7 @@ export default function TeamSpotlight({
 
       {/* Tiles */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 px-4 sm:px-6 pt-4">
-        <Tile label="Gold" value={formatPct(odds?.pGold ?? 0)} tone="text-chess-gold" delta={delta(odds?.pGold, baseline?.pGold)} />
+        <Tile label="Gold" value={formatPct(odds?.pGold ?? 0)} tone="text-gold-ink" delta={delta(odds?.pGold, baseline?.pGold)} />
         <Tile label="Podium" value={formatPct(odds?.pMedal ?? 0)} delta={delta(odds?.pMedal, baseline?.pMedal)}
           title={`Gold ${formatPct(odds?.pGold ?? 0)} · Silver ${formatPct(odds?.pSilver ?? 0)} · Bronze ${formatPct(odds?.pBronze ?? 0)}`}>
           <div className="mt-1 h-1.5 rounded-full overflow-hidden flex bg-[var(--bg-surface-3)]" aria-hidden>
@@ -225,7 +225,7 @@ export default function TeamSpotlight({
                 {players.map(p => (
                   <tr key={p.board} className="border-t border-[var(--border)]/60">
                     <td className="py-1.5 pr-2 text-[var(--text-muted)] tabular-nums w-5">{p.board}</td>
-                    <td className="py-1.5 pr-2 w-8 text-chess-gold font-semibold">{p.title ?? ''}</td>
+                    <td className="py-1.5 pr-2 w-8 text-gold-ink font-semibold">{p.title ?? ''}</td>
                     <td className="py-1.5 pr-2 text-[var(--text-primary)] truncate">{p.name}</td>
                     <td className="py-1.5 text-right tabular-nums text-[var(--text-secondary)] w-12">{p.rating || '—'}</td>
                   </tr>
@@ -245,7 +245,7 @@ export default function TeamSpotlight({
               <ul className="space-y-1 text-xs">
                 {played.map(h => {
                   const opp = h.opponentId !== null ? teamsById.get(h.opponentId) : null;
-                  const tone = h.outcome === 'w' ? 'text-emerald-500' : h.outcome === 'l' ? 'text-rose-400' : 'text-chess-gold';
+                  const tone = h.outcome === 'w' ? 'text-emerald-500' : h.outcome === 'l' ? 'text-rose-400' : 'text-gold-ink';
                   return (
                     <li key={h.round} className="flex items-center gap-2">
                       <span className="w-7 text-[var(--text-muted)] tabular-nums">R{h.round}</span>
@@ -298,7 +298,7 @@ export default function TeamSpotlight({
               </div>
               <div className="flex gap-[3px] mt-1" aria-hidden>
                 {bucketed.map((b, i) => (
-                  <div key={b.label} className={`flex-1 text-center text-[10px] tabular-nums ${median !== null && String(median) === b.label ? 'text-chess-gold font-bold' : 'text-[var(--text-muted)]'} ${i % 2 === 1 && i < RANK_BUCKETS ? 'invisible sm:visible' : ''}`}>{b.label}</div>
+                  <div key={b.label} className={`flex-1 text-center text-[10px] tabular-nums ${median !== null && String(median) === b.label ? 'text-gold-ink font-bold' : 'text-[var(--text-muted)]'} ${i % 2 === 1 && i < RANK_BUCKETS ? 'invisible sm:visible' : ''}`}>{b.label}</div>
                 ))}
               </div>
               <p className="mt-2 text-[11px] text-[var(--text-muted)]">Final position across {total.toLocaleString()} simulations{isScenario ? ' matching your scenario' : ''}.</p>

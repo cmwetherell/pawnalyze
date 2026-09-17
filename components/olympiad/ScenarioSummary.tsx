@@ -19,7 +19,7 @@ export default function ScenarioSummary({ pickCount, matched, nSims, sentence, o
     : low
       ? 'bg-amber-500/10 border-amber-500/30'
       : 'bg-chess-gold/10 border-chess-gold/25';
-  const accent = zero ? 'text-rose-400' : low ? 'text-amber-500' : 'text-chess-gold';
+  const accent = zero ? 'text-rose-400' : low ? 'text-amber-500' : 'text-gold-ink';
   const share = nSims > 0 ? (matched / nSims) * 100 : 0;
 
   return (

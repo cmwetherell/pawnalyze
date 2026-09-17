@@ -224,7 +224,7 @@ export default function OlympiadScenarioBuilder({
                             : 'bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
                     }`}
                   >
-                    <span aria-hidden className={`text-[10px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : s === 'projected' || s === 'played' ? 'text-chess-gold' : ''}`}>{stateGlyph(s)}</span>
+                    <span aria-hidden className={`text-[10px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : s === 'projected' || s === 'played' ? 'text-gold-ink' : ''}`}>{stateGlyph(s)}</span>
                     R{r}
                     {hasSel && !isActive && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-chess-gold" />}
                   </button>
@@ -244,7 +244,7 @@ export default function OlympiadScenarioBuilder({
             </button>
           </div>
           <p className="px-4 pb-2 text-[10px] text-[var(--text-muted)]">
-            <span className="text-chess-gold">✓</span> simulated · <span className="text-red-400">●</span> pairings out · <span className="text-chess-gold">◐</span> projected · ○ not yet paired
+            <span className="text-gold-ink">✓</span> simulated · <span className="text-red-400">●</span> pairings out · <span className="text-gold-ink">◐</span> projected · ○ not yet paired
           </p>
 
           {/* Round content */}
@@ -256,7 +256,7 @@ export default function OlympiadScenarioBuilder({
             {activeState === 'played' && (
               <div className="space-y-1.5">
                 <div className="rounded-md bg-chess-gold/10 border border-chess-gold/25 px-2.5 py-2 text-[11px] text-[var(--text-secondary)]">
-                  <span className="font-semibold text-chess-gold">Round {activeRound} has been played.</span> The medal odds still reflect round {run.roundsCompleted}; the next simulation run will fold these results in.
+                  <span className="font-semibold text-gold-ink">Round {activeRound} has been played.</span> The medal odds still reflect round {run.roundsCompleted}; the next simulation run will fold these results in.
                   {applyResults && applyResults.count > 0 && (
                     <button
                       type="button"
@@ -285,7 +285,7 @@ export default function OlympiadScenarioBuilder({
                   );
                 })}
                 {roundMatches.length > limit && (
-                  <button type="button" onClick={() => setLimit(l => l + MORE_MATCHES)} className="w-full text-xs text-chess-gold hover:text-chess-gold-light py-2">
+                  <button type="button" onClick={() => setLimit(l => l + MORE_MATCHES)} className="w-full text-xs text-gold-ink hover:text-chess-gold-light py-2">
                     Show {Math.min(MORE_MATCHES, roundMatches.length - limit)} more of {roundMatches.length}
                   </button>
                 )}
@@ -296,7 +296,7 @@ export default function OlympiadScenarioBuilder({
               <div className="space-y-1.5">
                 {activeState === 'projected' && (
                   <div className="rounded-md bg-chess-gold/10 border border-chess-gold/25 px-2.5 py-1.5 text-[11px] text-[var(--text-secondary)]">
-                    <span className="font-semibold text-chess-gold">Projected pairings.</span> Official round {activeRound} pairings aren&apos;t out yet; these come from our Swiss pairing engine and may differ slightly.
+                    <span className="font-semibold text-gold-ink">Projected pairings.</span> Official round {activeRound} pairings aren&apos;t out yet; these come from our Swiss pairing engine and may differ slightly.
                   </div>
                 )}
                 <p className="text-xs text-[var(--text-muted)] pb-0.5">
@@ -351,7 +351,7 @@ export default function OlympiadScenarioBuilder({
                   );
                 })}
                 {roundMatches.length > limit && (
-                  <button type="button" onClick={() => setLimit(l => l + MORE_MATCHES)} className="w-full text-xs text-chess-gold hover:text-chess-gold-light py-2">
+                  <button type="button" onClick={() => setLimit(l => l + MORE_MATCHES)} className="w-full text-xs text-gold-ink hover:text-chess-gold-light py-2">
                     Show {Math.min(MORE_MATCHES, roundMatches.length - limit)} more of {roundMatches.length}
                   </button>
                 )}
@@ -421,7 +421,7 @@ export default function OlympiadScenarioBuilder({
                         <>
                           <Flag code={opp.fedCode} size="xs" />
                           <span className="truncate text-[var(--text-secondary)]">{opp.name}</span>
-                          {entry?.projected && <span className="text-[10px] uppercase tracking-wider text-chess-gold shrink-0">proj.</span>}
+                          {entry?.projected && <span className="text-[10px] uppercase tracking-wider text-gold-ink shrink-0">proj.</span>}
                         </>
                       ) : entry && entry.opponentId === null ? (
                         <span className="text-[var(--text-muted)] italic">bye</span>
@@ -431,7 +431,7 @@ export default function OlympiadScenarioBuilder({
                     </div>
                     {locked ? (
                       <span className={`font-mono text-[11px] w-[84px] text-center ${
-                        entry?.outcome === 'w' ? 'text-emerald-500' : entry?.outcome === 'l' ? 'text-rose-400' : 'text-chess-gold'
+                        entry?.outcome === 'w' ? 'text-emerald-500' : entry?.outcome === 'l' ? 'text-rose-400' : 'text-gold-ink'
                       }`}>
                         {entry ? formatMatchScore(entry.score, entry.oppScore) : '–'}
                       </span>
@@ -460,7 +460,7 @@ export default function OlympiadScenarioBuilder({
         {totalPicks > 0 && (
           <p className="text-[11px] text-[var(--text-muted)] mb-2" aria-live="polite">
             {totalPicks} of {MAX_PICKS} picks
-            {dirty ? <span className="text-chess-gold"> · not yet simulated</span> : <span> · simulated</span>}
+            {dirty ? <span className="text-gold-ink"> · not yet simulated</span> : <span> · simulated</span>}
           </p>
         )}
         <div className="flex gap-2">

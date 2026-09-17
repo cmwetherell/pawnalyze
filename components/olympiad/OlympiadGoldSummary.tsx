@@ -31,7 +31,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
             {status.anyLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse-live" />}
             {event === 'open' ? 'Open' : "Women's"} · {stage}
           </p>
-          <h3 className="font-heading text-lg text-[var(--text-primary)] group-hover:text-chess-gold transition-colors">
+          <h3 className="font-heading text-lg text-[var(--text-primary)] group-hover:text-gold-ink transition-colors">
             Who wins gold?
           </h3>
         </div>
@@ -54,7 +54,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-sm font-medium text-[var(--text-primary)] truncate">{team.name}</span>
-                    <span className="text-sm font-heading text-chess-gold tabular-nums shrink-0">{formatPct(s.pGold)}</span>
+                    <span className="text-sm font-heading text-gold-ink tabular-nums shrink-0">{formatPct(s.pGold)}</span>
                   </div>
                   <div className="mt-1 h-1.5 rounded-full bg-[var(--bg-surface-3)] overflow-hidden">
                     <div className="h-full bg-medal-gold rounded-full" style={{ width: `${Math.min(100, s.pGold * 100)}%` }} />
@@ -70,7 +70,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
         </p>
       )}
 
-      <p className="mt-4 text-sm text-chess-gold group-hover:translate-x-1 transition-transform inline-block">
+      <p className="mt-4 text-sm text-gold-ink group-hover:translate-x-1 transition-transform inline-block">
         {top.length > 0 ? `Explore all ${summary.length} teams & build scenarios` : 'See the field'} &rarr;
       </p>
     </Link>

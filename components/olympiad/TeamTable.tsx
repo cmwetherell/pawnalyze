@@ -32,7 +32,7 @@ const HEADERS: { key: SortKey; label: string; title?: string; className?: string
   { key: 'name', label: 'Team', className: 'text-left' },
   { key: 'rating', label: 'Rtg', title: 'Average rating', className: 'w-12 text-right', hide: 'xl' },
   { key: 'mp', label: 'MP', title: 'Match points', className: 'w-11 text-right', needsPlay: true },
-  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', className: 'w-[7.5rem] sm:w-40 text-chess-gold' },
+  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', className: 'w-[7.5rem] sm:w-40 text-gold-ink' },
   { key: 'pMedal', label: 'Podium', title: 'Probability of any medal', className: 'w-36', hide: 'sm' },
   { key: 'expRank', label: 'Finish', title: 'Expected final position', className: 'w-14 text-right' },
 ];
@@ -167,7 +167,7 @@ export default function TeamTable({
                 <td className="px-1.5 sm:px-3 py-2">
                   <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                     <Flag code={t.fedCode} size="sm" title={t.name} className="!ring-0" aria-hidden />
-                    <span className={`font-medium truncate ${selected ? 'text-chess-gold' : 'text-[var(--text-primary)]'}`}>{t.name}</span>
+                    <span className={`font-medium truncate ${selected ? 'text-gold-ink' : 'text-[var(--text-primary)]'}`}>{t.name}</span>
                     <span className="text-[10px] text-[var(--text-muted)] tabular-nums shrink-0" title={`Seed #${t.teamId}`}>#{t.teamId}</span>
                   </div>
                 </td>
@@ -201,7 +201,7 @@ export default function TeamTable({
           {isScenario && ' · ghost bars show the baseline'}
         </span>
         {!query.trim() && rows.length > PAGE && (
-          <button type="button" onClick={() => setShowAll(v => !v)} className="h-8 px-2 text-chess-gold hover:text-chess-gold-light">
+          <button type="button" onClick={() => setShowAll(v => !v)} className="h-8 px-2 text-gold-ink hover:text-chess-gold-light">
             {showAll ? 'Show top 25' : `Show all ${rows.length}`}
           </button>
         )}

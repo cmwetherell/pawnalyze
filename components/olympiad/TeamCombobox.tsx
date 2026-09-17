@@ -70,6 +70,7 @@ export default function TeamCombobox({ teams, onSelect, placeholder = 'Search te
           role="combobox"
           aria-expanded={open}
           aria-controls={listId}
+          aria-activedescendant={open && results[active] ? `${listId}-opt-${results[active].teamId}` : undefined}
           aria-autocomplete="list"
         />
       </div>
@@ -82,6 +83,7 @@ export default function TeamCombobox({ teams, onSelect, placeholder = 'Search te
           {results.map((t, i) => (
             <li
               key={t.teamId}
+              id={`${listId}-opt-${t.teamId}`}
               role="option"
               aria-selected={i === active}
               onMouseDown={e => { e.preventDefault(); choose(t); }}
