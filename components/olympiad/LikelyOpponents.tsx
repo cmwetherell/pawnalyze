@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 
 import Flag from '@/components/ui/Flag';
+import { SkeletonBars } from '@/components/ui/Skeleton';
 import { formatPct } from '@/components/ui/ProbBar';
 import { StaleRunError, cachedJson } from '@/lib/olympiad/clientCache';
-import type { OlympiadEvent, OpponentShare, Run, Team, TeamOpponents } from '@/lib/olympiad/types';
+import type { OlympiadEvent, OpponentShare, Outcome, Run, Team, TeamOpponents } from '@/lib/olympiad/types';
 
 interface LikelyOpponentsProps {
   event: OlympiadEvent;
@@ -15,6 +16,8 @@ interface LikelyOpponentsProps {
   filtersKey: string;
   isScenario: boolean;
   onStale?: () => void;
+  /** The team's actual result in the next simulated round, when that round has already been played */
+  playedNextResult?: Outcome | null;
 }
 
 type Split = 'all' | 'w' | 'd' | 'l';
@@ -54,10 +57,10 @@ function ShareList({ shares, total, teamsById }: { shares: OpponentShare[]; tota
   );
 }
 
-export default function LikelyOpponents({ event, run, team, teamsById, filtersKey, isScenario, onStale }: LikelyOpponentsProps) {
+export default function LikelyOpponents({ event, run, team, teamsById, filtersKey, isScenario, onStale, playedNextResult = null }: LikelyOpponentsProps) {
   const requestKey = `opp|${event}|${run.runId}|${team.teamId}|${filtersKey}`;
   const [result, setResult] = useState<{ key: string; data?: TeamOpponents; error?: string } | null>(null);
-  const [split, setSplit] = useState<Split>('all');
+  const [split, setSplit] = useState<Split>(playedNextResult ?? 'all');
   const data = result?.key === requestKey ? result.data ?? null : null;
   const error = result?.key === requestKey ? result.error ?? null : null;
 
@@ -82,7 +85,15 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
   );
 
   if (error) return <div>{heading}<p className="text-xs text-rose-400">{error}</p></div>;
-  if (!data) return <div>{heading}<div className="h-24 rounded bg-[var(--bg-surface-3)]/50 animate-pulse" /></div>;
+  if (!data) {
+    return (
+      <div>
+        {heading}
+        <div className="h-3 w-24 rounded bg-[var(--bg-surface-3)] animate-pulse mb-2" aria-hidden />
+        <SkeletonBars rows={6} />
+      </div>
+    );
+  }
   if (!data.available || data.nextRound === null) {
     return <div>{heading}<p className="text-xs text-[var(--text-muted)] italic">Pairing odds arrive with the next simulation upload.</p></div>;
   }
@@ -94,6 +105,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     <div>
       {heading}
 
+      {playedNextResult === null && (
       <div className="mb-3">
         <div className="text-[11px] text-[var(--text-muted)] mb-1">
           Round {data.nextRound}{nextIsFixed ? ' · pairing set' : ''}
@@ -111,13 +123,16 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
           <ShareList shares={data.next} total={data.total} teamsById={teamsById} />
         )}
       </div>
+      )}
 
       {data.followingRound !== null && (
         <div>
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <div className="text-[11px] text-[var(--text-muted)]">
               Round {data.followingRound}
-              {split !== 'all' && <span> · if {SPLIT_LABEL[split].toLowerCase()} in R{data.nextRound}</span>}
+              {split !== 'all' && (
+                <span> · {playedNextResult === split ? 'after the actual' : 'if'} {SPLIT_LABEL[split].toLowerCase()} in R{data.nextRound}</span>
+              )}
             </div>
             <div role="tablist" aria-label={`Condition on round ${data.nextRound} result`} className="inline-flex rounded-md bg-[var(--bg-surface-1)] border border-[var(--border)] p-0.5">
               {(['all', 'w', 'd', 'l'] as Split[]).map(k => {

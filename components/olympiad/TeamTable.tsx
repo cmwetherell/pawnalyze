@@ -19,6 +19,8 @@ interface TeamTableProps {
   anyPlayed: boolean;
   selectedTeamId: number | null;
   onSelect: (teamId: number) => void;
+  /** Warm the spotlight data for a team the user is about to open */
+  onPrefetch?: (teamId: number) => void;
   /** Reports the sorted, filtered order (on sort/search changes only) so the parent can offer prev/next. */
   onOrderChange?: (teamIds: number[]) => void;
 }
@@ -41,7 +43,7 @@ const HIDE: Record<Hide, string> = { sm: 'hidden sm:table-cell', md: 'hidden md:
 
 export default function TeamTable({
   teams, standings, odds, baseline, isScenario, anyPlayed,
-  selectedTeamId, onSelect, onOrderChange,
+  selectedTeamId, onSelect, onPrefetch, onOrderChange,
 }: TeamTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>('pGold');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -158,6 +160,8 @@ export default function TeamTable({
                 aria-pressed={selected}
                 aria-label={`${team_label(t, selected)}`}
                 onClick={() => onSelect(t.teamId)}
+                onMouseEnter={() => onPrefetch?.(t.teamId)}
+                onFocus={() => onPrefetch?.(t.teamId)}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(t.teamId); } }}
                 className={`group cursor-pointer border-b border-[var(--border)]/60 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-chess-gold ${
                   selected ? 'bg-chess-gold/10 ring-1 ring-inset ring-chess-gold/40' : 'hover:bg-[var(--bg-surface-2)]/60'

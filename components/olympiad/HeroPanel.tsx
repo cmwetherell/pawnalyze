@@ -26,12 +26,13 @@ interface HeroPanelProps {
   anyLive: boolean;
   selectedTeamId: number | null;
   onSelect: (teamId: number) => void;
+  onPrefetch?: (teamId: number) => void;
   applyResults: { count: number; onApply: () => void; applied: boolean } | null;
 }
 
 export default function HeroPanel({
   run, rows, odds, baseline, teamsById, isScenario, history, matches, standings, roundOdds, nextRound, resultsRound,
-  anyLive, selectedTeamId, onSelect, applyResults,
+  anyLive, selectedTeamId, onSelect, onPrefetch, applyResults,
 }: HeroPanelProps) {
   const trendAvailable = useMemo(() => new Set(history.map(h => h.roundsCompleted)).size >= 2, [history]);
   const resultsDefault = anyLive || (resultsRound !== null && resultsRound > run.roundsCompleted);
@@ -83,7 +84,7 @@ export default function HeroPanel({
         {tab === 'race' && (
           <>
             <MoversStrip history={history} teamsById={teamsById} onSelect={onSelect} roundLabel={roundLabel} />
-            <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} selectedTeamId={selectedTeamId} onSelect={onSelect} />
+            <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} selectedTeamId={selectedTeamId} onSelect={onSelect} onPrefetch={onPrefetch} />
           </>
         )}
         {tab === 'trend' && (

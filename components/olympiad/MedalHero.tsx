@@ -11,10 +11,11 @@ interface MedalHeroProps {
   isScenario: boolean;
   selectedTeamId?: number | null;
   onSelect?: (teamId: number) => void;
+  onPrefetch?: (teamId: number) => void;
   topN?: number;
 }
 
-export default function MedalHero({ rows, baseline, teamsById, isScenario, selectedTeamId, onSelect, topN = 8 }: MedalHeroProps) {
+export default function MedalHero({ rows, baseline, teamsById, isScenario, selectedTeamId, onSelect, onPrefetch, topN = 8 }: MedalHeroProps) {
   const top = [...rows]
     .sort((a, b) => b.pGold - a.pGold || b.pMedal - a.pMedal || a.teamId - b.teamId)
     .slice(0, topN);
@@ -45,6 +46,8 @@ export default function MedalHero({ rows, baseline, teamsById, isScenario, selec
               <button
                 type="button"
                 onClick={() => onSelect?.(row.teamId)}
+                onMouseEnter={() => onPrefetch?.(row.teamId)}
+                onFocus={() => onPrefetch?.(row.teamId)}
                 aria-pressed={selected}
                 aria-label={`${team.name}: ${srPodium}. Open team details`}
                 className={`group w-full flex items-center gap-3 rounded-lg px-2 py-1.5 text-left transition-colors ${

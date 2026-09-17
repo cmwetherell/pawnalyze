@@ -14,6 +14,7 @@ import { MAX_PICKS, N_ROUNDS } from '@/lib/olympiad/config';
 import { cachedJson, StaleRunError } from '@/lib/olympiad/clientCache';
 import { describePick, encodePicks, normalizePick, parseFiltersLenient, pickKey } from '@/lib/olympiad/filters';
 import { baselineOdds, scenarioOdds } from '@/lib/olympiad/odds';
+import { prefetchTeam } from '@/lib/olympiad/prefetch';
 import { latestActiveRound } from '@/lib/olympiad/rounds';
 import { deriveStandings, outcomeFromScores, sortMatchesForPicker } from '@/lib/olympiad/standings';
 import { formatPct } from '@/components/ui/ProbBar';
@@ -79,6 +80,17 @@ export default function OlympiadDashboard({
   const roundOdds = isScenario && scenarioRoundOdds?.key === scenarioKey ? scenarioRoundOdds.odds : baseRoundOdds;
 
   const markStale = useCallback(() => setStaleRun(true), []);
+  const filtersKey = isScenario ? scenarioKey : '';
+  const prefetch = useCallback((teamId: number) => prefetchTeam(event, run.runId, teamId, filtersKey), [event, run.runId, filtersKey]);
+
+  // Warm the top eight (the hero) while the browser is idle so opening them is instant.
+  useEffect(() => {
+    const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 8).map(s => s.teamId);
+    const run_ = () => top.forEach(id => prefetchTeam(event, run.runId, id, ''));
+    const hasIdle = typeof window.requestIdleCallback === 'function';
+    const handle = hasIdle ? window.requestIdleCallback(run_) : window.setTimeout(run_, 1500);
+    return () => { if (hasIdle) window.cancelIdleCallback(handle); else clearTimeout(handle); };
+  }, [event, run.runId, summary]);
 
   const runSimulation = useCallback(async (key: string, extraTeam: number | null) => {
     if (key === '') {
@@ -303,6 +315,7 @@ export default function OlympiadDashboard({
         anyLive={anyLive}
         selectedTeamId={selectedTeamId}
         onSelect={id => selectTeam(id)}
+        onPrefetch={prefetch}
         applyResults={applyResults}
       />
 
@@ -353,6 +366,7 @@ export default function OlympiadDashboard({
               anyPlayed={anyPlayed}
               selectedTeamId={selectedTeamId}
               onSelect={id => selectTeam(id === selectedTeamId ? null : id)}
+              onPrefetch={prefetch}
               onOrderChange={setOrder}
             />
           </div>

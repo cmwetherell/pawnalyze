@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import CopyLink from '@/components/ui/CopyLink';
+import { SkeletonHistogram, SkeletonRounds } from '@/components/ui/Skeleton';
 import Flag from '@/components/ui/Flag';
 import { formatDelta, formatPct } from '@/components/ui/ProbBar';
 import LikelyOpponents from './LikelyOpponents';
@@ -144,6 +145,8 @@ export default function TeamSpotlight({
   const roundHistory = useMemo(() => teamRoundHistory(matches, team.teamId), [matches, team.teamId]);
   const played = roundHistory.filter(h => h.status === 'final');
   const nextMatch = roundHistory.find(h => h.status !== 'final') ?? null;
+  // The round the simulations treat as "next" may already be played; feed its real result to the opponent odds.
+  const playedNext = roundHistory.find(h => h.round === run.roundsCompleted + 1 && h.status === 'final') ?? null;
   const nextOpp = nextMatch?.opponentId != null ? teamsById.get(nextMatch.opponentId) ?? null : null;
   const trend = useMemo(
     () => history.filter(h => h.teamId === team.teamId).sort((a, b) => a.roundsCompleted - b.roundsCompleted).map(h => h.pGold),
@@ -312,7 +315,7 @@ export default function TeamSpotlight({
               <p className="text-xs text-[var(--text-muted)] italic">No matches played yet.</p>
             )}
           </div>
-          <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} isScenario={isScenario} onStale={onStale} />
+          <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} isScenario={isScenario} onStale={onStale} playedNextResult={playedNext?.outcome ?? null} />
           </div>
         </Section>
 
@@ -321,7 +324,7 @@ export default function TeamSpotlight({
           {error ? (
             <p className="text-xs text-rose-400">{error}</p>
           ) : !data ? (
-            <div className="h-28 rounded bg-[var(--bg-surface-3)]/50 animate-pulse" />
+            <SkeletonHistogram />
           ) : total === 0 ? (
             <p className="text-xs text-[var(--text-muted)] italic">No matching simulations.</p>
           ) : (
@@ -355,7 +358,7 @@ export default function TeamSpotlight({
           {error ? (
             <p className="text-xs text-rose-400">{error}</p>
           ) : !data ? (
-            <div className="h-28 rounded bg-[var(--bg-surface-3)]/50 animate-pulse" />
+            <SkeletonRounds rows={Math.max(1, 11 - run.roundsCompleted)} />
           ) : data.roundOdds.length === 0 ? (
             <p className="text-xs text-[var(--text-muted)] italic">Tournament complete.</p>
           ) : (
