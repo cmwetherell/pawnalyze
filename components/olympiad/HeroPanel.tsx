@@ -42,7 +42,7 @@ export default function HeroPanel({
   const tabs: { key: Tab; label: string; disabled?: boolean; hint?: string }[] = [
     { key: 'race', label: 'Gold race' },
     { key: 'results', label: resultsRound !== null ? `Round ${resultsRound}` : `Round ${nextRound} preview` },
-    { key: 'trend', label: 'Trend', disabled: !trendAvailable, hint: trendAvailable ? undefined : 'Appears once two rounds have been simulated' },
+    { key: 'trend', label: 'Trend' },
   ];
 
   const roundLabel = useMemo(() => {
@@ -87,9 +87,18 @@ export default function HeroPanel({
             <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} selectedTeamId={selectedTeamId} onSelect={onSelect} onPrefetch={onPrefetch} />
           </>
         )}
-        {tab === 'trend' && (
+        {tab === 'trend' && (trendAvailable ? (
           <MedalHistoryChart history={history} teamsById={teamsById} extraTeamId={selectedTeamId} embedded />
-        )}
+        ) : (
+          <div className="rounded-lg border border-dashed border-[var(--border)] px-4 py-6 text-sm text-[var(--text-secondary)] max-w-2xl">
+            <p className="font-medium text-[var(--text-primary)]">No trend to show yet.</p>
+            <p className="mt-1 text-[var(--text-muted)]">
+              Odds over time needs at least two simulation runs that use the same team numbering. Chess-results renumbers
+              every seed when a team withdraws, which resets this history; the chart picks up again from the next run
+              after round {run.roundsCompleted}.
+            </p>
+          </div>
+        ))}
         {tab === 'results' && (
           <RoundResults
             run={run}
