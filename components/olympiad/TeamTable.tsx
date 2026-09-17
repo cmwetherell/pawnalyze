@@ -28,7 +28,7 @@ const PAGE = 25;
 // Fixed-layout table at 100% width, never scrolls horizontally: columns appear by breakpoint.
 type Hide = 'sm' | 'md' | 'xl';
 const HEADERS: { key: SortKey; label: string; title?: string; className?: string; hide?: Hide; needsPlay?: boolean }[] = [
-  { key: 'pos', label: 'Pos', title: 'Current standing (unofficial: match points, then game points)', className: 'w-14 text-right', hide: 'md', needsPlay: true },
+  { key: 'pos', label: 'Pos', title: 'Unofficial standing: match points, then game points, then seed. Early in the event many teams are tied on match points, so this order is decided by margin of victory.', className: 'w-14 text-right', hide: 'md', needsPlay: true },
   { key: 'name', label: 'Team', className: 'text-left' },
   { key: 'rating', label: 'Rtg', title: 'Average rating', className: 'w-12 text-right', hide: 'xl' },
   { key: 'mp', label: 'MP', title: 'Match points', className: 'w-11 text-right', needsPlay: true },
@@ -43,8 +43,8 @@ export default function TeamTable({
   teams, standings, odds, baseline, isScenario, anyPlayed,
   selectedTeamId, onSelect, onOrderChange,
 }: TeamTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>(() => (anyPlayed ? 'pos' : 'pGold'));
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(() => (anyPlayed ? 'asc' : 'desc'));
+  const [sortKey, setSortKey] = useState<SortKey>('pGold');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [query, setQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -105,7 +105,7 @@ export default function TeamTable({
         <div>
           <h2 className="text-xl font-heading text-[var(--text-primary)]">Team Odds</h2>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {isScenario ? 'Scenario odds with change vs. baseline · select a team to open its spotlight' : anyPlayed ? 'Standings order · select a team for roster, results, finish odds and likely opponents' : 'Select a team for roster, results, finish odds and likely opponents'}
+            {isScenario ? 'Scenario odds with change vs. baseline · select a team to open its spotlight' : anyPlayed ? 'Sorted by gold odds · click Pos or MP for the standings · select a team for its full profile' : 'Select a team for roster, results, finish odds and likely opponents'}
           </p>
         </div>
         <input
