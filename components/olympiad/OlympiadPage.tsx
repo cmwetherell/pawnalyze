@@ -28,7 +28,11 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
     getOlympiadMatches(event),
     getOlympiadStatus(event),
     getOlympiadBoardRace(event),
-  ]);
+  ]).catch((err: unknown) => {
+    // Surface driver errors that are thrown as plain objects (they otherwise log as [object Object]).
+    console.error(`[olympiad] data load failed for ${event}:`, err instanceof Error ? err.stack : JSON.stringify(err));
+    throw err;
+  });
   // Attach each player's board-race stats so the spotlight roster can show TPR and link to profiles.
   const raceByFide = new Map(race.boards.flat().map(r => [r.fideId, r]));
   const players = roster.map(p => {
