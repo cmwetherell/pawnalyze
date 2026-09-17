@@ -192,37 +192,125 @@ async function summaryFromSims(event: OlympiadEvent, runId: number): Promise<Tea
 }
 
 /**
+ * Chess-results renumbers every seed when a team withdraws, so team_ids differ between runs with
+ * different n_teams. Completed rounds are stored with their actual scores in every sim row, and the
+ * matches table always uses the current numbering, so aligning an old run's scores against today's
+ * results recovers the mapping old team_id -> current team_id. Returns null when it can't be done safely.
+ */
+async function numberingMap(
+  runId: number,
+  roundsCompleted: number,
+  nTeamsOld: number,
+  nTeamsCur: number,
+  curScores: Map<number, number[]>,   // current team_id -> half-points per completed round (index 0 = round 1)
+): Promise<Map<number, number> | null> {
+  if (roundsCompleted === 0 || nTeamsOld <= nTeamsCur) return null;
+  const { rows } = await sql<{ scores: number[][] | null }>`
+    SELECT round_scores[1:${sql.lit(roundsCompleted)}][1:${sql.lit(nTeamsOld)}] AS scores
+    FROM olympiad_2026_sims WHERE run_id = ${runId} ORDER BY sim_id LIMIT 1
+  `.execute(db());
+  const old = rows[0]?.scores;
+  if (!old) return null;
+  const oldVec = (t: number) => old.map(r => r[t - 1]);
+  const same = (a: number[], b: number[] | undefined) => !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+
+  const map = new Map<number, number>();
+  let cur = 1;
+  let dropped = 0;
+  for (let t = 1; t <= nTeamsOld; t++) {
+    const v = oldVec(t);
+    if (cur <= nTeamsCur && same(v, curScores.get(cur))) {
+      map.set(t, cur);
+      cur += 1;
+    } else {
+      dropped += 1;
+      if (dropped > nTeamsOld - nTeamsCur) return null; // alignment failed
+    }
+  }
+  return cur === nTeamsCur + 1 && dropped === nTeamsOld - nTeamsCur ? map : null;
+}
+
+/**
  * Latest pipeline run per rounds_completed, joined to its summary — for the odds-over-time chart.
- * Only runs with the same n_teams as the current run are included: chess-results renumbers seeds
- * when a team withdraws, so team_ids from runs with a different field size refer to different teams.
+ * Runs made under an older team numbering are translated to the current numbering (see numberingMap);
+ * runs that cannot be translated are left out rather than mis-attributed.
  */
 export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<HistoryPoint[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(tags.sims(event));
+  const current = await getOlympiadRun(event);
+  if (!current) return [];
+
   const { rows } = await sql<{
-    run_id: number; rounds_completed: number; team_id: number; p_gold: number; p_medal: number; p_top10: number;
+    run_id: number; rounds_completed: number; n_teams: number; team_id: number; p_gold: number; p_medal: number; p_top10: number;
   }>`
     WITH latest AS (
-      SELECT DISTINCT ON (rounds_completed) run_id, rounds_completed
+      SELECT DISTINCT ON (rounds_completed) run_id, rounds_completed, n_teams
       FROM olympiad_2026_runs
-      WHERE event = ${event} AND source = 'pipeline'
-        AND n_teams = (SELECT n_teams FROM olympiad_2026_runs WHERE event = ${event} AND is_current)
+      WHERE event = ${event} AND source = 'pipeline' AND rounds_completed <= ${current.roundsCompleted}
       ORDER BY rounds_completed, created_at DESC
     )
-    SELECT l.run_id, l.rounds_completed, s.team_id, s.p_gold, s.p_medal, s.p_top10
+    SELECT l.run_id, l.rounds_completed, l.n_teams, s.team_id, s.p_gold, s.p_medal, s.p_top10
     FROM latest l
     JOIN olympiad_2026_team_summary s ON s.run_id = l.run_id
     ORDER BY l.rounds_completed, s.team_id
   `.execute(db());
-  return rows.map(r => ({
-    runId: r.run_id,
-    roundsCompleted: r.rounds_completed,
-    teamId: r.team_id,
-    pGold: Number(r.p_gold),
-    pMedal: Number(r.p_medal),
-    pTop10: Number(r.p_top10),
-  }));
+  if (rows.length === 0) return [];
+
+  // Current numbering's actual scores per completed round, from the matches table.
+  const matches = await getOlympiadMatches(event);
+  const curScores = new Map<number, number[]>();
+  for (let t = 1; t <= current.nTeams; t++) curScores.set(t, Array.from({ length: current.roundsCompleted }, () => 0));
+  for (const m of matches) {
+    if (m.status !== 'final' || m.round > current.roundsCompleted) continue;
+    const a = curScores.get(m.team1Id);
+    if (a) a[m.round - 1] = m.team1Score ?? 0;
+    if (m.team2Id !== null) {
+      const b = curScores.get(m.team2Id);
+      if (b) b[m.round - 1] = m.team2Score ?? 0;
+    }
+  }
+  const scoresUpTo = (rc: number) => {
+    const out = new Map<number, number[]>();
+    for (const [t, v] of curScores) out.set(t, v.slice(0, rc));
+    return out;
+  };
+
+  // One mapping per distinct old numbering (n_teams), derived from the run with the most completed rounds.
+  const runsByN = new Map<number, { runId: number; roundsCompleted: number }[]>();
+  for (const r of rows) {
+    if (r.n_teams === current.nTeams) continue;
+    const list = runsByN.get(r.n_teams) ?? [];
+    if (!list.some(x => x.runId === r.run_id)) list.push({ runId: r.run_id, roundsCompleted: r.rounds_completed });
+    runsByN.set(r.n_teams, list);
+  }
+  const maps = new Map<number, Map<number, number> | null>();
+  for (const [n, list] of runsByN) {
+    const best = [...list].sort((a, b) => b.roundsCompleted - a.roundsCompleted)[0];
+    maps.set(n, await numberingMap(best.runId, best.roundsCompleted, n, current.nTeams, scoresUpTo(best.roundsCompleted)));
+  }
+
+  const out: HistoryPoint[] = [];
+  for (const r of rows) {
+    let teamId = r.team_id;
+    if (r.n_teams !== current.nTeams) {
+      const m = maps.get(r.n_teams);
+      if (!m) continue;
+      const mapped = m.get(r.team_id);
+      if (mapped === undefined) continue;
+      teamId = mapped;
+    }
+    out.push({
+      runId: r.run_id,
+      roundsCompleted: r.rounds_completed,
+      teamId,
+      pGold: Number(r.p_gold),
+      pMedal: Number(r.p_medal),
+      pTop10: Number(r.p_top10),
+    });
+  }
+  return out;
 }
 
 export async function getOlympiadStatus(event: OlympiadEvent): Promise<OlympiadStatus> {
