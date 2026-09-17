@@ -88,7 +88,7 @@ export default function HeroPanel({
           </>
         )}
         {tab === 'trend' && (trendAvailable ? (
-          <MedalHistoryChart history={history} teamsById={teamsById} extraTeamId={selectedTeamId} embedded />
+          <MedalHistoryChart history={history} teamsById={teamsById} extraTeamId={selectedTeamId} embedded onSelect={onSelect} />
         ) : (
           <div className="rounded-lg border border-dashed border-[var(--border)] px-4 py-6 text-sm text-[var(--text-secondary)] max-w-2xl">
             <p className="font-medium text-[var(--text-primary)]">No trend to show yet.</p>
