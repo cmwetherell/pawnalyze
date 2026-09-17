@@ -7,6 +7,7 @@ import MedalHistoryChart from './MedalHistoryChart';
 import OlympiadScenarioBuilder from './OlympiadScenarioBuilder';
 import ScenarioSummary from './ScenarioSummary';
 import StatusBar from './StatusBar';
+import TeamSpotlight from './TeamSpotlight';
 import TeamTable from './TeamTable';
 import { encodePicks, normalizePick, parseFilters, pickKey } from '@/lib/olympiad/filters';
 import { baselineOdds, scenarioOdds } from '@/lib/olympiad/odds';
@@ -50,7 +51,9 @@ export default function OlympiadDashboard({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [staleRun, setStaleRun] = useState(false);
-  const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [order, setOrder] = useState<number[]>([]);
+  const spotlightRef = useRef<HTMLDivElement>(null);
   const cache = useRef<Map<string, ScenarioResult>>(new Map());
 
   const picksKey = useMemo(() => encodePicks(Array.from(picks.values())), [picks]);
@@ -99,9 +102,12 @@ export default function OlympiadDashboard({
     }
   }, [event, run.runId]);
 
-  // Restore a shared scenario from ?s= (client-only; never touch searchParams on the server).
+  // Restore a shared scenario (?s=) and spotlight (?team=) client-side; never touch searchParams on the server.
   useEffect(() => {
-    const s = new URLSearchParams(window.location.search).get('s');
+    const qs = new URLSearchParams(window.location.search);
+    const teamParam = Number(qs.get('team'));
+    if (participantIds.has(teamParam)) setSelectedTeamId(teamParam);
+    const s = qs.get('s');
     if (!s) return;
     const parsed = parseFilters(s, { roundsCompleted: run.roundsCompleted, nTeams: run.nTeams, participantIds });
     if (!parsed.ok || parsed.picks.length === 0) return;
@@ -119,7 +125,7 @@ export default function OlympiadDashboard({
     const url = new URL(window.location.href);
     if (picksKey) url.searchParams.set('s', picksKey); else url.searchParams.delete('s');
     window.history.replaceState(null, '', url.toString());
-    void runSimulation(picksKey, expandedTeamId);
+    void runSimulation(picksKey, selectedTeamId);
   };
 
   const handleReset = () => {
@@ -131,6 +137,21 @@ export default function OlympiadDashboard({
     url.searchParams.delete('s');
     window.history.replaceState(null, '', url.toString());
   };
+
+  const selectTeam = useCallback((teamId: number | null, scroll = true) => {
+    setSelectedTeamId(teamId);
+    const url = new URL(window.location.href);
+    if (teamId === null) url.searchParams.delete('team'); else url.searchParams.set('team', String(teamId));
+    window.history.replaceState(null, '', url.toString());
+    if (teamId !== null && scroll) {
+      requestAnimationFrame(() => spotlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+    }
+  }, []);
+
+  const selectedTeam = selectedTeamId !== null ? teamsById.get(selectedTeamId) ?? null : null;
+  const selectedIndex = selectedTeamId !== null ? order.indexOf(selectedTeamId) : -1;
+  const prevTeam = selectedIndex > 0 ? order[selectedIndex - 1] : null;
+  const nextTeam = selectedIndex >= 0 && selectedIndex < order.length - 1 ? order[selectedIndex + 1] : null;
 
   const handleSetPick = (round: number, teamId: number, outcome: Outcome | null) => {
     setPicks(prev => {
@@ -162,6 +183,31 @@ export default function OlympiadDashboard({
 
       <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} />
 
+      {selectedTeam && (
+        <div ref={spotlightRef} className="scroll-mt-20">
+          <TeamSpotlight
+            key={selectedTeam.teamId}
+            event={event}
+            run={run}
+            team={selectedTeam}
+            players={players.filter(p => p.teamId === selectedTeam.teamId)}
+            matches={matches}
+            teamsById={teamsById}
+            standing={standings.get(selectedTeam.teamId)}
+            participants={participants.length}
+            odds={odds.get(selectedTeam.teamId) ?? null}
+            baseline={baseline.get(selectedTeam.teamId) ?? null}
+            isScenario={isScenario}
+            filtersKey={isScenario ? scenarioKey : ''}
+            history={history}
+            anyPlayed={anyPlayed}
+            onClose={() => selectTeam(null)}
+            onPrev={prevTeam !== null ? () => selectTeam(prevTeam, false) : undefined}
+            onNext={nextTeam !== null ? () => selectTeam(nextTeam, false) : undefined}
+          />
+        </div>
+      )}
+
       <div className="lg:grid lg:grid-cols-5 lg:gap-6 space-y-6 lg:space-y-0">
         <div className="lg:col-span-3 space-y-4">
           {isScenario && scenario && (
@@ -172,20 +218,15 @@ export default function OlympiadDashboard({
           )}
           <div className={`transition-all duration-300 ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
             <TeamTable
-              event={event}
-              run={run}
               teams={participants}
-              teamsById={teamsById}
-              players={players}
-              matches={matches}
               standings={standings}
               odds={odds}
               baseline={baseline}
               isScenario={isScenario}
-              filtersKey={isScenario ? scenarioKey : ''}
               anyPlayed={anyPlayed}
-              expandedTeamId={expandedTeamId}
-              onToggle={id => setExpandedTeamId(cur => (cur === id ? null : id))}
+              selectedTeamId={selectedTeamId}
+              onSelect={id => selectTeam(id === selectedTeamId ? null : id)}
+              onOrderChange={setOrder}
             />
           </div>
           {nonParticipants.length > 0 && (

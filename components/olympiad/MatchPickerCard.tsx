@@ -61,7 +61,7 @@ function TeamSideButton({ team, standing, showMp, align, isWhite, state, onClick
         <span className="block text-sm font-medium text-[var(--text-primary)] truncate leading-tight">
           {shortTeamName(team.name)}
         </span>
-        <span className={`text-[10px] text-[var(--text-muted)] tabular-nums flex items-center gap-1 ${right ? 'justify-end' : ''}`}>
+        <span className={`text-[10px] text-[var(--text-muted)] tabular-nums flex items-center gap-1 overflow-hidden whitespace-nowrap ${right ? 'justify-end' : ''}`}>
           {isWhite && (
             <span className="inline-block w-2 h-2 rounded-[2px] bg-gray-200 border border-gray-400" title="White on board 1" />
           )}
