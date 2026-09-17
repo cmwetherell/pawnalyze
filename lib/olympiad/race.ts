@@ -1,6 +1,6 @@
 import { N_PRIZE_BOARDS, N_ROUNDS } from './config';
 import { eligibility, performanceRating, type RatedGame } from './tpr';
-import type { BoardRace, FormEntry, Game, OlympiadEvent, Player, PlayerRaceRow, Team } from './types';
+import type { BoardRace, BoardRaceRowLite, BoardRaceSummary, FormEntry, Game, OlympiadEvent, Player, PlayerRaceRow, Team } from './types';
 
 interface Roster {
   player: Player;
@@ -103,5 +103,23 @@ export function buildBoardRace(event: OlympiadEvent, games: Game[], players: Pla
 
   return {
     event, lastRound, lastFinalRound: finalRound, roundsLeft: Math.max(0, N_ROUNDS - finalRound), boards, ranked,
+  };
+}
+
+export function liteRow(row: PlayerRaceRow): BoardRaceRowLite {
+  const { tprByRound: _t, rankByRound: _r, ...rest } = row;
+  return rest;
+}
+
+/** The compact, client-safe view of a race: podiums, counts and a search index. */
+export function summarizeRace(race: BoardRace): BoardRaceSummary {
+  return {
+    event: race.event,
+    lastRound: race.lastRound,
+    lastFinalRound: race.lastFinalRound,
+    roundsLeft: race.roundsLeft,
+    ranked: race.ranked,
+    podium: race.boards.map(rows => rows.slice(0, 3).map(liteRow)),
+    index: race.boards.flat().map(r => ({ fideId: r.fideId, name: r.name, title: r.title, fedCode: r.fedCode, teamId: r.teamId, board: r.board, tpr: r.tpr })),
   };
 }

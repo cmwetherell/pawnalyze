@@ -2,11 +2,12 @@ import TournamentHeader from '@/components/simulation/TournamentHeader';
 import BoardRaceDashboard from './BoardRaceDashboard';
 import BoardRaceExplainer from './BoardRaceExplainer';
 import { BOARD_LABELS, OLYMPIAD_EVENTS, boardsHref, eventHref } from '@/lib/olympiad/config';
-import { getOlympiadBoardRace, getOlympiadRun, getOlympiadStatus, getOlympiadTeams } from '@/lib/olympiad/queries';
+import { getOlympiadBoardRace, getOlympiadBoardRows, getOlympiadRun, getOlympiadStatus, getOlympiadTeams } from '@/lib/olympiad/queries';
+import { summarizeRace } from '@/lib/olympiad/race';
 import { teamsInRun } from '@/lib/olympiad/standings';
 import { statusPillFor } from '@/lib/olympiad/status';
 import { MIN_GAMES_FOR_PRIZE, displayName } from '@/lib/olympiad/tpr';
-import type { BoardRaceLite, OlympiadEvent } from '@/lib/olympiad/types';
+import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 export function olympiadSubnav(event: OlympiadEvent, active: 'odds' | 'boards') {
   return [
@@ -17,15 +18,12 @@ export function olympiadSubnav(event: OlympiadEvent, active: 'odds' | 'boards') 
 
 export default async function BoardRacePage({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
-  const [run, allTeams, status, race] = await Promise.all([
-    getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event), getOlympiadBoardRace(event),
+  const [run, allTeams, status, race, board1] = await Promise.all([
+    getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event), getOlympiadBoardRace(event), getOlympiadBoardRows(event, 1),
   ]);
   const teams = teamsInRun(allTeams, run);
-  // Keep the client payload small: the leaderboard never needs the per-round arrays.
-  const lite: BoardRaceLite = {
-    ...race,
-    boards: race.boards.map(rows => rows.map(({ tprByRound: _t, rankByRound: _r, ...rest }) => rest)),
-  };
+  // The page ships podiums, a search index and board 1; other boards load on demand.
+  const summary = summarizeRace(race);
   const players = race.boards.reduce((n, b) => n + b.length, 0);
   const leaders = race.boards.map((rows, i) => rows[0] ? { code: rows[0].fedCode, title: `${BOARD_LABELS[i]}: ${displayName(rows[0].name)} (${rows[0].tpr})` } : null).filter((x): x is { code: string; title: string } => x !== null);
 
@@ -53,7 +51,7 @@ export default async function BoardRacePage({ event }: { event: OlympiadEvent })
         subnav={olympiadSubnav(event, 'boards')}
       />
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
-        <BoardRaceDashboard event={event} race={lite} teams={teams} />
+        <BoardRaceDashboard event={event} summary={summary} initialRows={board1} teams={teams} />
         <BoardRaceExplainer />
       </div>
     </main>

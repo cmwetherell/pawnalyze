@@ -10,11 +10,11 @@ import Flag from '@/components/ui/Flag';
 import { playerHref } from '@/lib/olympiad/config';
 import { eligibilityLabel } from './EligibilityPips';
 import { displayName, formatScore } from '@/lib/olympiad/tpr';
-import type { BoardRaceLite as BoardRace, OlympiadEvent, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
+import type { BoardRaceSummary, OlympiadEvent, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
 
 interface BoardLeaderboardProps {
   event: OlympiadEvent;
-  race: BoardRace;
+  race: BoardRaceSummary;
   rows: PlayerRaceRow[];
   /** Total rows on the board before filtering, for the footer */
   total: number;

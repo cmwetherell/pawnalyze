@@ -3,10 +3,10 @@
 import Flag from '@/components/ui/Flag';
 import { BOARD_LABELS } from '@/lib/olympiad/config';
 import { displayName, formatScore } from '@/lib/olympiad/tpr';
-import type { BoardRaceLite as BoardRace, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
+import type { BoardRaceSummary, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
 
 interface PodiumStripProps {
-  race: BoardRace;
+  race: BoardRaceSummary;
   selected: number;
   onSelect: (board: number) => void;
 }
@@ -29,7 +29,7 @@ export default function PodiumStrip({ race, selected, onSelect }: PodiumStripPro
     <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-5 gap-3 overflow-x-auto sm:overflow-visible snap-x snap-mandatory scrollbar-none pb-1">
       {BOARD_LABELS.map((label, i) => {
         const board = i + 1;
-        const rows = race.boards[i].slice(0, 3);
+        const rows = race.podium[i];
         const active = selected === board;
         const leader = rows[0];
         const newLeader = leader && leader.prevRank !== null && leader.prevRank !== 1;

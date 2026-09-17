@@ -4,11 +4,12 @@ import { sql } from 'kysely';
 
 import { N_ROUNDS } from './config';
 import { OUTCOME_OP } from './filters';
-import { buildBoardRace } from './race';
+import { buildBoardRace, liteRow } from './race';
 import { teamsInRun } from './standings';
 import { parseGamePgn } from './tpr';
 import type {
   BoardRace,
+  BoardRows,
   Game,
   HistoryPoint,
   Match,
@@ -667,4 +668,14 @@ export async function getOlympiadPlayerGames(event: OlympiadEvent, fideId: numbe
       moves: parseGamePgn(r.pgn).moves,
     };
   });
+}
+
+/** One board's leaderboard rows, ready for the client (no per-round arrays). */
+export async function getOlympiadBoardRows(event: OlympiadEvent, board: number): Promise<BoardRows> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.games(event));
+  cacheTag(tags.ref(event));
+  const race = await getOlympiadBoardRace(event);
+  return { board, lastRound: race.lastRound, rows: (race.boards[board - 1] ?? []).map(liteRow) };
 }

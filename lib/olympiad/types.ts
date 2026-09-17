@@ -230,11 +230,37 @@ export interface PlayerRaceRow {
   rankByRound: (number | null)[];
 }
 
-/** What the board-race dashboard ships to the client: rows without the per-round arrays. */
+/** Leaderboard row shipped to the client: no per-round arrays. */
 export type BoardRaceRowLite = Omit<PlayerRaceRow, 'tprByRound' | 'rankByRound'>;
 
-export interface BoardRaceLite extends Omit<BoardRace, 'boards'> {
-  boards: BoardRaceRowLite[][];
+/** Search index entry: enough to find a player and show where they stand. */
+export interface PlayerIndexEntry {
+  fideId: number;
+  name: string;
+  title: string | null;
+  fedCode: string;
+  teamId: number;
+  board: number;
+  tpr: number | null;
+}
+
+/** Everything the board-race page needs up front; full boards are fetched one at a time. */
+export interface BoardRaceSummary {
+  event: OlympiadEvent;
+  lastRound: number;
+  lastFinalRound: number;
+  roundsLeft: number;
+  ranked: number[];
+  /** Top three per board (index 0 = board 1) */
+  podium: BoardRaceRowLite[][];
+  /** Every rostered player, for search */
+  index: PlayerIndexEntry[];
+}
+
+export interface BoardRows {
+  board: number;
+  lastRound: number;
+  rows: BoardRaceRowLite[];
 }
 
 export interface BoardRace {
