@@ -85,7 +85,6 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     return <div>{heading}<p className="text-xs text-[var(--text-muted)] italic">Pairing odds arrive with the next simulation upload.</p></div>;
   }
 
-  const nextOpp = data.next[0] ? teamsById.get(data.next[0].teamId) : null;
   const nextIsFixed = data.next.length === 1 && data.next[0].n === data.total;
   const splitTotal = split === 'all' ? data.total : data.outcomeCounts[split];
 
@@ -93,19 +92,13 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     <div>
       {heading}
 
-      {/* Next round */}
-      <div className="mb-3">
-        <div className="text-[11px] text-[var(--text-muted)] mb-1">Round {data.nextRound}</div>
-        {nextIsFixed && nextOpp ? (
-          <div className="flex items-center gap-2 text-xs">
-            <Flag code={nextOpp.fedCode} size="sm" title={nextOpp.name} />
-            <span className="text-[var(--text-primary)] font-medium truncate">{nextOpp.name}</span>
-            <span className="text-[10px] text-[var(--text-muted)]">#{nextOpp.teamId} · {nextOpp.avgRating}</span>
-          </div>
-        ) : (
+      {/* Next round: only when it is genuinely uncertain (a fixed pairing already appears under Results) */}
+      {!nextIsFixed && (
+        <div className="mb-3">
+          <div className="text-[11px] text-[var(--text-muted)] mb-1">Round {data.nextRound}</div>
           <ShareList shares={data.next} total={data.total} teamsById={teamsById} />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Following round, split by next-round result */}
       {data.followingRound !== null && (
