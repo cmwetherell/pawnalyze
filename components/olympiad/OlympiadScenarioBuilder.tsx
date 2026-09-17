@@ -176,7 +176,7 @@ export default function OlympiadScenarioBuilder({
               aria-selected={view === v}
               type="button"
               onClick={() => setView(v)}
-              className={`h-8 px-2.5 rounded-md font-medium transition-colors ${
+              className={`h-10 px-2.5 rounded-md font-medium transition-colors ${
                 view === v ? 'bg-[var(--bg-surface-1)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               }`}
             >
@@ -195,7 +195,7 @@ export default function OlympiadScenarioBuilder({
               onClick={() => scrollBy(-1)}
               disabled={!canScrollLeft}
               aria-label="Scroll rounds left"
-              className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+              className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
                 canScrollLeft ? 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)]' : 'text-[var(--border)] cursor-default'
               }`}
             >
@@ -214,7 +214,7 @@ export default function OlympiadScenarioBuilder({
                     type="button"
                     onClick={() => { if (!didDrag.current) { setActiveRound(r); setLimit(INITIAL_MATCHES); setQuery(''); } }}
                     title={stateTitle(r, s)}
-                    className={`relative shrink-0 h-9 px-2.5 rounded-md text-xs font-medium transition-colors select-none inline-flex items-center gap-1 ${
+                    className={`relative shrink-0 h-10 px-2.5 rounded-md text-xs font-medium transition-colors select-none inline-flex items-center gap-1 ${
                       isActive
                         ? 'bg-chess-gold text-chess-dark'
                         : hasSel
@@ -224,7 +224,7 @@ export default function OlympiadScenarioBuilder({
                             : 'bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-secondary)]'
                     }`}
                   >
-                    <span aria-hidden className={`text-[10px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : s === 'projected' || s === 'played' ? 'text-gold-ink' : ''}`}>{stateGlyph(s)}</span>
+                    <span aria-hidden className={`text-[11px] ${isActive ? '' : s === 'paired' ? 'text-red-400' : s === 'projected' || s === 'played' ? 'text-gold-ink' : ''}`}>{stateGlyph(s)}</span>
                     R{r}
                     {hasSel && !isActive && <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-chess-gold" />}
                   </button>
@@ -236,14 +236,14 @@ export default function OlympiadScenarioBuilder({
               onClick={() => scrollBy(1)}
               disabled={!canScrollRight}
               aria-label="Scroll rounds right"
-              className={`shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
+              className={`shrink-0 w-10 h-10 flex items-center justify-center rounded-full transition-colors ${
                 canScrollRight ? 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)] hover:text-[var(--text-primary)]' : 'text-[var(--border)] cursor-default'
               }`}
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
             </button>
           </div>
-          <p className="px-4 pb-2 text-[10px] text-[var(--text-muted)]">
+          <p className="px-4 pb-2 text-[11px] text-[var(--text-muted)]">
             <span className="text-gold-ink">✓</span> simulated · <span className="text-red-400">●</span> pairings out · <span className="text-gold-ink">◐</span> projected · ○ not yet paired
           </p>
 
@@ -273,7 +273,7 @@ export default function OlympiadScenarioBuilder({
                   onChange={e => { setQuery(e.target.value); setLimit(INITIAL_MATCHES); }}
                   placeholder="Find a team…"
                   aria-label="Filter matches by team"
-                  className="w-full h-9 rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                  className="w-full h-10 rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                 />
                 {roundMatches.slice(0, limit).map(m => {
                   const t1 = teamsById.get(m.team1Id);
@@ -309,7 +309,7 @@ export default function OlympiadScenarioBuilder({
                     onChange={e => { setQuery(e.target.value); setLimit(INITIAL_MATCHES); }}
                     placeholder="Find a team…"
                     aria-label="Filter matches by team"
-                    className="flex-1 min-w-0 h-9 rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
+                    className="flex-1 min-w-0 h-10 rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
                   />
                   <div role="tablist" aria-label="Sort matches" className="inline-flex rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] p-0.5 text-[11px] shrink-0">
                     {([['strength', anyPlayed ? 'Top boards' : 'Top seeds'], ['closest', 'Closest']] as [SortMode, string][]).map(([k, label]) => (
@@ -320,7 +320,7 @@ export default function OlympiadScenarioBuilder({
                         type="button"
                         disabled={k === 'closest' && !(roundOdds && roundOdds.round === activeRound)}
                         onClick={() => { setSortMode(k); setLimit(INITIAL_MATCHES); }}
-                        className={`h-7 px-2 rounded-md font-medium transition-colors ${
+                        className={`h-9 px-2 rounded-md font-medium transition-colors ${
                           sortMode === k ? 'bg-[var(--bg-surface-3)] text-[var(--text-primary)]' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                         } disabled:opacity-40`}
                       >
@@ -376,7 +376,7 @@ export default function OlympiadScenarioBuilder({
                     if (!t) return null;
                     return (
                       <li key={p.teamId} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--bg-surface-2)] ring-1 ring-chess-gold/30">
-                        <Flag code={t.fedCode} size="sm" />
+                        <Flag code={t.fedCode} size="sm" aria-hidden />
                         <span className="text-sm text-[var(--text-primary)] truncate flex-1">{t.name}</span>
                         <MatchOutcomeToggle
                           selected={p.outcome}
@@ -401,7 +401,7 @@ export default function OlympiadScenarioBuilder({
           {pathTeam ? (
             <div className="space-y-1">
               <div className="flex items-center gap-2 py-1">
-                <Flag code={pathTeam.fedCode} size="md" />
+                <Flag code={pathTeam.fedCode} size="md" aria-hidden />
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-[var(--text-primary)] truncate">{pathTeam.name}</div>
                   <div className="text-[11px] text-[var(--text-muted)]">Seed #{pathTeam.teamId} · {pathTeam.avgRating} avg</div>
@@ -419,9 +419,9 @@ export default function OlympiadScenarioBuilder({
                     <div className="flex-1 min-w-0 flex items-center gap-1.5 text-xs">
                       {opp ? (
                         <>
-                          <Flag code={opp.fedCode} size="xs" />
+                          <Flag code={opp.fedCode} size="xs" aria-hidden />
                           <span className="truncate text-[var(--text-secondary)]">{opp.name}</span>
-                          {entry?.projected && <span className="text-[10px] uppercase tracking-wider text-gold-ink shrink-0">proj.</span>}
+                          {entry?.projected && <span className="text-[11px] uppercase tracking-wider text-gold-ink shrink-0">proj.</span>}
                         </>
                       ) : entry && entry.opponentId === null ? (
                         <span className="text-[var(--text-muted)] italic">bye</span>

@@ -48,7 +48,7 @@ function TeamSide({ team, standing, showMp, align, isWhite, state, onClick, prob
   const content = (
     <>
       <span className="relative shrink-0">
-        <Flag code={team.fedCode} size="md" title={team.name} />
+        <Flag code={team.fedCode} size="md" title={team.name} aria-hidden />
         {state === 'winner' && (
           <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow" aria-hidden>
             <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -108,7 +108,7 @@ export default function MatchPickerCard({
   if (!team2) {
     return (
       <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-[var(--bg-surface-2)]/40 text-xs text-[var(--text-muted)]">
-        <Flag code={team1.fedCode} size="sm" />
+        <Flag code={team1.fedCode} size="sm" aria-hidden />
         <span className="text-[var(--text-primary)] font-medium">{shortTeamName(team1.name)}</span>
         <span>receives a bye</span>
       </div>
@@ -147,7 +147,7 @@ export default function MatchPickerCard({
             }`}
           >
             =
-            {probs && <span className="text-[10px] font-medium mt-0.5">{Math.round(probs.d * 100)}%</span>}
+            {probs && <span className="text-[11px] font-medium mt-0.5">{Math.round(probs.d * 100)}%</span>}
           </button>
         )}
         <TeamSide
@@ -163,7 +163,7 @@ export default function MatchPickerCard({
         </div>
       )}
       {match.projected && !isFinal && !isLive && (
-        <div className="flex items-center justify-center gap-1 px-3 py-0.5 text-[10px] uppercase tracking-wider text-gold-ink/80 border-t border-[var(--border)]">
+        <div className="flex items-center justify-center gap-1 px-3 py-0.5 text-[11px] uppercase tracking-wider text-gold-ink/80 border-t border-[var(--border)]">
           Projected pairing
         </div>
       )}

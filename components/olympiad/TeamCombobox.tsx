@@ -92,9 +92,9 @@ export default function TeamCombobox({ teams, onSelect, placeholder = 'Search te
                 i === active ? 'bg-[var(--bg-surface-2)] text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'
               }`}
             >
-              <Flag code={t.fedCode} size="xs" />
+              <Flag code={t.fedCode} size="xs" aria-hidden />
               <span className="truncate flex-1">{t.name}</span>
-              <span className="text-[10px] text-[var(--text-muted)] tabular-nums">#{t.teamId} · {t.avgRating}</span>
+              <span className="text-[11px] text-[var(--text-muted)] tabular-nums">#{t.teamId} · {t.avgRating}</span>
             </li>
           ))}
         </ul>

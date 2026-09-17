@@ -37,11 +37,11 @@ function Side({ team, gold, align, onSelect, won }: {
       className={`flex items-center gap-2 min-w-0 flex-1 rounded-md px-1 py-0.5 hover:bg-[var(--bg-surface-3)] transition-colors ${right ? 'flex-row-reverse text-right' : 'text-left'}`}
       title={`${team.name} · seed #${team.teamId}${gold !== undefined ? ` · gold ${formatPct(gold)}` : ''}`}
     >
-      <Flag code={team.fedCode} size="sm" className="!ring-0" />
+      <Flag code={team.fedCode} size="sm" className="!ring-0" aria-hidden />
       <span className="min-w-0">
-        <span className={`block text-sm truncate ${won ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{shortTeamName(team.name)}</span>
+        <span className={`block text-sm truncate underline-offset-4 decoration-dotted decoration-[var(--text-muted)] hover:underline hover:text-gold-ink ${won ? 'font-semibold text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{shortTeamName(team.name)}</span>
         {gold !== undefined && gold >= 0.001 && (
-          <span className="block text-[10px] text-gold-ink tabular-nums">gold {formatPct(gold)}</span>
+          <span className="block text-[11px] text-gold-ink tabular-nums">gold {formatPct(gold)}</span>
         )}
       </span>
     </button>
@@ -106,7 +106,7 @@ export default function RoundResults({
               type="button"
               onClick={applyResults.onApply}
               disabled={applyResults.applied}
-              className="h-8 px-3 rounded-md text-xs font-semibold bg-chess-gold text-chess-dark hover:bg-chess-gold-light disabled:opacity-50 disabled:cursor-default"
+              className="h-10 px-3 rounded-md text-xs font-semibold bg-chess-gold text-chess-dark hover:bg-chess-gold-light disabled:opacity-50 disabled:cursor-default"
             >
               {applyResults.applied ? 'Results applied' : `Apply ${applyResults.count} result${applyResults.count === 1 ? '' : 's'} as a scenario`}
             </button>
@@ -116,7 +116,7 @@ export default function RoundResults({
             onChange={e => { setQuery(e.target.value); setLimit(PAGE); }}
             placeholder="Find a team…"
             aria-label="Filter matches by team"
-            className="h-8 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-40"
+            className="h-10 rounded-md bg-[var(--bg-surface-2)] border border-[var(--border)] px-3 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-40"
           />
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function RoundResults({
                         <div className="h-full bg-rose-400" style={{ width: `${p.l * 100}%` }} />
                       </div>
                     </div>
-                  ) : <span className="text-[10px] text-[var(--text-muted)]">vs</span>
+                  ) : <span className="text-[11px] text-[var(--text-muted)]">vs</span>
                 ) : m.status === 'final' ? (
                   <span className="font-mono text-sm text-[var(--text-primary)]">{formatMatchScore(m.team1Score, m.team2Score)}</span>
                 ) : m.status === 'live' ? (
@@ -155,7 +155,7 @@ export default function RoundResults({
                     {m.team1Score !== null && m.team2Score !== null ? formatMatchScore(m.team1Score, m.team2Score) : 'live'}
                   </span>
                 ) : (
-                  <span className="text-[10px] text-[var(--text-muted)]">not started</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">not started</span>
                 )}
               </div>
               <Side team={t2} gold={odds.get(t2.teamId)?.pGold} align="left" onSelect={onSelect} won={o === 'l'} />

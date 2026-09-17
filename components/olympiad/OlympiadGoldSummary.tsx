@@ -27,7 +27,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
     <Link href={href} className="group surface-card p-5 sm:p-6 block hover:border-chess-gold/30 transition-all">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <p className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+          <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
             {status.anyLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse-live" />}
             {event === 'open' ? 'Open' : "Women's"} · {stage}
           </p>
@@ -36,7 +36,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
           </h3>
         </div>
         {run && (
-          <span className="text-[10px] text-[var(--text-muted)] text-right tabular-nums shrink-0">
+          <span className="text-[11px] text-[var(--text-muted)] text-right tabular-nums shrink-0">
             {run.nSims.toLocaleString()} sims
           </span>
         )}

@@ -8,6 +8,7 @@ import HeroPanel from './HeroPanel';
 import OlympiadScenarioBuilder from './OlympiadScenarioBuilder';
 import ScenarioSummary from './ScenarioSummary';
 import TeamSpotlight from './TeamSpotlight';
+import SpotlightHint from './SpotlightHint';
 import TeamTable from './TeamTable';
 import { MAX_PICKS, N_ROUNDS } from '@/lib/olympiad/config';
 import { cachedJson, StaleRunError } from '@/lib/olympiad/clientCache';
@@ -59,7 +60,9 @@ export default function OlympiadDashboard({
   const [order, setOrder] = useState<number[]>([]);
   const [appliedResults, setAppliedResults] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [pickedByUser, setPickedByUser] = useState(false);
   const spotlightRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const cache = useRef<Map<string, ScenarioResult>>(new Map());
   const teamStats = useRef<Map<string, Map<number, ScenarioTeam>>>(new Map());
@@ -186,6 +189,11 @@ export default function OlympiadDashboard({
   };
 
   const selectTeam = useCallback((teamId: number | null, scroll = true) => {
+    if (teamId !== null) {
+      const active = document.activeElement as HTMLElement | null;
+      if (active && active !== document.body) triggerRef.current = active;
+      setPickedByUser(true);
+    }
     setSelectedTeamId(teamId);
     const url = new URL(window.location.href);
     if (teamId === null) url.searchParams.delete('team'); else url.searchParams.set('team', String(teamId));
@@ -194,6 +202,14 @@ export default function OlympiadDashboard({
       requestAnimationFrame(() => spotlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
     }
   }, []);
+
+  // After the spotlight unmounts, hand focus back to whatever opened it (row, hero entry, chip).
+  useEffect(() => {
+    if (selectedTeamId !== null) return;
+    const back = triggerRef.current;
+    triggerRef.current = null;
+    if (back?.isConnected) back.focus({ preventScroll: true });
+  }, [selectedTeamId]);
 
   const selectedTeam = selectedTeamId !== null ? teamsById.get(selectedTeamId) ?? null : null;
   const selectedIndex = selectedTeamId !== null ? order.indexOf(selectedTeamId) : -1;
@@ -326,6 +342,7 @@ export default function OlympiadDashboard({
               <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-400">{error}</div>
             )}
           </div>
+          <SpotlightHint hasSelected={pickedByUser} />
           <div className={`transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : ''}`} aria-busy={loading}>
             <TeamTable
               teams={participants}

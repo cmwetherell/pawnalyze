@@ -111,7 +111,7 @@ export default function MedalHistoryChart({ history, teamsById, topN = 8, extraT
               aria-selected={metric === k}
               type="button"
               onClick={() => setMetric(k)}
-              className={`h-8 px-2.5 rounded-md font-medium transition-colors ${
+              className={`h-10 px-2.5 rounded-md font-medium transition-colors ${
                 metric === k ? 'bg-[var(--bg-surface-1)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               }`}
             >

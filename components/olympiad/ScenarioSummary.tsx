@@ -38,7 +38,7 @@ export default function ScenarioSummary({ pickCount, matched, nSims, sentence, o
           <button
             type="button"
             onClick={onClear}
-            className="h-8 px-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-3)]"
+            className="h-10 px-2.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-3)]"
           >
             Clear
           </button>

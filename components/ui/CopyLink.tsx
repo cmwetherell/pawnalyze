@@ -33,7 +33,7 @@ export default function CopyLink({ href, label = 'Copy link', className = '' }: 
       type="button"
       onClick={copy}
       aria-live="polite"
-      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 h-8 text-xs font-medium transition-colors ${
+      className={`inline-flex items-center gap-1.5 rounded-md px-2.5 h-10 text-xs font-medium transition-colors ${
         state === 'copied'
           ? 'bg-emerald-500/15 text-emerald-500'
           : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-3)]'

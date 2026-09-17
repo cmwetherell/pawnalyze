@@ -76,7 +76,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
   }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale]);
 
   const heading = (
-    <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2">
+    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-2">
       Likely opponents{isScenario ? ' · scenario' : ''}
     </div>
   );
@@ -94,12 +94,23 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     <div>
       {heading}
 
-      {!nextIsFixed && (
-        <div className="mb-3">
-          <div className="text-[11px] text-[var(--text-muted)] mb-1">Round {data.nextRound}</div>
-          <ShareList shares={data.next} total={data.total} teamsById={teamsById} />
+      <div className="mb-3">
+        <div className="text-[11px] text-[var(--text-muted)] mb-1">
+          Round {data.nextRound}{nextIsFixed ? ' · pairing set' : ''}
         </div>
-      )}
+        {nextIsFixed ? (() => {
+          const opp = teamsById.get(data.next[0].teamId);
+          return opp ? (
+            <div className="flex items-center gap-2 text-xs">
+              <Flag code={opp.fedCode} size="sm" aria-hidden />
+              <span className="font-medium text-[var(--text-primary)] truncate">{opp.name}</span>
+              <span className="text-[var(--text-muted)]">#{opp.teamId} · {opp.avgRating}</span>
+            </div>
+          ) : <p className="text-xs text-[var(--text-muted)] italic">Bye</p>;
+        })() : (
+          <ShareList shares={data.next} total={data.total} teamsById={teamsById} />
+        )}
+      </div>
 
       {data.followingRound !== null && (
         <div>
@@ -122,7 +133,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
                     onClick={() => setSplit(k)}
                     disabled={count === 0}
                     title={`${SPLIT_LABEL[k]} in round ${data.nextRound} · ${formatPct(data.total ? count / data.total : 0)} of sims`}
-                    className={`h-8 min-w-[2.25rem] px-2 rounded text-[11px] font-semibold transition-colors ${
+                    className={`h-10 min-w-[2.5rem] px-2 rounded text-[11px] font-semibold transition-colors ${
                       active ? `bg-[var(--bg-surface-3)] ${tone}` : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                     } disabled:opacity-40`}
                   >

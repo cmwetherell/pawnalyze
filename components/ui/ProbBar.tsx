@@ -69,7 +69,7 @@ export default function ProbBar({
         </span>
       )}
       {baseline !== null && (
-        <span className={`tabular-nums text-[10px] font-semibold w-8 text-right shrink-0 ${up ? 'text-emerald-500' : 'text-rose-400'}`}>
+        <span className={`tabular-nums text-[11px] font-semibold w-8 text-right shrink-0 ${up ? 'text-emerald-500' : 'text-rose-400'}`}>
           {delta ?? ''}
         </span>
       )}

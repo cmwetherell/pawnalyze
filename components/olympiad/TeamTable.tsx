@@ -36,6 +36,7 @@ const HEADERS: { key: SortKey; label: string; title?: string; className?: string
   { key: 'pMedal', label: 'Podium', title: 'Probability of any medal', className: 'w-36', hide: 'sm' },
   { key: 'expRank', label: 'Finish', title: 'Expected final position', className: 'w-14 text-right' },
 ];
+const CHEVRON_COL = 'w-7';
 const HIDE: Record<Hide, string> = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell', xl: 'hidden xl:table-cell' };
 
 export default function TeamTable({
@@ -112,13 +113,13 @@ export default function TeamTable({
           onChange={e => setQuery(e.target.value)}
           placeholder="Search teams…"
           aria-label="Search teams"
-          className="h-9 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full sm:w-56"
+          className="h-10 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full sm:w-56"
         />
       </div>
 
       <table className="w-full text-sm table-fixed">
         <thead>
-          <tr className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] border-y border-[var(--border)] bg-[var(--bg-surface-2)]/60">
+          <tr className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] border-y border-[var(--border)] bg-[var(--bg-surface-2)]/60">
             {HEADERS.map(h => (
               <th
                 key={h.key}
@@ -132,13 +133,14 @@ export default function TeamTable({
                   type="button"
                   onClick={() => toggleSort(h.key)}
                   title={h.title}
-                  className={`h-9 w-full inline-flex items-center gap-0.5 hover:text-[var(--text-secondary)] ${h.className?.includes('text-right') ? 'justify-end' : h.key === 'name' ? 'justify-start' : 'justify-start'}`}
+                  className={`h-10 w-full inline-flex items-center gap-0.5 hover:text-[var(--text-secondary)] ${h.className?.includes('text-right') ? 'justify-end' : h.key === 'name' ? 'justify-start' : 'justify-start'}`}
                 >
                   {h.label}
                   {sortKey === h.key && <span aria-hidden>{sortDir === 'asc' ? '▲' : '▼'}</span>}
                 </button>
               </th>
             ))}
+            <th scope="col" className={`${CHEVRON_COL} py-0`}><span className="sr-only">Open details</span></th>
           </tr>
         </thead>
         <tbody>
@@ -157,7 +159,7 @@ export default function TeamTable({
                 aria-label={`${team_label(t, selected)}`}
                 onClick={() => onSelect(t.teamId)}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(t.teamId); } }}
-                className={`cursor-pointer border-b border-[var(--border)]/60 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-chess-gold ${
+                className={`group cursor-pointer border-b border-[var(--border)]/60 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-chess-gold ${
                   selected ? 'bg-chess-gold/10 ring-1 ring-inset ring-chess-gold/40' : 'hover:bg-[var(--bg-surface-2)]/60'
                 }`}
               >
@@ -167,15 +169,15 @@ export default function TeamTable({
                 <td className="px-1.5 sm:px-3 py-2">
                   <div className="flex items-center gap-2 min-w-0 overflow-hidden">
                     <Flag code={t.fedCode} size="sm" title={t.name} className="!ring-0" aria-hidden />
-                    <span className={`font-medium truncate ${selected ? 'text-gold-ink' : 'text-[var(--text-primary)]'}`}>{t.name}</span>
-                    <span className="text-[10px] text-[var(--text-muted)] tabular-nums shrink-0" title={`Seed #${t.teamId}`}>#{t.teamId}</span>
+                    <span className={`font-medium truncate underline-offset-4 decoration-dotted decoration-[var(--text-muted)] group-hover:underline group-hover:text-gold-ink ${selected ? 'text-gold-ink' : 'text-[var(--text-primary)]'}`}>{t.name}</span>
+                    <span className="text-[11px] text-[var(--text-muted)] tabular-nums shrink-0" title={`Seed #${t.teamId}`}>#{t.teamId}</span>
                   </div>
                 </td>
                 <td className={`px-1.5 sm:px-3 py-2 text-right tabular-nums text-[var(--text-secondary)] ${HIDE.xl}`}>{t.avgRating}</td>
                 {anyPlayed && (
                   <td className="px-1.5 sm:px-3 py-2 text-right tabular-nums text-[var(--text-primary)] font-semibold">
                     {s?.mp ?? 0}
-                    <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">/{(s?.played ?? 0) * 2}</span>
+                    <span className="text-[11px] text-[var(--text-muted)] font-normal hidden sm:inline">/{(s?.played ?? 0) * 2}</span>
                   </td>
                 )}
                 <td className="px-1.5 sm:px-3 py-2"><ProbBar value={o?.pGold ?? 0} baseline={isScenario ? b?.pGold ?? 0 : null} tint="gold" emphasis /></td>
@@ -184,10 +186,13 @@ export default function TeamTable({
                     title={isScenario && expRank === null ? 'Baseline value — expected finish is recomputed only for picked teams' : undefined}>
                   {formatRank(expRank ?? b?.expRank ?? null)}
                   {isScenario && expRank !== null && b?.expRank != null && Math.abs(expRank - b.expRank) >= 0.05 && (
-                    <span className={`block text-[10px] ${expRank < b.expRank ? 'text-emerald-500' : 'text-rose-400'}`}>
+                    <span className={`block text-[11px] ${expRank < b.expRank ? 'text-emerald-500' : 'text-rose-400'}`}>
                       {expRank < b.expRank ? '▲' : '▼'} {Math.abs(expRank - b.expRank).toFixed(1)}
                     </span>
                   )}
+                </td>
+                <td className={`${CHEVRON_COL} pr-2 text-right`} aria-hidden>
+                  <svg className={`inline w-4 h-4 transition-transform ${selected ? 'text-gold-ink rotate-90' : 'text-[var(--text-muted)] group-hover:text-gold-ink group-hover:translate-x-0.5'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                 </td>
               </tr>
             );
@@ -201,7 +206,7 @@ export default function TeamTable({
           {isScenario && ' · ghost bars show the baseline'}
         </span>
         {!query.trim() && rows.length > PAGE && (
-          <button type="button" onClick={() => setShowAll(v => !v)} className="h-8 px-2 text-gold-ink hover:text-chess-gold-light">
+          <button type="button" onClick={() => setShowAll(v => !v)} className="h-10 px-2 text-gold-ink hover:text-chess-gold-light">
             {showAll ? 'Show top 25' : `Show all ${rows.length}`}
           </button>
         )}

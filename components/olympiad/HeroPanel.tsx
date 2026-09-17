@@ -68,7 +68,7 @@ export default function HeroPanel({
               disabled={t.disabled}
               title={t.hint}
               onClick={() => setTab(t.key)}
-              className={`h-8 px-3 rounded-md font-medium transition-colors ${
+              className={`h-10 px-3 rounded-md font-medium transition-colors ${
                 tab === t.key ? 'bg-[var(--bg-surface-1)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               } disabled:opacity-40 disabled:cursor-not-allowed`}
             >

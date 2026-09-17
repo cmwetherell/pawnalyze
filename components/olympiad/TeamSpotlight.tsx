@@ -6,6 +6,7 @@ import CopyLink from '@/components/ui/CopyLink';
 import Flag from '@/components/ui/Flag';
 import { formatDelta, formatPct } from '@/components/ui/ProbBar';
 import LikelyOpponents from './LikelyOpponents';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { StaleRunError, cachedJson } from '@/lib/olympiad/clientCache';
 import { formatMp, formatRank, ordinal } from '@/lib/olympiad/odds';
 import { formatMatchScore, teamRoundHistory } from '@/lib/olympiad/standings';
@@ -41,7 +42,7 @@ function Tile({ label, value, sub, tone = 'text-[var(--text-primary)]', delta, c
 }) {
   return (
     <div className="rounded-lg bg-[var(--bg-surface-2)] px-3 py-2 min-w-0" title={title}>
-      <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">{label}</div>
+      <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">{label}</div>
       <div className="flex items-baseline gap-1.5">
         <span className={`text-lg font-heading tabular-nums leading-tight ${tone}`}>{value}</span>
         {delta && (
@@ -69,6 +70,30 @@ function Sparkline({ points }: { points: number[] }) {
   );
 }
 
+/** Plain block on tablets and up; a native <details> accordion on phones. */
+function Section({ title, right, defaultOpen, desktop, children }: {
+  title: string; right?: React.ReactNode; defaultOpen?: boolean; desktop: boolean; children: React.ReactNode;
+}) {
+  const heading = (
+    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] flex items-baseline justify-between gap-2">
+      <span>{title}</span>
+      {right && <span className="normal-case tracking-normal">{right}</span>}
+    </div>
+  );
+  if (desktop) return <div><div className="mb-2">{heading}</div>{children}</div>;
+  return (
+    <details className="group rounded-lg border border-[var(--border)]" open={defaultOpen}>
+      <summary className="list-none cursor-pointer select-none px-3 min-h-[44px] flex items-center justify-between gap-2 [&::-webkit-details-marker]:hidden">
+        <div className="flex-1">{heading}</div>
+        <svg className="w-4 h-4 text-[var(--text-muted)] transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
+      <div className="px-3 pb-3">{children}</div>
+    </details>
+  );
+}
+
 function isTypingTarget(el: EventTarget | null): boolean {
   if (!(el instanceof HTMLElement)) return false;
   const tag = el.tagName;
@@ -84,6 +109,7 @@ export default function TeamSpotlight({
   const data = result?.key === requestKey ? result.data ?? null : null;
   const error = result?.key === requestKey ? result.error ?? null : null;
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const desktop = useMediaQuery('(min-width: 768px)');
 
   useEffect(() => {
     let cancelled = false;
@@ -117,6 +143,8 @@ export default function TeamSpotlight({
 
   const roundHistory = useMemo(() => teamRoundHistory(matches, team.teamId), [matches, team.teamId]);
   const played = roundHistory.filter(h => h.status === 'final');
+  const nextMatch = roundHistory.find(h => h.status !== 'final') ?? null;
+  const nextOpp = nextMatch?.opponentId != null ? teamsById.get(nextMatch.opponentId) ?? null : null;
   const trend = useMemo(
     () => history.filter(h => h.teamId === team.teamId).sort((a, b) => a.roundsCompleted - b.roundsCompleted).map(h => h.pGold),
     [history, team.teamId],
@@ -152,7 +180,7 @@ export default function TeamSpotlight({
       aria-labelledby="spotlight-heading"
     >
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)]/60 sticky top-16 z-10 backdrop-blur-sm lg:static">
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-3 border-b border-[var(--border)] bg-[var(--bg-surface-2)]/60">
         <Flag code={team.fedCode} size="xl" title={team.name} aria-hidden />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2 flex-wrap">
@@ -166,9 +194,31 @@ export default function TeamSpotlight({
             )}
             {isScenario && <span className="text-gold-ink"> · scenario odds</span>}
           </div>
+          <div className="mt-1 text-xs text-[var(--text-secondary)] flex items-center gap-1.5 min-w-0">
+            <span className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] shrink-0">Next</span>
+            {nextMatch ? (
+              <>
+                <span className="shrink-0">R{nextMatch.round}</span>
+                {nextOpp ? (
+                  <>
+                    <span className="text-[var(--text-muted)] shrink-0">vs</span>
+                    <Flag code={nextOpp.fedCode} size="xs" aria-hidden />
+                    <span className="font-medium text-[var(--text-primary)] truncate min-w-[5rem]">{nextOpp.name}</span>
+                    <span className="text-[var(--text-muted)] shrink-0 hidden sm:inline">#{nextOpp.teamId} · {nextOpp.avgRating}</span>
+                    {nextMatch.projected && <span className="text-gold-ink text-[11px] uppercase tracking-wider shrink-0">projected</span>}
+                    {nextMatch.status === 'live' && <span className="text-red-400 text-[11px] shrink-0">· in play</span>}
+                  </>
+                ) : (
+                  <span className="italic text-[var(--text-muted)]">bye</span>
+                )}
+              </>
+            ) : (
+              <span className="italic text-[var(--text-muted)]">pairings not published yet</span>
+            )}
+          </div>
         </div>
         {trend.length >= 2 && (
-          <div className="hidden md:flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[var(--text-muted)]" title="Gold odds after each completed round">
+          <div className="hidden md:flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[var(--text-muted)]" title="Gold odds after each completed round">
             <span>Gold trend</span>
             <Sparkline points={trend} />
           </div>
@@ -214,11 +264,7 @@ export default function TeamSpotlight({
       {/* Body */}
       <div className="grid gap-6 px-4 sm:px-6 py-5 md:grid-cols-2 xl:grid-cols-4">
         {/* Roster */}
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-baseline justify-between">
-            <span>Roster</span>
-            {rosterAvg && <span className="normal-case tracking-normal">top-4 avg {rosterAvg}</span>}
-          </div>
+        <Section title="Roster" right={rosterAvg ? `top-4 avg ${rosterAvg}` : undefined} defaultOpen desktop={desktop}>
           {players.length ? (
             <table className="w-full text-xs table-fixed">
               <tbody>
@@ -235,12 +281,13 @@ export default function TeamSpotlight({
           ) : (
             <p className="text-xs text-[var(--text-muted)] italic">Roster pending.</p>
           )}
-        </div>
+        </Section>
 
         {/* Results + opponents */}
-        <div className="space-y-5">
+        <Section title="Results & likely opponents" desktop={desktop}>
+          <div className="space-y-5">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2">Results</div>
+            {desktop && <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-2">Results</div>}
             {played.length ? (
               <ul className="space-y-1 text-xs">
                 {played.map(h => {
@@ -252,7 +299,7 @@ export default function TeamSpotlight({
                       {opp ? <Flag code={opp.fedCode} size="xs" aria-hidden /> : null}
                       <span className="flex-1 truncate text-[var(--text-secondary)]">
                         {opp ? opp.name : h.opponentId === null ? 'bye' : '—'}
-                        {opp && <span className="text-[10px] text-[var(--text-muted)]"> #{opp.teamId}</span>}
+                        {opp && <span className="text-[11px] text-[var(--text-muted)]"> #{opp.teamId}</span>}
                       </span>
                       <span className={`font-mono ${tone}`}>
                         {h.outcome === 'w' ? 'W' : h.outcome === 'l' ? 'L' : 'D'} {formatMatchScore(h.score, h.oppScore)}
@@ -266,14 +313,11 @@ export default function TeamSpotlight({
             )}
           </div>
           <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} isScenario={isScenario} onStale={onStale} />
-        </div>
+          </div>
+        </Section>
 
         {/* Finish distribution */}
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-baseline justify-between">
-            <span>Finish distribution</span>
-            {median !== null && <span className="normal-case tracking-normal">median {ordinal(median)}</span>}
-          </div>
+        <Section title="Finish distribution" right={median !== null ? `median ${ordinal(median)}` : undefined} desktop={desktop}>
           {error ? (
             <p className="text-xs text-rose-400">{error}</p>
           ) : !data ? (
@@ -287,7 +331,7 @@ export default function TeamSpotlight({
                   const p = b.n / total;
                   return (
                     <div key={b.label} className="flex-1 flex flex-col items-center justify-end h-full group" title={`${b.label === `${RANK_BUCKETS + 1}+` ? `${RANK_BUCKETS + 1}th or worse` : ordinal(Number(b.label))}: ${formatPct(p)}`}>
-                      {p >= 0.08 && <span className="text-[10px] text-[var(--text-muted)] tabular-nums mb-0.5">{Math.round(p * 100)}%</span>}
+                      {p >= 0.08 && <span className="text-[11px] text-[var(--text-muted)] tabular-nums mb-0.5">{Math.round(p * 100)}%</span>}
                       <div
                         className={`w-full rounded-t-sm ${b.label === '1' ? 'bg-medal-gold' : b.label === '2' ? 'bg-medal-silver' : b.label === '3' ? 'bg-medal-bronze' : 'bg-[var(--text-muted)]/45 group-hover:bg-[var(--text-muted)]/70'}`}
                         style={{ height: `${Math.max(2, (b.n / maxN) * 100)}%` }}
@@ -298,17 +342,16 @@ export default function TeamSpotlight({
               </div>
               <div className="flex gap-[3px] mt-1" aria-hidden>
                 {bucketed.map((b, i) => (
-                  <div key={b.label} className={`flex-1 text-center text-[10px] tabular-nums ${median !== null && String(median) === b.label ? 'text-gold-ink font-bold' : 'text-[var(--text-muted)]'} ${i % 2 === 1 && i < RANK_BUCKETS ? 'invisible sm:visible' : ''}`}>{b.label}</div>
+                  <div key={b.label} className={`flex-1 text-center text-[11px] tabular-nums ${median !== null && String(median) === b.label ? 'text-gold-ink font-bold' : 'text-[var(--text-muted)]'} ${i % 2 === 1 && i < RANK_BUCKETS ? 'invisible sm:visible' : ''}`}>{b.label}</div>
                 ))}
               </div>
               <p className="mt-2 text-[11px] text-[var(--text-muted)]">Final position across {total.toLocaleString()} simulations{isScenario ? ' matching your scenario' : ''}.</p>
             </>
           )}
-        </div>
+        </Section>
 
         {/* Remaining rounds */}
-        <div>
-          <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2">Remaining rounds · win / draw / loss</div>
+        <Section title="Remaining rounds · win / draw / loss" defaultOpen desktop={desktop}>
           {error ? (
             <p className="text-xs text-rose-400">{error}</p>
           ) : !data ? (
@@ -335,7 +378,7 @@ export default function TeamSpotlight({
                       </span>
                     </div>
                     {opp && (
-                      <div className="pl-8 text-[10px] text-[var(--text-muted)] flex items-center gap-1">
+                      <div className="pl-8 text-[11px] text-[var(--text-muted)] flex items-center gap-1">
                         <Flag code={opp.fedCode} size="xs" aria-hidden /> vs {opp.name}{entry?.projected ? ' (projected)' : ''}
                       </div>
                     )}
@@ -344,7 +387,7 @@ export default function TeamSpotlight({
               })}
             </ul>
           )}
-        </div>
+        </Section>
       </div>
     </section>
   );

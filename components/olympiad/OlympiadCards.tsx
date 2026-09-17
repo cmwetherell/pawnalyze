@@ -31,7 +31,7 @@ async function OlympiadCard({ event }: { event: OlympiadEvent }) {
             {teams.slice(0, 8).map(t => (
               <Flag key={t.teamId} code={t.fedCode} title={t.name} size="sm" />
             ))}
-            <span className="ml-1 text-[10px] text-[var(--text-muted)]">+{Math.max(0, teams.length - 8)}</span>
+            <span className="ml-1 text-[11px] text-[var(--text-muted)]">+{Math.max(0, teams.length - 8)}</span>
           </div>
         ) : null
       }

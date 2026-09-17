@@ -49,16 +49,16 @@ export default function CompletedRoundList({ round, matches, teamsById }: Comple
           const o = outcomeFromScores(m.team1Score, m.team2Score);
           return (
             <li key={m.boardNo} className="flex items-center text-xs py-1 text-[var(--text-muted)] gap-1.5">
-              <span className="w-6 text-[10px] tabular-nums text-right shrink-0">{m.boardNo}</span>
+              <span className="w-6 text-[11px] tabular-nums text-right shrink-0">{m.boardNo}</span>
               <span className={`flex-1 flex items-center justify-end gap-1.5 min-w-0 ${o === 'w' ? 'text-gold-ink font-semibold' : ''}`}>
                 <span className="truncate">{t1?.name ?? m.team1Id}</span>
-                {t1 && <Flag code={t1.fedCode} size="xs" />}
+                {t1 && <Flag code={t1.fedCode} size="xs" aria-hidden />}
               </span>
               <span className="px-1.5 font-mono text-[11px] text-[var(--text-secondary)] shrink-0 w-14 text-center">
                 {t2 ? formatMatchScore(m.team1Score, m.team2Score) : 'bye'}
               </span>
               <span className={`flex-1 flex items-center gap-1.5 min-w-0 ${o === 'l' ? 'text-gold-ink font-semibold' : ''}`}>
-                {t2 && <Flag code={t2.fedCode} size="xs" />}
+                {t2 && <Flag code={t2.fedCode} size="xs" aria-hidden />}
                 <span className="truncate">{t2?.name ?? ''}</span>
               </span>
             </li>
