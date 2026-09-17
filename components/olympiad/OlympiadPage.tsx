@@ -5,6 +5,7 @@ import MethodologyCards from './MethodologyCards';
 import { olympiadSubnav } from './boards/BoardRacePage';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import {
+  getOlympiadBoardRace,
   getOlympiadMatches,
   getOlympiadPlayers,
   getOlympiadProjectedPairings,
@@ -20,13 +21,20 @@ import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 export default async function OlympiadPage({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
-  const [run, allTeams, players, matches, status] = await Promise.all([
+  const [run, allTeams, roster, matches, status, race] = await Promise.all([
     getOlympiadRun(event),
     getOlympiadTeams(event),
     getOlympiadPlayers(event),
     getOlympiadMatches(event),
     getOlympiadStatus(event),
+    getOlympiadBoardRace(event),
   ]);
+  // Attach each player's board-race stats so the spotlight roster can show TPR and link to profiles.
+  const raceByFide = new Map(race.boards.flat().map(r => [r.fideId, r]));
+  const players = roster.map(p => {
+    const r = p.fideId !== null ? raceByFide.get(p.fideId) : undefined;
+    return r ? { ...p, race: { tpr: r.tpr, score: r.score, games: r.games, rank: r.rank } } : p;
+  });
   const teams = teamsInRun(allTeams, run);
   const nextRound = run ? run.roundsCompleted + 1 : 0;
   const needProjected = run !== null && nextRound <= N_ROUNDS && !matches.some(m => m.round === nextRound);

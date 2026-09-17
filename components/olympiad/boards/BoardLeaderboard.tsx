@@ -74,7 +74,7 @@ export default function BoardLeaderboard({ event, race, rows, total }: BoardLead
                         onClick={e => e.stopPropagation()}
                         className="font-medium truncate text-[var(--text-primary)] group-hover:text-gold-ink underline-offset-4 decoration-dotted decoration-[var(--text-muted)] group-hover:underline outline-none focus-visible:ring-2 focus-visible:ring-chess-gold rounded-sm"
                       >
-                        {r.title && <span className="text-gold-ink text-[11px] font-semibold mr-1">{r.title}</span>}
+                        {r.title && <span className="text-gold-ink text-[11px] font-semibold mr-1">{r.title}</span>}{r.title ? ' ' : ''}
                         {displayName(r.name)}
                       </Link>
                       <span className="text-[11px] text-[var(--text-muted)] truncate">

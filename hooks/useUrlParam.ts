@@ -25,3 +25,22 @@ export function setUrlParam(name: string, value: string | null) {
   window.history.replaceState(null, '', url.toString());
   listeners.forEach(l => l());
 }
+
+const hashListeners = new Set<() => void>();
+function subscribeHash(cb: () => void) {
+  hashListeners.add(cb);
+  window.addEventListener('hashchange', cb);
+  return () => { hashListeners.delete(cb); window.removeEventListener('hashchange', cb); };
+}
+
+/** The current location hash without "#" (empty on the server and during hydration). */
+export function useHash(): string {
+  return useSyncExternalStore(subscribeHash, () => window.location.hash.replace(/^#/, ''), () => '');
+}
+
+export function setHash(value: string) {
+  const url = new URL(window.location.href);
+  url.hash = value;
+  window.history.replaceState(null, '', url.toString());
+  hashListeners.forEach(l => l());
+}

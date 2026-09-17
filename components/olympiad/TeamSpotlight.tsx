@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import CopyLink from '@/components/ui/CopyLink';
@@ -9,7 +10,9 @@ import { formatDelta, formatPct } from '@/components/ui/ProbBar';
 import LikelyOpponents from './LikelyOpponents';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { StaleRunError, cachedJson } from '@/lib/olympiad/clientCache';
+import { boardsHref, playerHref } from '@/lib/olympiad/config';
 import { formatMp, formatRank, ordinal } from '@/lib/olympiad/odds';
+import { formatScore } from '@/lib/olympiad/tpr';
 import { formatMatchScore, teamRoundHistory } from '@/lib/olympiad/standings';
 import type {
   DerivedStanding, HistoryPoint, Match, OlympiadEvent, Player, Run, Team, TeamDetail as TeamDetailData, TeamOdds,
@@ -173,6 +176,7 @@ export default function TeamSpotlight({
   const expRank = odds?.expRank ?? null;
   const expRankShown = expRank ?? baseline?.expRank ?? null;
   const expRankIsBaseline = isScenario && expRank === null;
+  const anyRace = players.some(p => p.race && p.race.games > 0);
   const rosterAvg = players.length ? Math.round(players.slice(0, 4).reduce((a, p) => a + p.rating, 0) / Math.min(4, players.length)) : null;
   const ctrl = 'w-10 h-10 rounded-md text-[var(--text-muted)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-primary)] disabled:opacity-30 flex items-center justify-center';
 
@@ -270,19 +274,50 @@ export default function TeamSpotlight({
         <Section title="Roster" right={rosterAvg ? `top-4 avg ${rosterAvg}` : undefined} defaultOpen desktop={desktop}>
           {players.length ? (
             <table className="w-full text-xs table-fixed">
+              {anyRace && (
+                <thead>
+                  <tr className="text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
+                    <th className="w-5" aria-label="Board" />
+                    <th className="w-8" aria-label="Title" />
+                    <th className="text-left font-semibold pb-1">Player</th>
+                    <th className="w-12 text-right font-semibold pb-1">Rtg</th>
+                    <th className="w-12 text-right font-semibold pb-1" title="Performance rating in the board-prize race">TPR</th>
+                    <th className="w-11 text-right font-semibold pb-1">Pts</th>
+                  </tr>
+                </thead>
+              )}
               <tbody>
                 {players.map(p => (
                   <tr key={p.board} className="border-t border-[var(--border)]/60">
                     <td className="py-1.5 pr-2 text-[var(--text-muted)] tabular-nums w-5">{p.board}</td>
                     <td className="py-1.5 pr-2 w-8 text-gold-ink font-semibold">{p.title ?? ''}</td>
-                    <td className="py-1.5 pr-2 text-[var(--text-primary)] truncate">{p.name}</td>
+                    <td className="py-1.5 pr-2 text-[var(--text-primary)] truncate">
+                      {p.race && p.fideId !== null ? (
+                        <Link href={playerHref(event, p.fideId)} className="hover:text-gold-ink underline-offset-4 decoration-dotted decoration-[var(--text-muted)] hover:underline" title="Games, performance rating and board-prize rank">
+                          {p.name}
+                        </Link>
+                      ) : p.name}
+                    </td>
                     <td className="py-1.5 text-right tabular-nums text-[var(--text-secondary)] w-12">{p.rating || '—'}</td>
+                    {anyRace && (
+                      <>
+                        <td className={`py-1.5 text-right tabular-nums w-12 font-mono ${p.race?.rank === 1 ? 'text-gold-ink font-semibold' : 'text-[var(--text-secondary)]'}`} title={p.race?.rank ? `${ordinal(p.race.rank)} on board ${p.board}` : undefined}>
+                          {p.race?.tpr ?? '—'}
+                        </td>
+                        <td className="py-1.5 text-right tabular-nums text-[var(--text-muted)] w-11">{p.race?.games ? formatScore(p.race.score, p.race.games) : '—'}</td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
             <p className="text-xs text-[var(--text-muted)] italic">Roster pending.</p>
+          )}
+          {anyRace && (
+            <Link href={`${boardsHref(event)}?team=${team.teamId}`} className="inline-flex items-center h-10 mt-1 text-xs text-gold-ink hover:text-chess-gold-light">
+              Board prize race →
+            </Link>
           )}
         </Section>
 

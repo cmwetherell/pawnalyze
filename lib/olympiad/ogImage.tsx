@@ -2,11 +2,12 @@ import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { ImageResponse } from 'next/og';
 
-import { BOARD_LABELS, N_ROUNDS, OLYMPIAD_EVENTS } from './config';
+import { BOARD_LABELS, N_ROUNDS, OLYMPIAD_EVENTS, boardLabel } from './config';
+import { ordinal } from './odds';
 import { fedToIso } from './fedToIso';
 import { getOlympiadBoardRace, getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadTeams } from './queries';
 import { teamsInRun } from './standings';
-import { displayName, formatScore } from './tpr';
+import { MIN_GAMES_FOR_PRIZE, displayName, formatScore } from './tpr';
 import type { OlympiadEvent } from './types';
 
 export const OG_SIZE = { width: 1200, height: 630 };
@@ -156,6 +157,81 @@ export async function boardRaceOgImage(event: OlympiadEvent) {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: 18, marginTop: 12 }}>
           <div style={{ display: 'flex' }}>Individual board medals · highest TPR with at least 8 games</div>
+          <div style={{ display: 'flex' }}>pawnalyze.com</div>
+        </div>
+      </div>
+    ),
+    { ...OG_SIZE },
+  );
+}
+
+const PIP = { 1: '#10b981', 0.5: '#8b949e', 0: '#f43f5e' } as const;
+
+/** Social card for one player in the board-prize race. */
+export async function playerOgImage(event: OlympiadEvent, fideId: number) {
+  const cfg = OLYMPIAD_EVENTS[event];
+  const race = await getOlympiadBoardRace(event);
+  const p = race.boards.flat().find(r => r.fideId === fideId);
+  if (!p) return boardRaceOgImage(event);
+  const flag = flagDataUri(fedToIso(p.fedCode));
+  const name = clip(displayName(p.name), 26);
+  const rankText = p.rank !== null ? `${ordinal(p.rank)} of ${race.ranked[p.board - 1]}` : 'not yet ranked';
+  const elig = p.eligible ? 'Eligible for a medal' : p.canReach ? `Needs ${p.needed} more of ${MIN_GAMES_FOR_PRIZE} games` : `Cannot reach ${MIN_GAMES_FOR_PRIZE} games`;
+  const medalHex = p.rank !== null && p.rank <= 3 ? MEDAL_HEX[p.rank - 1] : null;
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '44px 56px',
+          background: 'linear-gradient(135deg, #0F1116 0%, #1a1d23 100%)', color: '#f0f2f5', fontFamily: 'sans-serif',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', fontSize: 20, letterSpacing: 4, textTransform: 'uppercase', color: '#C9A84C' }}>{`Pawnalyze · ${cfg.shortTitle} · Board prize race`}</div>
+          <div style={{ display: 'flex', fontSize: 20, color: '#8b949e' }}>{race.lastRound > 0 ? `After round ${race.lastRound} of ${N_ROUNDS}` : 'Before round 1'}</div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 36, marginTop: 40, flex: 1 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+              {flag ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={flag} alt="" width={80} height={60} style={{ borderRadius: 6 }} />
+              ) : (
+                <div style={{ display: 'flex', width: 80, height: 60, borderRadius: 6, background: '#2a2f38' }} />
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', fontSize: 50, fontWeight: 700, lineHeight: 1.1 }}>
+                  {p.title && <span style={{ color: '#C9A84C', marginRight: 14 }}>{p.title}</span>}
+                  {name}
+                </div>
+                <div style={{ display: 'flex', fontSize: 24, color: '#c9d1d9', marginTop: 6 }}>{`${p.teamName} · ${boardLabel(p.board)}${p.rating ? ` · rating ${p.rating}` : ''}`}</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 34, alignItems: 'center' }}>
+              {p.form.map(f => (
+                <div key={f.round} style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, background: PIP[f.score], alignItems: 'center', justifyContent: 'center', color: '#0F1116', fontSize: 15, fontWeight: 700 }}>{f.score === 1 ? 'W' : f.score === 0.5 ? 'D' : 'L'}</div>
+              ))}
+              {Array.from({ length: Math.max(0, N_ROUNDS - p.form.length) }, (_, i) => (
+                <div key={`e${i}`} style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, border: '2px solid #2d333b' }} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', fontSize: 22, color: '#8b949e', marginTop: 16 }}>{`${formatScore(p.score, p.games)} · ${elig}`}</div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', minWidth: 300 }}>
+            <div style={{ display: 'flex', fontSize: 18, letterSpacing: 3, textTransform: 'uppercase', color: '#8b949e' }}>Performance rating</div>
+            <div style={{ display: 'flex', fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#C9A84C', marginTop: 4 }}>{p.tpr ?? '–'}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
+              {medalHex && <div style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, background: medalHex, color: '#0F1116', fontSize: 18, fontWeight: 800, alignItems: 'center', justifyContent: 'center' }}>{p.rank}</div>}
+              <div style={{ display: 'flex', fontSize: 28, color: '#f0f2f5', fontWeight: 600 }}>{`${rankText} · ${boardLabel(p.board).toLowerCase()}`}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: 18 }}>
+          <div style={{ display: 'flex' }}>Board medals go to the best performance rating with at least 8 games</div>
           <div style={{ display: 'flex' }}>pawnalyze.com</div>
         </div>
       </div>

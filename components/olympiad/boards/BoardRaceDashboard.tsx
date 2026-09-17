@@ -112,7 +112,7 @@ export default function BoardRaceDashboard({ event, race, teams }: BoardRaceDash
               renderOption={p => (
                 <>
                   <Flag code={p.fedCode} size="xs" aria-hidden />
-                  <span className="truncate flex-1">{p.title && <span className="text-gold-ink text-[11px] font-semibold mr-1">{p.title}</span>}{displayName(p.name)}</span>
+                  <span className="truncate flex-1">{p.title && <span className="text-gold-ink text-[11px] font-semibold mr-1">{p.title}</span>}{p.title ? ' ' : ''}{displayName(p.name)}</span>
                   <span className="text-[11px] text-[var(--text-muted)] tabular-nums">{boardLabel(p.board)}{p.tpr !== null ? ` · ${p.tpr}` : ''}</span>
                 </>
               )}

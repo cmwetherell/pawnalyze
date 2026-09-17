@@ -12,6 +12,14 @@ export interface Team {
   captain: string | null;
 }
 
+/** Compact board-race stats attached to a roster player for the team spotlight. */
+export interface PlayerRaceStats {
+  tpr: number | null;
+  score: number;
+  games: number;
+  rank: number | null;
+}
+
 export interface Player {
   teamId: number;
   board: number;
@@ -19,6 +27,7 @@ export interface Player {
   title: string | null;
   rating: number;
   fideId: number | null;
+  race?: PlayerRaceStats;
 }
 
 export interface Match {
