@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import TournamentCard from "@/components/TournamentCard";
+import OlympiadBoardLeaders from "@/components/olympiad/OlympiadBoardLeaders";
 import OlympiadGoldSummary from "@/components/olympiad/OlympiadGoldSummary";
 
 export default async function Home() {
@@ -66,6 +67,9 @@ export default async function Home() {
         </div>
         <div className="grid md:grid-cols-2 gap-6">
           <OlympiadGoldSummary />
+        </div>
+        <div className="mt-6">
+          <OlympiadBoardLeaders />
         </div>
       </section>
 
