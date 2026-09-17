@@ -231,7 +231,13 @@ export interface PlayerRaceRow {
 }
 
 /** Form entry shipped with leaderboard rows: enough for the pips and their tooltips. */
-export type FormEntryLite = Pick<FormEntry, 'round' | 'colour' | 'score' | 'oppFedCode' | 'oppRating'>;
+export interface FormEntryLite {
+  round: number;
+  colour: Colour;
+  score: 0 | 0.5 | 1;
+  oppFedCode: string | null;
+  oppRating: number;
+}
 
 /** Leaderboard row shipped to the client: no per-round arrays, compact form. */
 export type BoardRaceRowLite = Omit<PlayerRaceRow, 'tprByRound' | 'rankByRound' | 'form'> & { form: FormEntryLite[] };
