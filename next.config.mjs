@@ -5,6 +5,10 @@ const nextConfig = {
     outputFileTracingIncludes: {
       '/simulations/chess-olympiad-2026/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
       '/simulations/womens-chess-olympiad-2026/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
+    '/simulations/chess-olympiad-2026/boards/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
+    '/simulations/womens-chess-olympiad-2026/boards/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
+    '/simulations/chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
+    '/simulations/womens-chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
     },
 
         async redirects() {

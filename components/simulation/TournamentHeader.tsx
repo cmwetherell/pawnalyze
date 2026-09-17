@@ -19,6 +19,10 @@ interface TournamentHeaderProps {
   meta?: ReactNode[];
   /** Sibling events, e.g. Open ⇄ Women. */
   switcher?: { label: string; href: string; active: boolean }[];
+  /** Breadcrumb trail after "Simulations"; defaults to the event name. */
+  crumbs?: { label: string; href?: string }[];
+  /** Sections of this event, e.g. Medal odds · Board prizes, rendered as tabs along the bottom. */
+  subnav?: { label: string; href: string; active: boolean }[];
 }
 
 export default function TournamentHeader({
@@ -32,7 +36,10 @@ export default function TournamentHeader({
   statusPill,
   meta,
   switcher,
+  crumbs,
+  subnav,
 }: TournamentHeaderProps) {
+  const trail = crumbs && crumbs.length > 0 ? crumbs : [{ label: name }];
   const pillStyle = {
     backgroundColor: 'var(--header-pill-bg)',
     color: 'var(--header-pill-text)',
@@ -56,9 +63,17 @@ export default function TournamentHeader({
         {/* Breadcrumb + switcher */}
         <div className="flex items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2 text-sm min-w-0" style={{ color: 'var(--header-text-muted)' }}>
-            <a href="/simulations" className="hover:text-chess-gold transition-colors">Simulations</a>
-            <span>/</span>
-            <span className="truncate" style={{ color: 'var(--header-text)' }}>{name}</span>
+            <a href="/simulations" className="hover:text-chess-gold transition-colors shrink-0">Simulations</a>
+            {trail.map((c, i) => (
+              <span key={`${c.label}-${i}`} className="inline-flex items-center gap-2 min-w-0">
+                <span>/</span>
+                {c.href && i < trail.length - 1 ? (
+                  <Link href={c.href} className="truncate hover:text-chess-gold transition-colors">{c.label}</Link>
+                ) : (
+                  <span className="truncate" style={{ color: 'var(--header-text)' }}>{c.label}</span>
+                )}
+              </span>
+            ))}
           </div>
           {switcher && switcher.length > 0 && (
             <nav aria-label="Event" className="inline-flex rounded-full p-0.5 shrink-0" style={{ backgroundColor: 'var(--header-pill-bg)', border: '1px solid var(--header-pill-border)' }}>
@@ -153,6 +168,24 @@ export default function TournamentHeader({
               <Flag key={`${f.code}-${i}`} code={f.code} title={f.title} size="lg" className="!ring-2 !ring-[var(--header-avatar-ring)]" />
             ))}
           </div>
+        )}
+
+        {subnav && subnav.length > 0 && (
+          <nav aria-label="Sections" className="mt-6 -mb-4 sm:-mb-6 flex gap-1 border-b" style={{ borderColor: 'var(--header-pill-border)' }}>
+            {subnav.map(s => (
+              <Link
+                key={s.href}
+                href={s.href}
+                aria-current={s.active ? 'page' : undefined}
+                className={`h-11 px-3 -mb-px inline-flex items-center text-sm font-semibold border-b-2 transition-colors ${
+                  s.active ? 'border-chess-gold text-chess-gold' : 'border-transparent hover:text-chess-gold'
+                }`}
+                style={s.active ? undefined : { color: 'var(--header-text-muted)' }}
+              >
+                {s.label}
+              </Link>
+            ))}
+          </nav>
         )}
       </div>
     </div>

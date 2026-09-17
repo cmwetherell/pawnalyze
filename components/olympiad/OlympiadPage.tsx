@@ -2,6 +2,7 @@ import TournamentHeader from '@/components/simulation/TournamentHeader';
 import RelativeTime from '@/components/ui/RelativeTime';
 import OlympiadDashboard from './OlympiadDashboard';
 import MethodologyCards from './MethodologyCards';
+import { olympiadSubnav } from './boards/BoardRacePage';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import {
   getOlympiadMatches,
@@ -81,6 +82,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
         statusPill={statusPill}
         meta={meta}
         switcher={switcher}
+        subnav={olympiadSubnav(event, 'odds')}
       />
 
       {run ? (

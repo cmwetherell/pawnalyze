@@ -15,6 +15,7 @@ export async function GET() {
     revalidateTag(`olympiad-2026-${event}`, 'max')
     revalidateTag(`olympiad-2026-sims-${event}`, 'max')
     revalidateTag(`olympiad-2026-scenario-${event}`, 'max')
+    revalidateTag(`olympiad-2026-games-${event}`, 'max')
   }
 
   return NextResponse.json({ revalidated: true })

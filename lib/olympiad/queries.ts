@@ -4,7 +4,12 @@ import { sql } from 'kysely';
 
 import { N_ROUNDS } from './config';
 import { OUTCOME_OP } from './filters';
+import { buildBoardRace } from './race';
+import { teamsInRun } from './standings';
+import { parseGamePgn } from './tpr';
 import type {
+  BoardRace,
+  Game,
   HistoryPoint,
   Match,
   OlympiadEvent,
@@ -12,6 +17,7 @@ import type {
   OlympiadStatus,
   Pick,
   Player,
+  PlayerGame,
   RoundOdds,
   Run,
   ScenarioResult,
@@ -40,6 +46,12 @@ interface SimsTable {
   top10: number[]; final_rank: number[]; match_points: number[]; game_points: number[]; round_scores: number[][];
   round_opps: number[][] | null;
 }
+interface GamesTable {
+  event: string; round: number; board_no: number; board: number;
+  white_team_id: number | null; black_team_id: number | null;
+  white_player: string; black_player: string; white_fide_id: number | null; black_fide_id: number | null;
+  white_elo: number; black_elo: number; result: string; pgn: string | null; source: string; updated_at: Date;
+}
 interface TeamSummaryTable {
   run_id: number; event: string; team_id: number; p_gold: number; p_silver: number; p_bronze: number;
   p_medal: number; p_top10: number; exp_rank: number; exp_mp: number; exp_gp: number;
@@ -52,6 +64,7 @@ export interface OlympiadDatabase {
   olympiad_2026_runs: RunsTable;
   olympiad_2026_sims: SimsTable;
   olympiad_2026_team_summary: TeamSummaryTable;
+  olympiad_2026_games: GamesTable;
 }
 
 const db = () => createKysely<OlympiadDatabase>();
@@ -60,6 +73,7 @@ export const tags = {
   ref: (event: OlympiadEvent) => `olympiad-2026-${event}`,
   sims: (event: OlympiadEvent) => `olympiad-2026-sims-${event}`,
   scenario: (event: OlympiadEvent) => `olympiad-2026-scenario-${event}`,
+  games: (event: OlympiadEvent) => `olympiad-2026-games-${event}`,
 };
 
 function toRun(r: RunsTable): Run {
@@ -580,4 +594,77 @@ export async function getOlympiadRoundOdds(
     total = Math.max(total, row.w + row.d + row.l);
   }
   return { round, total, teams };
+}
+
+// ---- Board-prize race
+
+function scoreFor(result: string, colour: 'w' | 'b'): 0 | 0.5 | 1 | null {
+  if (result === '1/2-1/2') return 0.5;
+  if (result === '1-0') return colour === 'w' ? 1 : 0;
+  if (result === '0-1') return colour === 'w' ? 0 : 1;
+  return null;
+}
+
+/** Every finished board game of the event, without moves. */
+export async function getOlympiadGames(event: OlympiadEvent): Promise<Game[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.games(event));
+  const rows = await db()
+    .selectFrom('olympiad_2026_games')
+    .select(['round', 'board_no', 'board', 'white_fide_id', 'black_fide_id', 'white_player', 'black_player', 'white_elo', 'black_elo', 'result'])
+    .where('event', '=', event)
+    .orderBy('round')
+    .orderBy('board_no')
+    .orderBy('board')
+    .execute();
+  return rows.map(r => ({
+    round: r.round, boardNo: r.board_no, board: r.board,
+    whiteFideId: r.white_fide_id, blackFideId: r.black_fide_id,
+    whiteName: r.white_player, blackName: r.black_player,
+    whiteElo: r.white_elo, blackElo: r.black_elo,
+    result: r.result as Game['result'],
+  }));
+}
+
+/** Per-board TPR leaderboards for the individual medals, keyed by FIDE id (stable across seed renumbering). */
+export async function getOlympiadBoardRace(event: OlympiadEvent): Promise<BoardRace> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.games(event));
+  cacheTag(tags.ref(event));
+  const [games, players, teams, run, status] = await Promise.all([
+    getOlympiadGames(event), getOlympiadPlayers(event), getOlympiadTeams(event), getOlympiadRun(event), getOlympiadStatus(event),
+  ]);
+  return buildBoardRace(event, games, players, teamsInRun(teams, run), status.lastFinalRound);
+}
+
+/** One player's games with moves (a handful of rows, so the PGN column is fine here). */
+export async function getOlympiadPlayerGames(event: OlympiadEvent, fideId: number): Promise<PlayerGame[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.games(event));
+  const rows = await db()
+    .selectFrom('olympiad_2026_games')
+    .select(['round', 'board_no', 'white_fide_id', 'black_fide_id', 'white_player', 'black_player', 'white_elo', 'black_elo', 'result', 'pgn'])
+    .where('event', '=', event)
+    .where(eb => eb.or([eb('white_fide_id', '=', fideId), eb('black_fide_id', '=', fideId)]))
+    .orderBy('round')
+    .execute();
+  return rows.map(r => {
+    const colour: 'w' | 'b' = r.white_fide_id === fideId ? 'w' : 'b';
+    const own = colour === 'w';
+    return {
+      round: r.round,
+      boardNo: r.board_no,
+      colour,
+      ownRating: own ? r.white_elo : r.black_elo,
+      oppFideId: own ? r.black_fide_id : r.white_fide_id,
+      oppName: own ? r.black_player : r.white_player,
+      oppRating: own ? r.black_elo : r.white_elo,
+      result: r.result as PlayerGame['result'],
+      score: scoreFor(r.result, colour),
+      moves: parseGamePgn(r.pgn).moves,
+    };
+  });
 }

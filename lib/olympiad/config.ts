@@ -53,3 +53,19 @@ export function isOlympiadEvent(value: unknown): value is OlympiadEvent {
 export function eventHref(event: OlympiadEvent): string {
   return `/simulations/${OLYMPIAD_EVENTS[event].slug}`;
 }
+
+export function boardsHref(event: OlympiadEvent): string {
+  return `${eventHref(event)}/boards`;
+}
+
+export function playerHref(event: OlympiadEvent, fideId: number): string {
+  return `${eventHref(event)}/players/${fideId}`;
+}
+
+/** Board-prize categories: roster boards 1-4 plus the reserve (listed as board 5). */
+export const BOARD_LABELS = ['Board 1', 'Board 2', 'Board 3', 'Board 4', 'Reserve'] as const;
+export const N_PRIZE_BOARDS = BOARD_LABELS.length;
+
+export function boardLabel(board: number): string {
+  return BOARD_LABELS[board - 1] ?? `Board ${board}`;
+}

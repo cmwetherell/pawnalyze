@@ -162,3 +162,88 @@ export interface TeamOdds {
   expRank: number | null;
   expMp: number | null;
 }
+
+// ---- Board-prize race (individual medals by performance rating)
+
+export type GameResult = '1-0' | '0-1' | '1/2-1/2' | '*';
+export type Colour = 'w' | 'b';
+
+/** One board game from the broadcast (no moves; see PlayerGame). Team ids are omitted on purpose: they go stale on renumbering. */
+export interface Game {
+  round: number;
+  boardNo: number;
+  board: number;
+  whiteFideId: number | null;
+  blackFideId: number | null;
+  whiteName: string;
+  blackName: string;
+  whiteElo: number;
+  blackElo: number;
+  result: GameResult;
+}
+
+export interface FormEntry {
+  round: number;
+  colour: Colour;
+  score: 0 | 0.5 | 1;
+  oppFideId: number | null;
+  oppName: string;
+  oppFedCode: string | null;
+  oppTeamId: number | null;
+  oppRating: number;
+}
+
+export interface PlayerRaceRow {
+  fideId: number;
+  name: string;
+  title: string | null;
+  teamId: number;
+  teamName: string;
+  fedCode: string;
+  /** Prize board: the roster board (1-4, 5 = reserve) */
+  board: number;
+  /** Official list rating (0 = unrated) */
+  rating: number;
+  tpr: number | null;
+  avgOpp: number | null;
+  score: number;
+  games: number;
+  eligible: boolean;
+  needed: number;
+  canReach: boolean;
+  /** 1-based rank on the board among players with at least one game; null without games */
+  rank: number | null;
+  /** Rank after the previous round, for movers */
+  prevRank: number | null;
+  form: FormEntry[];
+  /** TPR after each round (index 0 = after round 1); null until the player has played */
+  tprByRound: (number | null)[];
+  rankByRound: (number | null)[];
+}
+
+export interface BoardRace {
+  event: OlympiadEvent;
+  /** Latest round with games ingested */
+  lastRound: number;
+  /** Latest round final on chess-results (drives eligibility maths) */
+  lastFinalRound: number;
+  roundsLeft: number;
+  /** Rows per prize board (index 0 = board 1), ranked */
+  boards: PlayerRaceRow[][];
+  /** Number of players with at least one game, per board */
+  ranked: number[];
+}
+
+export interface PlayerGame {
+  round: number;
+  boardNo: number;
+  colour: Colour;
+  ownRating: number;
+  oppFideId: number | null;
+  oppName: string;
+  oppRating: number;
+  result: GameResult;
+  score: 0 | 0.5 | 1 | null;
+  /** SAN moves without the result token; empty when unplayed */
+  moves: string;
+}
