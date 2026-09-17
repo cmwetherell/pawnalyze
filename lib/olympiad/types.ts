@@ -230,8 +230,11 @@ export interface PlayerRaceRow {
   rankByRound: (number | null)[];
 }
 
-/** Leaderboard row shipped to the client: no per-round arrays. */
-export type BoardRaceRowLite = Omit<PlayerRaceRow, 'tprByRound' | 'rankByRound'>;
+/** Form entry shipped with leaderboard rows: enough for the pips and their tooltips. */
+export type FormEntryLite = Pick<FormEntry, 'round' | 'colour' | 'score' | 'oppFedCode' | 'oppRating'>;
+
+/** Leaderboard row shipped to the client: no per-round arrays, compact form. */
+export type BoardRaceRowLite = Omit<PlayerRaceRow, 'tprByRound' | 'rankByRound' | 'form'> & { form: FormEntryLite[] };
 
 /** Search index entry: enough to find a player and show where they stand. */
 export interface PlayerIndexEntry {

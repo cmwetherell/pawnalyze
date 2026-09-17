@@ -107,8 +107,8 @@ export function buildBoardRace(event: OlympiadEvent, games: Game[], players: Pla
 }
 
 export function liteRow(row: PlayerRaceRow): BoardRaceRowLite {
-  const { tprByRound: _t, rankByRound: _r, ...rest } = row;
-  return rest;
+  const { tprByRound: _t, rankByRound: _r, form, ...rest } = row;
+  return { ...rest, form: form.map(f => ({ round: f.round, colour: f.colour, score: f.score, oppFedCode: f.oppFedCode, oppRating: f.oppRating })) };
 }
 
 /** The compact, client-safe view of a race: podiums, counts and a search index. */
