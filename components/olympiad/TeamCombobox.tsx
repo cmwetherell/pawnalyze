@@ -66,7 +66,7 @@ export default function TeamCombobox({ teams, onSelect, placeholder = 'Search te
             else if (e.key === 'Escape') setOpen(false);
           }}
           placeholder={placeholder}
-          className="w-full rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] pl-8 pr-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-chess-gold/50"
+          className="w-full rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] pl-8 pr-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
           role="combobox"
           aria-expanded={open}
           aria-controls={listId}

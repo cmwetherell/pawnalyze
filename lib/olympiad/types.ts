@@ -55,8 +55,6 @@ export interface TeamSummary {
   pTop10: number;
   expRank: number;
   expMp: number;
-  /** Board game points (0..44), not half-points */
-  expGp: number;
 }
 
 export interface HistoryPoint {
@@ -131,7 +129,26 @@ export interface OlympiadStatus {
   run: Run | null;
   lastFinalRound: number;
   anyLive: boolean;
-  nextRoundPublished: number | null;
+}
+
+export interface WdlCounts {
+  w: number;
+  d: number;
+  l: number;
+}
+
+/** Model win/draw/loss counts for every team in one round (before any result is known). */
+export interface RoundOdds {
+  round: number;
+  total: number;
+  teams: Record<number, WdlCounts>;
+}
+
+export interface Mover {
+  teamId: number;
+  from: number;
+  to: number;
+  delta: number;
 }
 
 /** Per-team odds row used by the dashboard (baseline or scenario). */

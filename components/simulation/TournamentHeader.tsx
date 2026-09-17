@@ -1,3 +1,6 @@
+import type { ReactNode } from 'react';
+import Link from 'next/link';
+
 import PlayerAvatar from './PlayerAvatar';
 import Flag from '@/components/ui/Flag';
 
@@ -12,6 +15,10 @@ interface TournamentHeaderProps {
   flags?: { code: string; title?: string }[];
   /** Small status pill, e.g. "Round 4 of 11" */
   statusPill?: { text: string; live?: boolean };
+  /** Metadata fragments rendered as one dotted line under the description. */
+  meta?: ReactNode[];
+  /** Sibling events, e.g. Open ⇄ Women. */
+  switcher?: { label: string; href: string; active: boolean }[];
 }
 
 export default function TournamentHeader({
@@ -23,6 +30,8 @@ export default function TournamentHeader({
   players,
   flags,
   statusPill,
+  meta,
+  switcher,
 }: TournamentHeaderProps) {
   const pillStyle = {
     backgroundColor: 'var(--header-pill-bg)',
@@ -44,11 +53,30 @@ export default function TournamentHeader({
       }} />
 
       <div className="relative max-w-7xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm mb-4" style={{ color: 'var(--header-text-muted)' }}>
-          <a href="/simulations" className="hover:text-chess-gold transition-colors">Simulations</a>
-          <span>/</span>
-          <span style={{ color: 'var(--header-text)' }}>{name}</span>
+        {/* Breadcrumb + switcher */}
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex items-center gap-2 text-sm min-w-0" style={{ color: 'var(--header-text-muted)' }}>
+            <a href="/simulations" className="hover:text-chess-gold transition-colors">Simulations</a>
+            <span>/</span>
+            <span className="truncate" style={{ color: 'var(--header-text)' }}>{name}</span>
+          </div>
+          {switcher && switcher.length > 0 && (
+            <nav aria-label="Event" className="inline-flex rounded-full p-0.5 shrink-0" style={{ backgroundColor: 'var(--header-pill-bg)', border: '1px solid var(--header-pill-border)' }}>
+              {switcher.map(s => (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  aria-current={s.active ? 'page' : undefined}
+                  className={`px-3 h-7 inline-flex items-center rounded-full text-xs font-semibold transition-colors ${
+                    s.active ? 'bg-chess-gold text-chess-dark' : 'hover:text-chess-gold'
+                  }`}
+                  style={s.active ? undefined : { color: 'var(--header-pill-text)' }}
+                >
+                  {s.label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-heading tracking-tight" style={{ color: 'var(--header-text)' }}>
@@ -90,6 +118,17 @@ export default function TournamentHeader({
         <p className="mt-3 text-sm max-w-2xl" style={{ color: 'var(--header-text-muted)' }}>
           {description}
         </p>
+
+        {meta && meta.length > 0 && (
+          <p className="mt-2 text-xs flex flex-wrap items-center gap-x-2 gap-y-1" style={{ color: 'var(--header-text-muted)' }}>
+            {meta.map((m, i) => (
+              <span key={i} className="inline-flex items-center gap-2">
+                {i > 0 && <span aria-hidden className="opacity-50">·</span>}
+                {m}
+              </span>
+            ))}
+          </p>
+        )}
 
         {/* Player avatars */}
         {players && players.length > 0 && (

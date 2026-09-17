@@ -12,6 +12,7 @@ import type {
   OlympiadStatus,
   Pick,
   Player,
+  RoundOdds,
   Run,
   ScenarioResult,
   Team,
@@ -145,7 +146,7 @@ export async function getOlympiadSummary(event: OlympiadEvent, runId: number): P
   cacheTag(tags.sims(event));
   const rows = await db()
     .selectFrom('olympiad_2026_team_summary')
-    .select(['team_id', 'p_gold', 'p_silver', 'p_bronze', 'p_medal', 'p_top10', 'exp_rank', 'exp_mp', 'exp_gp'])
+    .select(['team_id', 'p_gold', 'p_silver', 'p_bronze', 'p_medal', 'p_top10', 'exp_rank', 'exp_mp'])
     .where('run_id', '=', runId)
     .orderBy('p_gold', 'desc')
     .execute();
@@ -159,7 +160,6 @@ export async function getOlympiadSummary(event: OlympiadEvent, runId: number): P
     pTop10: Number(r.p_top10),
     expRank: Number(r.exp_rank),
     expMp: Number(r.exp_mp),
-    expGp: Number(r.exp_gp),
   }));
 }
 
@@ -172,7 +172,7 @@ async function summaryFromSims(event: OlympiadEvent, runId: number): Promise<Tea
   const n = Math.max(scenario.matched, 1);
   const map = new Map<number, TeamSummary>();
   for (const id of ids) {
-    map.set(id, { teamId: id, pGold: 0, pSilver: 0, pBronze: 0, pMedal: 0, pTop10: 0, expRank: 0, expMp: 0, expGp: 0 });
+    map.set(id, { teamId: id, pGold: 0, pSilver: 0, pBronze: 0, pMedal: 0, pTop10: 0, expRank: 0, expMp: 0 });
   }
   for (const r of scenario.ranks) {
     const row = map.get(r.teamId);
@@ -232,21 +232,17 @@ export async function getOlympiadStatus(event: OlympiadEvent): Promise<OlympiadS
   cacheTag(tags.sims(event));
   const [run, agg] = await Promise.all([
     getOlympiadRun(event),
-    sql<{ last_final: number | null; any_live: boolean; max_round: number | null }>`
+    sql<{ last_final: number | null; any_live: boolean }>`
       SELECT max(round) FILTER (WHERE status = 'final')::int AS last_final,
-             coalesce(bool_or(status = 'live'), false) AS any_live,
-             max(round)::int AS max_round
+             coalesce(bool_or(status = 'live'), false) AS any_live
       FROM olympiad_2026_matches WHERE event = ${event}
     `.execute(db()),
   ]);
   const row = agg.rows[0];
-  const lastFinal = row?.last_final ?? 0;
-  const maxRound = row?.max_round ?? 0;
   return {
     run,
-    lastFinalRound: lastFinal,
+    lastFinalRound: row?.last_final ?? 0,
     anyLive: row?.any_live ?? false,
-    nextRoundPublished: maxRound > lastFinal ? maxRound : null,
   };
 }
 
@@ -459,4 +455,41 @@ export async function getOlympiadTeamOpponents(
     following: { all: toShares(all), w: toShares(byOutcome.w), d: toShares(byOutcome.d), l: toShares(byOutcome.l) },
     outcomeCounts,
   };
+}
+
+/** Model win/draw/loss counts for every team in `round`, optionally conditioned on picks. One pass over the run. */
+export async function getOlympiadRoundOdds(
+  event: OlympiadEvent,
+  runId: number,
+  round: number,
+  nTeams: number,
+  picks: Pick[],
+): Promise<RoundOdds> {
+  'use cache';
+  cacheLife('days');
+  cacheTag(tags.scenario(event));
+
+  const empty: RoundOdds = { round, total: 0, teams: {} };
+  if (round < 1 || round > N_ROUNDS) return empty;
+  const where = picks.length ? sql`AND ${sql.join(predicates(picks), sql` AND `)}` : sql``;
+  const r = sql.lit(round);
+  const n = sql.lit(nTeams);
+
+  const { rows } = await sql<{ team_id: number; w: number; d: number; l: number }>`
+    SELECT u.tid::int AS team_id,
+           count(*) FILTER (WHERE u.v > 4)::int AS w,
+           count(*) FILTER (WHERE u.v = 4)::int AS d,
+           count(*) FILTER (WHERE u.v < 4)::int AS l
+    FROM olympiad_2026_sims m, unnest(m.round_scores[${r}:${r}][1:${n}]) WITH ORDINALITY AS u(v, tid)
+    WHERE m.run_id = ${runId} ${where}
+    GROUP BY u.tid
+  `.execute(db());
+
+  const teams: RoundOdds['teams'] = {};
+  let total = 0;
+  for (const row of rows) {
+    teams[row.team_id] = { w: row.w, d: row.d, l: row.l };
+    total = Math.max(total, row.w + row.d + row.l);
+  }
+  return { round, total, teams };
 }

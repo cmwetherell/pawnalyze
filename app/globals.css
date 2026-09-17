@@ -367,3 +367,21 @@ body {
 .tn_ZAM{background-position:-245px -400px}
 .tn_ZIM{background-position:-280px -400px}
 .tn_ZZZ{background-position:-315px -400px}
+
+/* Keyboard focus: one visible ring everywhere (hover-only styles never remove it) */
+:where(a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible) {
+  outline: 2px solid #C9A84C;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-live,
+  .animate-fade-in-up,
+  .animate-shimmer {
+    animation: none !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}

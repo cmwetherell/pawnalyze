@@ -15,9 +15,13 @@ interface MedalHistoryChartProps {
   history: HistoryPoint[];
   teamsById: Map<number, Team>;
   topN?: number;
+  /** Always include this team's line (the spotlighted team) */
+  extraTeamId?: number | null;
+  /** Rendered inside another card: no outer card chrome or title */
+  embedded?: boolean;
 }
 
-export default function MedalHistoryChart({ history, teamsById, topN = 8 }: MedalHistoryChartProps) {
+export default function MedalHistoryChart({ history, teamsById, topN = 8, extraTeamId = null, embedded = false }: MedalHistoryChartProps) {
   const [metric, setMetric] = useState<Metric>('pGold');
   const theme = useChartTheme();
 
@@ -26,6 +30,7 @@ export default function MedalHistoryChart({ history, teamsById, topN = 8 }: Meda
     const latest = rounds[rounds.length - 1];
     const latestRows = history.filter(h => h.roundsCompleted === latest);
     const top = [...latestRows].sort((a, b) => b[metric] - a[metric]).slice(0, topN).map(r => r.teamId);
+    if (extraTeamId !== null && !top.includes(extraTeamId) && latestRows.some(r => r.teamId === extraTeamId)) top.push(extraTeamId);
     const labels = rounds.map(r => (r === 0 ? 'Pre' : `R${r}`));
     const datasets = top.map((teamId, i) => {
       const team = teamsById.get(teamId);
@@ -48,7 +53,7 @@ export default function MedalHistoryChart({ history, teamsById, topN = 8 }: Meda
       };
     });
     return { labels, datasets, rounds };
-  }, [history, metric, teamsById, topN]);
+  }, [history, metric, teamsById, topN, extraTeamId]);
 
   if (rounds.length < 2) return null;
 
@@ -92,19 +97,21 @@ export default function MedalHistoryChart({ history, teamsById, topN = 8 }: Meda
   };
 
   return (
-    <div className="surface-card p-4 sm:p-6">
+    <div className={embedded ? '' : 'surface-card p-4 sm:p-6'}>
       <div className="flex flex-wrap items-baseline justify-between gap-3 mb-3">
         <div>
-          <h2 className="text-xl font-heading text-[var(--text-primary)]">Odds Over Time</h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">How the favourites&apos; chances moved round by round</p>
+          {!embedded && <h2 className="text-xl font-heading text-[var(--text-primary)]">Odds Over Time</h2>}
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">How the favourites&apos; chances moved round by round{extraTeamId !== null ? ' · includes the spotlighted team' : ''}</p>
         </div>
-        <div className="inline-flex rounded-lg bg-[var(--bg-surface-2)] p-0.5 text-xs">
+        <div role="tablist" aria-label="Metric" className="inline-flex rounded-lg bg-[var(--bg-surface-2)] p-0.5 text-xs">
           {([['pGold', 'Gold'], ['pMedal', 'Medal'], ['pTop10', 'Top 10']] as [Metric, string][]).map(([k, label]) => (
             <button
               key={k}
+              role="tab"
+              aria-selected={metric === k}
               type="button"
               onClick={() => setMetric(k)}
-              className={`px-2.5 py-1 rounded-md font-medium transition-colors ${
+              className={`h-8 px-2.5 rounded-md font-medium transition-colors ${
                 metric === k ? 'bg-[var(--bg-surface-1)] text-[var(--text-primary)] shadow-sm' : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
               }`}
             >

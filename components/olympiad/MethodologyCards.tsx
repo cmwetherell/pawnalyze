@@ -1,4 +1,4 @@
-export default function MethodologyCards() {
+export default function MethodologyCards({ nonParticipants = [] }: { nonParticipants?: string[] }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 pt-4 w-full">
       <div className="max-w-3xl">
@@ -62,6 +62,11 @@ export default function MethodologyCards() {
               How Our Chess Tournament Predictions Work
             </a>.
           </p>
+          {nonParticipants.length > 0 && (
+            <p className="mt-3 text-xs text-[var(--text-muted)]">
+              Registered but not playing: {nonParticipants.join(', ')}.
+            </p>
+          )}
         </div>
       </div>
     </div>

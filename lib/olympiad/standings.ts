@@ -133,14 +133,6 @@ export function sortMatchesForPicker(
   });
 }
 
-export function roundsWithPairings(matches: Match[]): Set<number> {
-  return new Set(matches.map(m => m.round));
-}
-
-export function roundIsFinal(matches: Match[], round: number): boolean {
-  const inRound = matches.filter(m => m.round === round);
-  return inRound.length > 0 && inRound.every(m => m.status === 'final');
-}
 
 /**
  * Teams that exist in the current run's numbering. chess-results renumbers seeds when a team

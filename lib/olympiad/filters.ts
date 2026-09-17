@@ -79,3 +79,38 @@ export function outcomeFor(
   const viaTeam1 = picks.get(pickKey(round, match.team1Id));
   return viaTeam1 ? INVERT_OUTCOME[viaTeam1.outcome] : null;
 }
+
+/**
+ * Like parseFilters, but keeps every valid pick and reports how many were dropped —
+ * used when restoring a shared link after rounds have completed or teams withdrew.
+ */
+export function parseFiltersLenient(
+  param: string | null | undefined,
+  opts: { roundsCompleted: number; nTeams: number; participantIds?: Set<number> },
+): { picks: Pick[]; dropped: number } {
+  if (!param) return { picks: [], dropped: 0 };
+  const picks: Pick[] = [];
+  let dropped = 0;
+  for (const token of param.split(',').filter(Boolean)) {
+    const one = parseFilters(token, opts);
+    if (one.ok && one.picks[0]) picks.push(one.picks[0]);
+    else dropped += 1;
+  }
+  const deduped = new Map<string, Pick>();
+  for (const p of picks) deduped.set(pickKey(p.round, p.teamId), p);
+  return { picks: Array.from(deduped.values()).slice(0, MAX_PICKS), dropped };
+}
+
+/** Human sentence for one pick, using the known pairing when there is one. */
+export function describePick(pick: Pick, matches: Match[], teamName: (id: number) => string): string {
+  const match = matches.find(m => m.round === pick.round && (m.team1Id === pick.teamId || m.team2Id === pick.teamId));
+  const me = teamName(pick.teamId);
+  const oppId = match ? (match.team1Id === pick.teamId ? match.team2Id : match.team1Id) : null;
+  const opp = oppId != null ? teamName(oppId) : null;
+  if (opp) {
+    if (pick.outcome === 'w') return `${me} beating ${opp} in R${pick.round}`;
+    if (pick.outcome === 'd') return `${me} drawing ${opp} in R${pick.round}`;
+    return `${opp} beating ${me} in R${pick.round}`;
+  }
+  return `${me} ${pick.outcome === 'w' ? 'winning' : pick.outcome === 'd' ? 'drawing' : 'losing'} R${pick.round}`;
+}

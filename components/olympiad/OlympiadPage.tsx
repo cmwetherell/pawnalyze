@@ -1,11 +1,13 @@
 import TournamentHeader from '@/components/simulation/TournamentHeader';
+import RelativeTime from '@/components/ui/RelativeTime';
 import OlympiadDashboard from './OlympiadDashboard';
 import MethodologyCards from './MethodologyCards';
-import { N_ROUNDS, OLYMPIAD_EVENTS } from '@/lib/olympiad/config';
+import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import {
   getOlympiadMatches,
   getOlympiadPlayers,
   getOlympiadProjectedPairings,
+  getOlympiadRoundOdds,
   getOlympiadRun,
   getOlympiadStatus,
   getOlympiadSummary,
@@ -27,24 +29,45 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
   const teams = teamsInRun(allTeams, run);
   const nextRound = run ? run.roundsCompleted + 1 : 0;
   const needProjected = run !== null && nextRound <= N_ROUNDS && !matches.some(m => m.round === nextRound);
-  const [summary, history, projected] = run
+  const [summary, history, projected, roundOdds] = run
     ? await Promise.all([
         getOlympiadSummary(event, run.runId),
         getOlympiadSummaryHistory(event),
         needProjected ? getOlympiadProjectedPairings(event, run.runId, nextRound, run.nTeams) : Promise.resolve([]),
+        nextRound <= N_ROUNDS ? getOlympiadRoundOdds(event, run.runId, nextRound, run.nTeams, []) : Promise.resolve(null),
       ])
-    : [[], [], []];
+    : [[], [], [], null];
   const allMatches = projected.length ? [...matches, ...projected] : matches;
+  const participantIds = new Set(summary.map(s => s.teamId));
+  const nonParticipants = run ? teams.filter(t => !participantIds.has(t.teamId)).map(t => t.name) : [];
 
   const topSeeds = teams.slice(0, 8).map(t => ({ code: t.fedCode, title: t.name }));
   const finished = status.lastFinalRound >= N_ROUNDS;
+  const startLabel = new Date(cfg.startDate + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
   const statusPill = finished
     ? { text: 'Final', live: false }
     : status.anyLive
       ? { text: `Round ${status.lastFinalRound + 1} in progress`, live: true }
       : status.lastFinalRound > 0
         ? { text: `After round ${status.lastFinalRound} of ${N_ROUNDS}`, live: false }
-        : { text: `Starts ${new Date(cfg.startDate + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}`, live: false };
+        : { text: `Starts ${startLabel}`, live: false };
+
+  const meta = run
+    ? [
+        <span key="sims"><strong className="text-chess-gold font-semibold">{run.nSims.toLocaleString()}</strong> simulations after round {run.roundsCompleted}</span>,
+        ...(status.lastFinalRound > run.roundsCompleted
+          ? [<span key="lag">round {status.lastFinalRound} results not yet simulated</span>]
+          : []),
+        <RelativeTime key="upd" iso={run.createdAt} prefix="updated " />,
+        <span key="teams">{summary.length} teams playing</span>,
+      ]
+    : [<span key="teams">{teams.length} teams registered</span>];
+
+  const switcher = (['open', 'women'] as OlympiadEvent[]).map(e => ({
+    label: e === 'open' ? 'Open' : 'Women',
+    href: eventHref(e),
+    active: e === event,
+  }));
 
   return (
     <main className="flex-1 flex flex-col min-h-screen">
@@ -56,24 +79,9 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
         format={cfg.format}
         flags={topSeeds}
         statusPill={statusPill}
+        meta={meta}
+        switcher={switcher}
       />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-2 w-full">
-        <p className="text-[var(--text-secondary)] text-sm sm:text-base leading-relaxed max-w-3xl">
-          {run ? (
-            <>
-              We simulate the remaining rounds <strong className="text-chess-gold">{run.nSims.toLocaleString()} times</strong> after
-              every round, pairing teams Swiss-style and playing out each board from the players&apos; ratings. Use the{' '}
-              <span className="text-[var(--text-primary)] font-medium">Scenario Builder</span> to lock in match results
-              and see how the medal picture changes.
-            </>
-          ) : (
-            <>
-              Simulations for the {cfg.shortTitle} arrive shortly before round 1. Check back soon.
-            </>
-          )}
-        </p>
-      </div>
 
       {run ? (
         <OlympiadDashboard
@@ -84,7 +92,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
           matches={allMatches}
           summary={summary}
           history={history}
-          lastFinalRound={status.lastFinalRound}
+          roundOdds={roundOdds}
           anyLive={status.anyLive}
         />
       ) : (
@@ -113,7 +121,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
         </div>
       )}
 
-      <MethodologyCards />
+      <MethodologyCards nonParticipants={nonParticipants} />
     </main>
   );
 }

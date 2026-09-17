@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 
 import Flag from '@/components/ui/Flag';
 import { formatPct } from '@/components/ui/ProbBar';
+import { StaleRunError, cachedJson } from '@/lib/olympiad/clientCache';
 import type { OlympiadEvent, OpponentShare, Run, Team, TeamOpponents } from '@/lib/olympiad/types';
 
 interface LikelyOpponentsProps {
@@ -13,6 +14,7 @@ interface LikelyOpponentsProps {
   teamsById: Map<number, Team>;
   filtersKey: string;
   isScenario: boolean;
+  onStale?: () => void;
 }
 
 type Split = 'all' | 'w' | 'd' | 'l';
@@ -32,7 +34,7 @@ function ShareList({ shares, total, teamsById }: { shares: OpponentShare[]; tota
         const p = s.n / total;
         return (
           <li key={s.teamId} className="flex items-center gap-2 text-xs">
-            {opp ? <Flag code={opp.fedCode} size="xs" title={opp.name} /> : <span className="w-[18px]" />}
+            {opp ? <Flag code={opp.fedCode} size="xs" title={opp.name} aria-hidden /> : <span className="w-[18px]" />}
             <span className="truncate text-[var(--text-secondary)] w-28 shrink-0">
               {opp ? opp.name : s.teamId === 0 ? 'Bye' : `Team ${s.teamId}`}
             </span>
@@ -44,7 +46,7 @@ function ShareList({ shares, total, teamsById }: { shares: OpponentShare[]; tota
         );
       })}
       {rest > 0 && (
-        <li className="text-[10px] text-[var(--text-muted)] pl-6">
+        <li className="text-[11px] text-[var(--text-muted)] pl-6">
           {shares.length - TOP_N} other teams · {formatPct(rest / total)}
         </li>
       )}
@@ -52,8 +54,8 @@ function ShareList({ shares, total, teamsById }: { shares: OpponentShare[]; tota
   );
 }
 
-export default function LikelyOpponents({ event, run, team, teamsById, filtersKey, isScenario }: LikelyOpponentsProps) {
-  const requestKey = `${event}|${run.runId}|${team.teamId}|${filtersKey}`;
+export default function LikelyOpponents({ event, run, team, teamsById, filtersKey, isScenario, onStale }: LikelyOpponentsProps) {
+  const requestKey = `opp|${event}|${run.runId}|${team.teamId}|${filtersKey}`;
   const [result, setResult] = useState<{ key: string; data?: TeamOpponents; error?: string } | null>(null);
   const [split, setSplit] = useState<Split>('all');
   const data = result?.key === requestKey ? result.data ?? null : null;
@@ -63,15 +65,15 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     let cancelled = false;
     const params = new URLSearchParams({ event, run: String(run.runId), teamId: String(team.teamId) });
     if (filtersKey) params.set('filters', filtersKey);
-    fetch(`/api/sims/olympiad-2026/opponents?${params.toString()}`)
-      .then(async r => {
-        if (!r.ok) throw new Error((await r.json().catch(() => ({})))?.error ?? `HTTP ${r.status}`);
-        return r.json() as Promise<TeamOpponents>;
-      })
+    cachedJson<TeamOpponents>(requestKey, `/api/sims/olympiad-2026/opponents?${params.toString()}`)
       .then(d => { if (!cancelled) setResult({ key: requestKey, data: d }); })
-      .catch(e => { if (!cancelled) setResult({ key: requestKey, error: e.message }); });
+      .catch(e => {
+        if (cancelled) return;
+        if (e instanceof StaleRunError) { onStale?.(); setResult({ key: requestKey, error: 'New simulations are available — reload the page.' }); return; }
+        setResult({ key: requestKey, error: e.message });
+      });
     return () => { cancelled = true; };
-  }, [event, run.runId, team.teamId, filtersKey, requestKey]);
+  }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale]);
 
   const heading = (
     <div className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] mb-2">
@@ -92,7 +94,6 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
     <div>
       {heading}
 
-      {/* Next round: only when it is genuinely uncertain (a fixed pairing already appears under Results) */}
       {!nextIsFixed && (
         <div className="mb-3">
           <div className="text-[11px] text-[var(--text-muted)] mb-1">Round {data.nextRound}</div>
@@ -100,7 +101,6 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
         </div>
       )}
 
-      {/* Following round, split by next-round result */}
       {data.followingRound !== null && (
         <div>
           <div className="flex items-center justify-between gap-2 mb-1.5">
@@ -108,7 +108,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
               Round {data.followingRound}
               {split !== 'all' && <span> · if {SPLIT_LABEL[split].toLowerCase()} in R{data.nextRound}</span>}
             </div>
-            <div className="inline-flex rounded-md bg-[var(--bg-surface-1)] border border-[var(--border)] p-0.5">
+            <div role="tablist" aria-label={`Condition on round ${data.nextRound} result`} className="inline-flex rounded-md bg-[var(--bg-surface-1)] border border-[var(--border)] p-0.5">
               {(['all', 'w', 'd', 'l'] as Split[]).map(k => {
                 const count = k === 'all' ? data.total : data.outcomeCounts[k];
                 const active = split === k;
@@ -116,11 +116,13 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
                 return (
                   <button
                     key={k}
+                    role="tab"
+                    aria-selected={active}
                     type="button"
                     onClick={() => setSplit(k)}
                     disabled={count === 0}
                     title={`${SPLIT_LABEL[k]} in round ${data.nextRound} · ${formatPct(data.total ? count / data.total : 0)} of sims`}
-                    className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                    className={`h-8 min-w-[2.25rem] px-2 rounded text-[11px] font-semibold transition-colors ${
                       active ? `bg-[var(--bg-surface-3)] ${tone}` : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
                     } disabled:opacity-40`}
                   >
@@ -132,7 +134,7 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
           </div>
           <ShareList shares={data.following[split]} total={splitTotal} teamsById={teamsById} />
           {split !== 'all' && data.total > 0 && (
-            <p className="mt-1.5 text-[10px] text-[var(--text-muted)]">
+            <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
               {formatPct(splitTotal / data.total)} of simulations have {team.name} {split === 'w' ? 'winning' : split === 'd' ? 'drawing' : 'losing'} round {data.nextRound}.
             </p>
           )}

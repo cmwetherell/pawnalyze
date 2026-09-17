@@ -40,7 +40,7 @@ export default function CompletedRoundList({ round, matches, teamsById }: Comple
         value={query}
         onChange={e => { setQuery(e.target.value); setLimit(PAGE); }}
         placeholder="Filter by team…"
-        className="w-full rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-chess-gold/50"
+        className="w-full rounded-lg bg-[var(--bg-surface-1)] border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--text-primary)] placeholder:text-[var(--text-muted)]"
       />
       <ul className="space-y-0.5">
         {rows.slice(0, limit).map(m => {
