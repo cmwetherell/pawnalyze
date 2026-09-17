@@ -10,7 +10,7 @@ import Flag from '@/components/ui/Flag';
 import { playerHref } from '@/lib/olympiad/config';
 import { eligibilityLabel } from './EligibilityPips';
 import { displayName, formatScore } from '@/lib/olympiad/tpr';
-import type { BoardRace, OlympiadEvent, PlayerRaceRow } from '@/lib/olympiad/types';
+import type { BoardRaceLite as BoardRace, OlympiadEvent, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
 
 interface BoardLeaderboardProps {
   event: OlympiadEvent;

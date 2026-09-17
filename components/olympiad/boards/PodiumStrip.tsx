@@ -3,7 +3,7 @@
 import Flag from '@/components/ui/Flag';
 import { BOARD_LABELS } from '@/lib/olympiad/config';
 import { displayName, formatScore } from '@/lib/olympiad/tpr';
-import type { BoardRace, PlayerRaceRow } from '@/lib/olympiad/types';
+import type { BoardRaceLite as BoardRace, BoardRaceRowLite as PlayerRaceRow } from '@/lib/olympiad/types';
 
 interface PodiumStripProps {
   race: BoardRace;

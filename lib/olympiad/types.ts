@@ -230,6 +230,13 @@ export interface PlayerRaceRow {
   rankByRound: (number | null)[];
 }
 
+/** What the board-race dashboard ships to the client: rows without the per-round arrays. */
+export type BoardRaceRowLite = Omit<PlayerRaceRow, 'tprByRound' | 'rankByRound'>;
+
+export interface BoardRaceLite extends Omit<BoardRace, 'boards'> {
+  boards: BoardRaceRowLite[][];
+}
+
 export interface BoardRace {
   event: OlympiadEvent;
   /** Latest round with games ingested */

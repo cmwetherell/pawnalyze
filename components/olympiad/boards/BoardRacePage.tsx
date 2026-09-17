@@ -6,7 +6,7 @@ import { getOlympiadBoardRace, getOlympiadRun, getOlympiadStatus, getOlympiadTea
 import { teamsInRun } from '@/lib/olympiad/standings';
 import { statusPillFor } from '@/lib/olympiad/status';
 import { MIN_GAMES_FOR_PRIZE, displayName } from '@/lib/olympiad/tpr';
-import type { OlympiadEvent } from '@/lib/olympiad/types';
+import type { BoardRaceLite, OlympiadEvent } from '@/lib/olympiad/types';
 
 export function olympiadSubnav(event: OlympiadEvent, active: 'odds' | 'boards') {
   return [
@@ -21,6 +21,11 @@ export default async function BoardRacePage({ event }: { event: OlympiadEvent })
     getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event), getOlympiadBoardRace(event),
   ]);
   const teams = teamsInRun(allTeams, run);
+  // Keep the client payload small: the leaderboard never needs the per-round arrays.
+  const lite: BoardRaceLite = {
+    ...race,
+    boards: race.boards.map(rows => rows.map(({ tprByRound: _t, rankByRound: _r, ...rest }) => rest)),
+  };
   const players = race.boards.reduce((n, b) => n + b.length, 0);
   const leaders = race.boards.map((rows, i) => rows[0] ? { code: rows[0].fedCode, title: `${BOARD_LABELS[i]}: ${displayName(rows[0].name)} (${rows[0].tpr})` } : null).filter((x): x is { code: string; title: string } => x !== null);
 
@@ -48,7 +53,7 @@ export default async function BoardRacePage({ event }: { event: OlympiadEvent })
         subnav={olympiadSubnav(event, 'boards')}
       />
       <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
-        <BoardRaceDashboard event={event} race={race} teams={teams} />
+        <BoardRaceDashboard event={event} race={lite} teams={teams} />
         <BoardRaceExplainer />
       </div>
     </main>

@@ -11,7 +11,7 @@ import Flag from '@/components/ui/Flag';
 import { setUrlParam, useUrlParam } from '@/hooks/useUrlParam';
 import { BOARD_LABELS, N_PRIZE_BOARDS, boardLabel, playerHref } from '@/lib/olympiad/config';
 import { MIN_GAMES_FOR_PRIZE, displayName } from '@/lib/olympiad/tpr';
-import type { BoardRace, OlympiadEvent, PlayerRaceRow, Team } from '@/lib/olympiad/types';
+import type { BoardRaceLite as BoardRace, OlympiadEvent, BoardRaceRowLite as PlayerRaceRow, Team } from '@/lib/olympiad/types';
 
 interface BoardRaceDashboardProps {
   event: OlympiadEvent;
