@@ -30,7 +30,8 @@ export function formatMatchScore(a: number | null, b: number | null): string {
 
 /**
  * Unofficial live standings from final matches: MP desc, GP desc, seed asc.
- * Byes (team2 null) count as a match win worth 2 MP and whatever score is stored (default 8 half-points).
+ * A pairing-allocated bye (team2 null) scores 1 MP and 2 GP, as on chess-results; the stored
+ * team1_score carries the half-points (default 4).
  */
 export function deriveStandings(
   matches: Match[],
@@ -48,8 +49,8 @@ export function deriveStandings(
     const r1 = rows.get(m.team1Id);
     if (m.team2Id === null) {
       if (r1) {
-        r1.mp += 2;
-        r1.gpHalf += m.team1Score ?? 8;
+        r1.mp += 1;
+        r1.gpHalf += m.team1Score ?? 4;
         r1.played += 1;
       }
       continue;
@@ -103,7 +104,7 @@ export function teamRoundHistory(matches: Match[], teamId: number): TeamRoundEnt
       score,
       oppScore,
       status: m.status,
-      outcome: m.team2Id === null ? 'w' : outcomeFromScores(score, oppScore),
+      outcome: m.team2Id === null ? 'd' : outcomeFromScores(score, oppScore), // a bye is worth a draw
       projected: m.projected === true,
     });
   }
