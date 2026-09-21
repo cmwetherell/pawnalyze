@@ -116,14 +116,19 @@ export default function MedalHistoryChart({
   const gridVals: number[] = [];
   for (let v = 0; v <= yMax + 1e-9; v += gridStep) gridVals.push(Number(v.toFixed(4)));
 
-  // ---- end labels: greedy push-down, then shift back up if the stack overflows the plot
+  // ---- end labels: push overlapping labels down, then back up from the bottom edge, then down from
+  // the top edge — so a crowded tail near 0% compresses upward without shoving the leader off the plot.
   const minGap = narrow ? 22 : 26;
+  const labelTop = T + minGap / 2;
+  const labelBottom = H - B - 6;
   const labels = series.map(s => ({ s, y: y(s.latest), target: y(s.latest) })).sort((a, b) => a.y - b.y);
-  for (let i = 1; i < labels.length; i++) {
-    if (labels[i].y - labels[i - 1].y < minGap) labels[i].y = labels[i - 1].y + minGap;
+  for (let i = 1; i < labels.length; i++) labels[i].y = Math.max(labels[i].y, labels[i - 1].y + minGap);
+  for (let i = labels.length - 1; i >= 0; i--) {
+    labels[i].y = Math.min(labels[i].y, i === labels.length - 1 ? labelBottom : labels[i + 1].y - minGap);
   }
-  const overflow = labels.length ? labels[labels.length - 1].y - (H - B - 6) : 0;
-  if (overflow > 0) for (const l of labels) l.y -= overflow;
+  for (let i = 0; i < labels.length; i++) {
+    labels[i].y = Math.max(labels[i].y, i === 0 ? labelTop : labels[i - 1].y + minGap);
+  }
 
   const hoverIndex = hover !== null && hover >= 0 && hover < rounds.length ? hover : null;
   const tickEvery = narrow && rounds.length > 6 ? 2 : 1;
