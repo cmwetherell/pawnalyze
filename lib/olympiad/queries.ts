@@ -230,7 +230,11 @@ async function numberingMap(
   if (!old) return null;
   const oldVec = (t: number) => old.map(r => r[t - 1]);
   const curVec = (t: number) => curScores.slice(0, roundsCompleted).map(r => r[t - 1]);
-  const same = (a: number[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
+  // When teams have been added since, the old run may also have excluded matches it did not know
+  // about (late arrivals, forfeits against them), which it stored as 0 — so an old 0 is "unknown".
+  const wildcardZero = nTeamsOld < nTeamsCur;
+  const same = (a: number[], b: number[]) =>
+    a.length === b.length && a.every((v, i) => v === b[i] || (wildcardZero && v === 0));
 
   const map = new Map<number, number>();
   const slack = Math.abs(nTeamsOld - nTeamsCur);
