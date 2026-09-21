@@ -207,19 +207,21 @@ async function summaryFromSims(event: OlympiadEvent, runId: number): Promise<Tea
 }
 
 /**
- * Chess-results renumbers every seed when a team withdraws, so team_ids differ between runs with
- * different n_teams. Completed rounds are stored with their actual scores in every sim row, and the
- * matches table always uses the current numbering, so aligning an old run's scores against today's
- * results recovers the mapping old team_id -> current team_id. Returns null when it can't be done safely.
+ * Chess-results renumbers every seed when a team withdraws, so team_ids can differ between runs with
+ * different n_teams. Completed rounds are stored with their actual scores in every sim row, so aligning
+ * an old run's scores against the current run's (same pipeline, same conventions for forfeits and byes)
+ * recovers the mapping old team_id -> current team_id. Whichever numbering has more teams may skip
+ * exactly the surplus; a team appended at the end (a late scrape pickup) maps as the identity.
+ * Returns null when it can't be done safely.
  */
 async function numberingMap(
   runId: number,
   roundsCompleted: number,
   nTeamsOld: number,
   nTeamsCur: number,
-  curScores: Map<number, number[]>,   // current team_id -> half-points per completed round (index 0 = round 1)
+  curScores: number[][],   // current run's actual scores, [round][team - 1], at least roundsCompleted rounds
 ): Promise<Map<number, number> | null> {
-  if (roundsCompleted === 0 || nTeamsOld <= nTeamsCur) return null;
+  if (roundsCompleted === 0 || nTeamsOld === nTeamsCur) return null;
   const { rows } = await sql<{ scores: number[][] | null }>`
     SELECT round_scores[1:${sql.lit(roundsCompleted)}][1:${sql.lit(nTeamsOld)}] AS scores
     FROM olympiad_2026_sims WHERE run_id = ${runId} ORDER BY sim_id LIMIT 1
@@ -227,22 +229,30 @@ async function numberingMap(
   const old = rows[0]?.scores;
   if (!old) return null;
   const oldVec = (t: number) => old.map(r => r[t - 1]);
-  const same = (a: number[], b: number[] | undefined) => !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+  const curVec = (t: number) => curScores.slice(0, roundsCompleted).map(r => r[t - 1]);
+  const same = (a: number[], b: number[]) => a.length === b.length && a.every((v, i) => v === b[i]);
 
   const map = new Map<number, number>();
-  let cur = 1;
-  let dropped = 0;
-  for (let t = 1; t <= nTeamsOld; t++) {
-    const v = oldVec(t);
-    if (cur <= nTeamsCur && same(v, curScores.get(cur))) {
-      map.set(t, cur);
-      cur += 1;
+  const slack = Math.abs(nTeamsOld - nTeamsCur);
+  let skipped = 0;
+  let o = 1;
+  let c = 1;
+  while (o <= nTeamsOld && c <= nTeamsCur) {
+    if (same(oldVec(o), curVec(c))) {
+      map.set(o, c);
+      o += 1;
+      c += 1;
+    } else if (nTeamsOld > nTeamsCur) {
+      o += 1; // team withdrawn since the old run
+      skipped += 1;
     } else {
-      dropped += 1;
-      if (dropped > nTeamsOld - nTeamsCur) return null; // alignment failed
+      c += 1; // team added since the old run
+      skipped += 1;
     }
+    if (skipped > slack) return null; // alignment failed
   }
-  return cur === nTeamsCur + 1 && dropped === nTeamsOld - nTeamsCur ? map : null;
+  skipped += (nTeamsOld - o + 1) + (nTeamsCur - c + 1);
+  return skipped === slack ? map : null;
 }
 
 /**
@@ -262,9 +272,10 @@ export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<H
   }>`
     WITH latest AS (
       SELECT DISTINCT ON (rounds_completed) run_id, rounds_completed, n_teams
-      FROM olympiad_2026_runs
+      FROM olympiad_2026_runs r
       WHERE event = ${event} AND source = 'pipeline' AND rounds_completed <= ${current.roundsCompleted}
-      ORDER BY rounds_completed, created_at DESC
+        AND EXISTS (SELECT 1 FROM olympiad_2026_team_summary s WHERE s.run_id = r.run_id)
+      ORDER BY rounds_completed, (run_id = ${current.runId}) DESC, created_at DESC
     )
     SELECT l.run_id, l.rounds_completed, l.n_teams, s.team_id, s.p_gold, s.p_medal, s.p_top10
     FROM latest l
@@ -272,25 +283,6 @@ export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<H
     ORDER BY l.rounds_completed, s.team_id
   `.execute(db());
   if (rows.length === 0) return [];
-
-  // Current numbering's actual scores per completed round, from the matches table.
-  const matches = await getOlympiadMatches(event);
-  const curScores = new Map<number, number[]>();
-  for (let t = 1; t <= current.nTeams; t++) curScores.set(t, Array.from({ length: current.roundsCompleted }, () => 0));
-  for (const m of matches) {
-    if (m.status !== 'final' || m.round > current.roundsCompleted) continue;
-    const a = curScores.get(m.team1Id);
-    if (a) a[m.round - 1] = m.team1Score ?? 0;
-    if (m.team2Id !== null) {
-      const b = curScores.get(m.team2Id);
-      if (b) b[m.round - 1] = m.team2Score ?? 0;
-    }
-  }
-  const scoresUpTo = (rc: number) => {
-    const out = new Map<number, number[]>();
-    for (const [t, v] of curScores) out.set(t, v.slice(0, rc));
-    return out;
-  };
 
   // One mapping per distinct old numbering (n_teams), derived from the run with the most completed rounds.
   const runsByN = new Map<number, { runId: number; roundsCompleted: number }[]>();
@@ -301,9 +293,17 @@ export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<H
     runsByN.set(r.n_teams, list);
   }
   const maps = new Map<number, Map<number, number> | null>();
-  for (const [n, list] of runsByN) {
-    const best = [...list].sort((a, b) => b.roundsCompleted - a.roundsCompleted)[0];
-    maps.set(n, await numberingMap(best.runId, best.roundsCompleted, n, current.nTeams, scoresUpTo(best.roundsCompleted)));
+  if (runsByN.size > 0) {
+    // Current numbering's actual scores per completed round, from the current run's own sims.
+    const { rows: cur } = await sql<{ scores: number[][] | null }>`
+      SELECT round_scores[1:${sql.lit(Math.max(current.roundsCompleted, 1))}][1:${sql.lit(current.nTeams)}] AS scores
+      FROM olympiad_2026_sims WHERE run_id = ${current.runId} ORDER BY sim_id LIMIT 1
+    `.execute(db());
+    const curScores = cur[0]?.scores ?? [];
+    for (const [n, list] of runsByN) {
+      const best = [...list].sort((a, b) => b.roundsCompleted - a.roundsCompleted)[0];
+      maps.set(n, await numberingMap(best.runId, best.roundsCompleted, n, current.nTeams, curScores));
+    }
   }
 
   const out: HistoryPoint[] = [];
