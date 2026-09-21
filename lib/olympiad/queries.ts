@@ -13,6 +13,7 @@ import type {
   Game,
   HistoryPoint,
   Match,
+  OfficialStandings,
   OlympiadEvent,
   OpponentShare,
   OlympiadStatus,
@@ -53,6 +54,10 @@ interface GamesTable {
   white_player: string; black_player: string; white_fide_id: number | null; black_fide_id: number | null;
   white_elo: number; black_elo: number; result: string; pgn: string | null; source: string; updated_at: Date;
 }
+interface StandingsTable {
+  event: string; after_round: number; team_id: number; rank: number; mp: number; gp_hp: number;
+  tb1: number | null; tb2: number | null; tb3: number | null; updated_at: Date;
+}
 interface TeamSummaryTable {
   run_id: number; event: string; team_id: number; p_gold: number; p_silver: number; p_bronze: number;
   p_medal: number; p_top10: number; exp_rank: number; exp_mp: number; exp_gp: number;
@@ -63,6 +68,7 @@ export interface OlympiadDatabase {
   olympiad_2026_players: PlayersTable;
   olympiad_2026_matches: MatchesTable;
   olympiad_2026_runs: RunsTable;
+  olympiad_2026_standings: StandingsTable;
   olympiad_2026_sims: SimsTable;
   olympiad_2026_team_summary: TeamSummaryTable;
   olympiad_2026_games: GamesTable;
@@ -330,6 +336,30 @@ export async function getOlympiadSummaryHistory(event: OlympiadEvent): Promise<H
     });
   }
   return out;
+}
+
+/**
+ * Official chess-results ranking after the latest completed round the pipeline has a table for.
+ * mp/gp_hp are cross-checked against the official values on every scrape; tb1 is null only when the
+ * ranking page could not be fetched and the pipeline fell back to a derived rank.
+ */
+export async function getOlympiadOfficialStandings(event: OlympiadEvent): Promise<OfficialStandings | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.ref(event));
+  const rows = await db()
+    .selectFrom('olympiad_2026_standings')
+    .select(['after_round', 'team_id', 'rank', 'mp', 'gp_hp', 'tb1'])
+    .where('event', '=', event)
+    .where('after_round', '=', db().selectFrom('olympiad_2026_standings').select(({ fn }) => fn.max('after_round').as('m')).where('event', '=', event))
+    .orderBy('rank')
+    .execute();
+  if (rows.length === 0) return null;
+  return {
+    afterRound: rows[0].after_round,
+    official: rows.every(r => r.tb1 !== null),
+    rows: rows.map(r => ({ teamId: r.team_id, rank: r.rank, mp: r.mp, gpHalf: r.gp_hp })),
+  };
 }
 
 export async function getOlympiadStatus(event: OlympiadEvent): Promise<OlympiadStatus> {

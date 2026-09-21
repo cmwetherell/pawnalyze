@@ -30,7 +30,7 @@ const PAGE = 25;
 // Fixed-layout table at 100% width, never scrolls horizontally: columns appear by breakpoint.
 type Hide = 'sm' | 'md' | 'xl';
 const HEADERS: { key: SortKey; label: string; title?: string; className?: string; hide?: Hide; needsPlay?: boolean }[] = [
-  { key: 'pos', label: 'Pos', title: 'Unofficial standing: match points, then game points, then seed. Early in the event many teams are tied on match points, so this order is decided by margin of victory.', className: 'w-14 text-right', hide: 'md', needsPlay: true },
+  { key: 'pos', label: 'Pos', className: 'w-14 text-right', hide: 'md', needsPlay: true },
   { key: 'name', label: 'Team', className: 'text-left' },
   { key: 'rating', label: 'Rtg', title: 'Average rating', className: 'w-12 text-right', hide: 'xl' },
   { key: 'mp', label: 'MP', title: 'Match points', className: 'w-11 text-right', needsPlay: true },
@@ -98,6 +98,11 @@ export default function TeamTable({
     }
   };
 
+  const official = anyPlayed && Array.from(standings.values()).some(s => s.official);
+  const posTitle = official
+    ? 'Official standing from chess-results after the last completed round: match points, then Olympiad Sonneborn-Berger, then game points.'
+    : 'Unofficial standing: match points, then game points, then seed. Early in the event many teams are tied on match points, so this order is decided by margin of victory.';
+
   const ariaSort = (key: SortKey): 'ascending' | 'descending' | 'none' =>
     sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
 
@@ -134,7 +139,7 @@ export default function TeamTable({
                 <button
                   type="button"
                   onClick={() => toggleSort(h.key)}
-                  title={h.title}
+                  title={h.key === 'pos' ? posTitle : h.title}
                   className={`h-10 w-full inline-flex items-center gap-0.5 hover:text-[var(--text-secondary)] ${h.className?.includes('text-right') ? 'justify-end' : h.key === 'name' ? 'justify-start' : 'justify-start'}`}
                 >
                   {h.label}

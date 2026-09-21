@@ -19,7 +19,7 @@ import { latestActiveRound } from '@/lib/olympiad/rounds';
 import { deriveStandings, outcomeFromScores, sortMatchesForPicker } from '@/lib/olympiad/standings';
 import { formatPct } from '@/components/ui/ProbBar';
 import type {
-  HistoryPoint, Match, OlympiadEvent, Outcome, Pick, Player, RoundOdds, Run, ScenarioResult, ScenarioTeam, Team, TeamOdds, TeamSummary,
+  HistoryPoint, Match, OfficialStandings, OlympiadEvent, Outcome, Pick, Player, RoundOdds, Run, ScenarioResult, ScenarioTeam, Team, TeamOdds, TeamSummary,
 } from '@/lib/olympiad/types';
 
 interface OlympiadDashboardProps {
@@ -32,18 +32,19 @@ interface OlympiadDashboardProps {
   history: HistoryPoint[];
   roundOdds: RoundOdds | null;
   anyLive: boolean;
+  officialStandings: OfficialStandings | null;
 }
 
 const LIVE_REFRESH_MS = 5 * 60 * 1000;
 
 export default function OlympiadDashboard({
-  event, run, teams, players, matches, summary, history, roundOdds: baseRoundOdds, anyLive,
+  event, run, teams, players, matches, summary, history, roundOdds: baseRoundOdds, anyLive, officialStandings,
 }: OlympiadDashboardProps) {
   const router = useRouter();
   const teamsById = useMemo(() => new Map(teams.map(t => [t.teamId, t])), [teams]);
   const participantIds = useMemo(() => new Set(summary.map(s => s.teamId)), [summary]);
   const participants = useMemo(() => teams.filter(t => participantIds.has(t.teamId)), [teams, participantIds]);
-  const standings = useMemo(() => deriveStandings(matches, teams, participantIds), [matches, teams, participantIds]);
+  const standings = useMemo(() => deriveStandings(matches, teams, participantIds, officialStandings), [matches, teams, participantIds, officialStandings]);
   const anyPlayed = useMemo(() => matches.some(m => m.status === 'final'), [matches]);
   const baseline = useMemo(() => baselineOdds(summary), [summary]);
   const nextRound = run.roundsCompleted + 1;

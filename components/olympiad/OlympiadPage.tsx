@@ -7,6 +7,7 @@ import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import {
   getOlympiadBoardRace,
   getOlympiadMatches,
+  getOlympiadOfficialStandings,
   getOlympiadPlayers,
   getOlympiadProjectedPairings,
   getOlympiadRoundOdds,
@@ -21,13 +22,14 @@ import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 export default async function OlympiadPage({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
-  const [run, allTeams, roster, matches, status, race] = await Promise.all([
+  const [run, allTeams, roster, matches, status, race, officialStandings] = await Promise.all([
     getOlympiadRun(event),
     getOlympiadTeams(event),
     getOlympiadPlayers(event),
     getOlympiadMatches(event),
     getOlympiadStatus(event),
     getOlympiadBoardRace(event),
+    getOlympiadOfficialStandings(event),
   ]).catch((err: unknown) => {
     // Surface driver errors that are thrown as plain objects (they otherwise log as [object Object]).
     console.error(`[olympiad] data load failed for ${event}:`, err instanceof Error ? err.stack : JSON.stringify(err));
@@ -108,6 +110,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
           history={history}
           roundOdds={roundOdds}
           anyLive={status.anyLive}
+          officialStandings={officialStandings}
         />
       ) : (
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-10">

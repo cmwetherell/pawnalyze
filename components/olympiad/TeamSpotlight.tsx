@@ -197,7 +197,7 @@ export default function TeamSpotlight({
           <div className="text-[11px] text-[var(--text-muted)] truncate">
             {team.captain ? `Captain ${team.captain}` : 'Captain TBA'}
             {anyPlayed && standing && (
-              <> · <span className="text-[var(--text-secondary)]">{ordinal(standing.rank)} of {participants}</span> on {standing.mp} MP (unofficial)</>
+              <> · <span className="text-[var(--text-secondary)]">{ordinal(standing.rank)} of {participants}</span> on {standing.mp} MP{standing.official ? '' : ' (unofficial)'}</>
             )}
             {isScenario && <span className="text-gold-ink"> · scenario odds</span>}
           </div>

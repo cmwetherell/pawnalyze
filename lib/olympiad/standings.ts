@@ -1,4 +1,4 @@
-import type { DerivedStanding, Match, Outcome, Run, Team } from './types';
+import type { DerivedStanding, Match, OfficialStandings, Outcome, Run, Team } from './types';
 
 export function matchPointsFor(score: number | null, oppScore: number | null): number {
   if (score === null || oppScore === null) return 0;
@@ -29,14 +29,17 @@ export function formatMatchScore(a: number | null, b: number | null): string {
 }
 
 /**
- * Unofficial live standings from final matches: MP desc, GP desc, seed asc.
+ * Live standings from final matches: MP desc, GP desc, seed asc.
  * A pairing-allocated bye (team2 null) scores 1 MP and 2 GP, as on chess-results; the stored
  * team1_score carries the half-points (default 4).
+ * When the official chess-results table covers exactly the rounds that have finished, its rank
+ * (which applies the real tiebreaks) replaces the derived order; mid-round the derived order stands.
  */
 export function deriveStandings(
   matches: Match[],
   teams: Team[],
   participantIds?: Set<number>,
+  official?: OfficialStandings | null,
 ): Map<number, DerivedStanding> {
   const rows = new Map<number, DerivedStanding>();
   for (const t of teams) {
@@ -73,7 +76,32 @@ export function deriveStandings(
     (a, b) => b.mp - a.mp || b.gpHalf - a.gpHalf || a.teamId - b.teamId,
   );
   sorted.forEach((row, i) => { row.rank = i + 1; });
+
+  if (official?.official && official.afterRound === completedRound(matches)) {
+    // Only adopt the official table if it agrees with what the matches say, so rank never contradicts MP.
+    const agrees = official.rows.every(o => {
+      const row = rows.get(o.teamId);
+      return !row || (row.mp === o.mp && row.gpHalf === o.gpHalf);
+    });
+    if (agrees) {
+      for (const o of official.rows) {
+        const row = rows.get(o.teamId);
+        if (row) { row.rank = o.rank; row.official = true; }
+      }
+    }
+  }
   return rows;
+}
+
+/** Latest round in which every published pairing has a final result (0 before round 1 finishes). */
+export function completedRound(matches: Match[]): number {
+  let last = 0;
+  for (const m of matches) {
+    if (m.projected) continue;
+    if (m.status === 'final' && m.round > last) last = m.round;
+  }
+  while (last > 0 && matches.some(m => !m.projected && m.round === last && m.status !== 'final')) last -= 1;
+  return last;
 }
 
 export interface TeamRoundEntry {

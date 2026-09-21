@@ -132,6 +132,23 @@ export interface DerivedStanding {
   gpHalf: number;
   played: number;
   rank: number;
+  /** Rank taken from the official chess-results table rather than derived from MP and GP */
+  official?: boolean;
+}
+
+/** One team's row in the official chess-results ranking table after a completed round. */
+export interface OfficialStanding {
+  teamId: number;
+  rank: number;
+  mp: number;
+  gpHalf: number;
+}
+
+export interface OfficialStandings {
+  afterRound: number;
+  /** False when the pipeline could not fetch the ranking page and the ranks were derived instead */
+  official: boolean;
+  rows: OfficialStanding[];
 }
 
 export interface OlympiadStatus {
