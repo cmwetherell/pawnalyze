@@ -38,6 +38,9 @@ const Footer = () => {
           <div>
             <p className="text-sm font-semibold text-[var(--text-primary)] mb-3">Tournaments</p>
             <div className="space-y-2">
+              <Link href="/world-chess-championship-2026" className="block text-sm text-[var(--text-muted)] hover:text-chess-gold transition-colors">
+                World Championship 2026
+              </Link>
               <Link href="/simulations/chess-olympiad-2026" className="block text-sm text-[var(--text-muted)] hover:text-chess-gold transition-colors">
                 Chess Olympiad 2026
               </Link>
@@ -70,7 +73,7 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-[var(--border)]">
           <p className="text-xs text-[var(--text-muted)]">
-            &copy; 2025 Pawnalyze. Built by Caleb Wetherell.
+            &copy; 2026 Pawnalyze. Built by Caleb Wetherell.
           </p>
         </div>
       </div>

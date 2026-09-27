@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import TournamentCard from "@/components/TournamentCard";
-import OlympiadBoardLeaders from "@/components/olympiad/OlympiadBoardLeaders";
-import OlympiadGoldSummary from "@/components/olympiad/OlympiadGoldSummary";
+import OlympiadCards from "@/components/olympiad/OlympiadCards";
+import WccHomeFeature from "@/components/wcc/WccHomeFeature";
 
 export default async function Home() {
   return (
@@ -52,25 +52,9 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Just finished */}
+      {/* Flagship: the World Championship */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 w-full pb-14">
-        <div className="flex items-end justify-between gap-4 mb-6">
-          <div>
-            <h2 className="font-heading text-2xl text-[var(--text-primary)]">
-              Chess Olympiad 2026
-            </h2>
-            <p className="text-sm text-[var(--text-muted)] mt-1">
-              Uzbekistan and China took gold in Samarkand. Final standings, board prizes, and how our
-              odds moved across all 11 rounds.
-            </p>
-          </div>
-        </div>
-        <div className="grid md:grid-cols-2 gap-6">
-          <OlympiadGoldSummary />
-        </div>
-        <div className="mt-6">
-          <OlympiadBoardLeaders />
-        </div>
+        <WccHomeFeature />
       </section>
 
       {/* As seen in */}
@@ -123,6 +107,7 @@ export default async function Home() {
           Recent Results
         </h2>
         <div className="grid md:grid-cols-2 gap-6">
+          <OlympiadCards />
           <TournamentCard
             name="2026 Candidates Tournament"
             href="/simulations/candidates-2026"
@@ -153,7 +138,7 @@ export default async function Home() {
             </div>
             <h3 className="font-heading text-lg text-[var(--text-primary)] mb-2">Tournament Simulations</h3>
             <p className="text-sm text-[var(--text-muted)] mb-3">
-              Over one million Monte Carlo simulations for the Candidates Tournament.
+              Exact World Championship odds, Olympiad medal races and Candidates forecasts.
               Build custom scenarios and watch probabilities shift in real time.
             </p>
             <span className="text-sm text-chess-gold group-hover:translate-x-1 transition-transform inline-block">

@@ -1,5 +1,6 @@
 import TournamentCard from '@/components/TournamentCard';
 import OlympiadCards from '@/components/olympiad/OlympiadCards';
+import WccHomeFeature from '@/components/wcc/WccHomeFeature';
 
 export default async function SimPage() {
   return (
@@ -12,11 +13,11 @@ export default async function SimPage() {
         </p>
       </div>
 
-      {/* Most recent */}
+      {/* Featured */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Chess Olympiad 2026 · Final</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <OlympiadCards />
+        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">World Chess Championship 2026</h2>
+        <div className="max-w-4xl">
+          <WccHomeFeature />
         </div>
       </div>
 
@@ -24,6 +25,7 @@ export default async function SimPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-16 w-full">
         <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Past Tournaments</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <OlympiadCards />
           <TournamentCard
             name="2026 Candidates Tournament"
             href="/simulations/candidates-2026"

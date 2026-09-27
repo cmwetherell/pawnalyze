@@ -4,6 +4,7 @@ module.exports = {
     generateRobotsTxt: true, // Optional: to generate robots.txt
     // other configurations...
     additionalPaths: async (config) => [
+        await config.transform(config, '/world-chess-championship-2026'),
         await config.transform(config, '/simulations/chess-olympiad-2026/boards'),
         await config.transform(config, '/simulations/womens-chess-olympiad-2026/boards'),
     ],

@@ -18,5 +18,11 @@ export async function GET() {
     revalidateTag(`olympiad-2026-games-${event}`, 'max')
   }
 
+  // World Chess Championship 2026
+  revalidateTag('wcc-2026', 'max')
+  revalidateTag('wcc-2026-sims', 'max')
+  revalidateTag('wcc-2026-model', 'max')
+  revalidateTag('wcc-2026-markets', 'max')
+
   return NextResponse.json({ revalidated: true })
 }

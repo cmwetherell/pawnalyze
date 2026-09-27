@@ -9,6 +9,12 @@ const nextConfig = {
     '/simulations/womens-chess-olympiad-2026/boards/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
     '/simulations/chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
     '/simulations/womens-chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
+    // The World Championship OG image reads the player portraits and two flags from disk.
+    '/world-chess-championship-2026/opengraph-image': [
+      './public/players/wcc/*-og.jpg',
+      './node_modules/flag-icons/flags/4x3/in.svg',
+      './node_modules/flag-icons/flags/4x3/uz.svg',
+    ],
     },
 
         async redirects() {
