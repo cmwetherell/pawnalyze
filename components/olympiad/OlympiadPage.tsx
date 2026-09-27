@@ -1,6 +1,7 @@
 import TournamentHeader from '@/components/simulation/TournamentHeader';
 import RelativeTime from '@/components/ui/RelativeTime';
 import OlympiadDashboard from './OlympiadDashboard';
+import FinalPodium from './FinalPodium';
 import MethodologyCards from './MethodologyCards';
 import { olympiadSubnav } from './boards/BoardRacePage';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
@@ -12,12 +13,14 @@ import {
   getOlympiadProjectedPairings,
   getOlympiadRoundOdds,
   getOlympiadRun,
+  getOlympiadRunAtRound,
   getOlympiadStatus,
   getOlympiadSummary,
   getOlympiadSummaryHistory,
   getOlympiadTeams,
 } from '@/lib/olympiad/queries';
 import { teamsInRun } from '@/lib/olympiad/standings';
+import { isFinished, statusPillFor } from '@/lib/olympiad/status';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 export default async function OlympiadPage({ event }: { event: OlympiadEvent }) {
@@ -42,11 +45,17 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
     return r ? { ...p, race: { tpr: r.tpr, score: r.score, games: r.games, rank: r.rank } } : p;
   });
   const teams = teamsInRun(allTeams, run);
+  const finished = isFinished(status);
   const nextRound = run ? run.roundsCompleted + 1 : 0;
+
+  // With every round simulated the current run is degenerate (medalists at 100%, everyone else 0%),
+  // so once the event is over the odds shown are the ones from before the final round -- the last
+  // point at which they were a forecast. The result itself comes from the official standings.
+  const oddsRun = finished ? (await getOlympiadRunAtRound(event, N_ROUNDS - 1)) ?? run : run;
   const needProjected = run !== null && nextRound <= N_ROUNDS && !matches.some(m => m.round === nextRound);
   const [summary, history, projected, roundOdds] = run
     ? await Promise.all([
-        getOlympiadSummary(event, run.runId),
+        getOlympiadSummary(event, (oddsRun ?? run).runId),
         getOlympiadSummaryHistory(event),
         needProjected ? getOlympiadProjectedPairings(event, run.runId, nextRound, run.nTeams) : Promise.resolve([]),
         nextRound <= N_ROUNDS ? getOlympiadRoundOdds(event, run.runId, nextRound, run.nTeams, []) : Promise.resolve(null),
@@ -56,18 +65,29 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
   const participantIds = new Set(summary.map(s => s.teamId));
   const nonParticipants = run ? teams.filter(t => !participantIds.has(t.teamId)).map(t => t.name) : [];
 
-  const topSeeds = teams.slice(0, 8).map(t => ({ code: t.fedCode, title: t.name }));
-  const finished = status.lastFinalRound >= N_ROUNDS;
-  const startLabel = new Date(cfg.startDate + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const statusPill = finished
-    ? { text: 'Final', live: false }
-    : status.anyLive
-      ? { text: `Round ${status.lastFinalRound + 1} in progress`, live: true }
-      : status.lastFinalRound > 0
-        ? { text: `After round ${status.lastFinalRound} of ${N_ROUNDS}`, live: false }
-        : { text: `Starts ${startLabel}`, live: false };
+  const medalists = finished && officialStandings
+    ? officialStandings.rows.filter(r => r.rank <= 3).sort((a, b) => a.rank - b.rank)
+    : [];
+  const teamById = new Map(teams.map(t => [t.teamId, t]));
+  // Champions lead the header flag stack once the event is over; seeds order it before that.
+  const headerFlags = medalists.length === 3
+    ? medalists.flatMap(r => {
+        const t = teamById.get(r.teamId);
+        return t ? [{ code: t.fedCode, title: t.name }] : [];
+      })
+    : teams.slice(0, 8).map(t => ({ code: t.fedCode, title: t.name }));
+  const preTournamentGold = new Map(
+    history.filter(h => h.roundsCompleted === 0).map(h => [h.teamId, h.pGold]),
+  );
+  const statusPill = statusPillFor(status, cfg.startDate);
 
-  const meta = run
+  const meta = finished && run
+    ? [
+        <span key="final">Final · {N_ROUNDS} rounds · {summary.length} teams</span>,
+        <span key="sims"><strong className="text-gold-ink font-semibold">{run.nSims.toLocaleString()}</strong> simulations per round</span>,
+        <span key="ended">Ended {new Date(cfg.endDate + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}</span>,
+      ]
+    : run
     ? [
         <span key="sims"><strong className="text-gold-ink font-semibold">{run.nSims.toLocaleString()}</strong> simulations after round {run.roundsCompleted}</span>,
         ...(status.lastFinalRound > run.roundsCompleted
@@ -92,12 +112,23 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
         websiteLabel="chess-results"
         description={cfg.description}
         format={cfg.format}
-        flags={topSeeds}
+        flags={headerFlags}
         statusPill={statusPill}
         meta={meta}
         switcher={switcher}
         subnav={olympiadSubnav(event, 'odds')}
       />
+
+      {finished && officialStandings ? (
+        <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 pt-6">
+          <FinalPodium
+            standings={officialStandings}
+            teams={teams}
+            preTournamentGold={preTournamentGold}
+            eventLabel={cfg.shortTitle}
+          />
+        </div>
+      ) : null}
 
       {run ? (
         <OlympiadDashboard
@@ -110,6 +141,8 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
           history={history}
           roundOdds={roundOdds}
           anyLive={status.anyLive}
+          finished={finished}
+          oddsRound={(oddsRun ?? run).roundsCompleted}
           officialStandings={officialStandings}
         />
       ) : (

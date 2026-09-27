@@ -10,7 +10,7 @@ import CopyLink from '@/components/ui/CopyLink';
 import Flag from '@/components/ui/Flag';
 import { SkeletonRounds } from '@/components/ui/Skeleton';
 import { setUrlParam, useUrlParam } from '@/hooks/useUrlParam';
-import { BOARD_LABELS, N_PRIZE_BOARDS, boardLabel, playerHref } from '@/lib/olympiad/config';
+import { BOARD_LABELS, N_PRIZE_BOARDS, N_ROUNDS, boardLabel, playerHref } from '@/lib/olympiad/config';
 import { cachedJson } from '@/lib/olympiad/clientCache';
 import { MIN_GAMES_FOR_PRIZE, displayName } from '@/lib/olympiad/tpr';
 import type { BoardRaceSummary, BoardRows, OlympiadEvent, PlayerIndexEntry, Team } from '@/lib/olympiad/types';
@@ -124,9 +124,11 @@ export default function BoardRaceDashboard({ event, summary, initialRows, teams 
       <section className="surface-card overflow-hidden" aria-labelledby="board-table-heading">
         <div className="flex flex-wrap items-start justify-between gap-3 px-4 sm:px-6 pt-4 pb-3">
           <div>
-            <h2 id="board-table-heading" className="text-xl font-heading text-[var(--text-primary)]">{boardLabel(board)} race</h2>
+            <h2 id="board-table-heading" className="text-xl font-heading text-[var(--text-primary)]">{boardLabel(board)}{summary.lastRound >= N_ROUNDS ? '' : ' race'}</h2>
             <p className="text-xs text-[var(--text-muted)] mt-0.5">
-              Ranked by performance rating through round {summary.lastRound} · {MIN_GAMES_FOR_PRIZE} games needed · tap a player for games and replays
+              {summary.lastRound >= N_ROUNDS
+                ? `Final · ranked by performance rating over ${N_ROUNDS} rounds · ${MIN_GAMES_FOR_PRIZE}-game minimum · tap a player for games and replays`
+                : `Ranked by performance rating through round ${summary.lastRound} · ${MIN_GAMES_FOR_PRIZE} games needed · tap a player for games and replays`}
             </p>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -166,7 +168,7 @@ export default function BoardRaceDashboard({ event, summary, initialRows, teams 
           </div>
           <label className="inline-flex items-center gap-2 h-9 px-2 rounded-md text-[var(--text-secondary)] cursor-pointer select-none">
             <input type="checkbox" checked={onlyReachable} onChange={e => setOnlyReachable(e.target.checked)} className="accent-[#C9A84C]" />
-            Can still reach {MIN_GAMES_FOR_PRIZE} games
+            {summary.lastRound >= N_ROUNDS ? `Played ${MIN_GAMES_FOR_PRIZE}+ games` : `Can still reach ${MIN_GAMES_FOR_PRIZE} games`}
           </label>
           {team && (
             <button type="button" onClick={() => selectTeam(null)} className="inline-flex items-center gap-1.5 h-9 pl-2 pr-2.5 rounded-full border border-chess-gold/40 bg-chess-gold/10 text-[var(--text-primary)]">

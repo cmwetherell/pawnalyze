@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import Flag from '@/components/ui/Flag';
-import { BOARD_LABELS, boardsHref } from '@/lib/olympiad/config';
+import { BOARD_LABELS, N_ROUNDS, boardsHref } from '@/lib/olympiad/config';
 import { getOlympiadBoardRace } from '@/lib/olympiad/queries';
 import { displayName } from '@/lib/olympiad/tpr';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
@@ -42,17 +42,20 @@ async function LeaderRow({ event }: { event: OlympiadEvent }) {
   );
 }
 
-/** Home-page strip: the current performance-rating leader on each of the five boards, per event. */
+/** Home-page strip: the performance-rating leader (winner, once final) on each of the five boards. */
 export default async function OlympiadBoardLeaders() {
   const [open, women] = await Promise.all([getOlympiadBoardRace('open'), getOlympiadBoardRace('women')]);
   if (open.lastRound === 0 && women.lastRound === 0) return null;
   const through = Math.max(open.lastRound, women.lastRound);
+  const finished = through >= N_ROUNDS;
   return (
     <div className="surface-card p-5 sm:p-6">
       <div className="flex items-baseline justify-between gap-3 mb-3">
         <div>
-          <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">Board prize race · after round {through}</p>
-          <h3 className="font-heading text-lg text-[var(--text-primary)]">Who leads each board?</h3>
+          <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
+            {finished ? `Board prizes · final · ${through} rounds` : `Board prize race · after round ${through}`}
+          </p>
+          <h3 className="font-heading text-lg text-[var(--text-primary)]">{finished ? 'Who won each board?' : 'Who leads each board?'}</h3>
         </div>
         <Link href={boardsHref('open')} className="text-sm text-gold-ink hover:translate-x-1 transition-transform shrink-0">All boards &rarr;</Link>
       </div>
@@ -60,7 +63,11 @@ export default async function OlympiadBoardLeaders() {
         <LeaderRow event="open" />
         <LeaderRow event="women" />
       </div>
-      <p className="mt-3 text-[11px] text-[var(--text-muted)]">Individual medals go to the best performance rating on each board with at least 8 games; early leaders shift quickly.</p>
+      <p className="mt-3 text-[11px] text-[var(--text-muted)]">
+        {finished
+          ? 'Individual medals went to the best performance rating on each board among players with at least 8 games.'
+          : 'Individual medals go to the best performance rating on each board with at least 8 games; early leaders shift quickly.'}
+      </p>
     </div>
   );
 }

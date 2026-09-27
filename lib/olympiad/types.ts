@@ -142,6 +142,9 @@ export interface OfficialStanding {
   rank: number;
   mp: number;
   gpHalf: number;
+  /** Olympiad Sonneborn-Berger (official TB2), the first tiebreak after match points. Null if the
+   *  ranking page could not be fetched and the rank was derived. */
+  sb: number | null;
 }
 
 export interface OfficialStandings {

@@ -358,8 +358,28 @@ export async function getOlympiadOfficialStandings(event: OlympiadEvent): Promis
   return {
     afterRound: rows[0].after_round,
     official: rows.every(r => r.tb1 !== null),
-    rows: rows.map(r => ({ teamId: r.team_id, rank: r.rank, mp: r.mp, gpHalf: r.gp_hp })),
+    rows: rows.map(r => ({ teamId: r.team_id, rank: r.rank, mp: r.mp, gpHalf: r.gp_hp, sb: r.tb1 })),
   };
+}
+
+/**
+ * The pipeline run for a given rounds_completed, newest first. Used to show the odds as they stood
+ * before the last round: once every round is simulated the final run is degenerate (the medalists
+ * sit at p=1 and everyone else at 0), which reads as a claim of certainty rather than a forecast.
+ */
+export async function getOlympiadRunAtRound(event: OlympiadEvent, roundsCompleted: number): Promise<Run | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(tags.sims(event));
+  const row = await db()
+    .selectFrom('olympiad_2026_runs')
+    .selectAll()
+    .where('event', '=', event)
+    .where('source', '=', 'pipeline')
+    .where('rounds_completed', '=', roundsCompleted)
+    .orderBy('created_at', 'desc')
+    .executeTakeFirst();
+  return row ? toRun(row) : null;
 }
 
 export async function getOlympiadStatus(event: OlympiadEvent): Promise<OlympiadStatus> {

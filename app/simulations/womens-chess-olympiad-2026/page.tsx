@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 import OlympiadPage from '@/components/olympiad/OlympiadPage';
 
 export const metadata: Metadata = {
-  title: "Women's Chess Olympiad 2026 Predictions | Pawnalyze",
+  title: "Women's Chess Olympiad 2026: China Win Gold | Pawnalyze",
   description:
-    "Live Monte Carlo medal odds for the 46th Women's Chess Olympiad in Samarkand. Explore scenarios round by round and see which nations are favoured for gold.",
+    "China won the 46th Women's Chess Olympiad in Samarkand, ahead of Kazakhstan and India. Final standings, board prizes, and how our Monte Carlo odds tracked all 11 rounds.",
 };
 
 export default function Page() {

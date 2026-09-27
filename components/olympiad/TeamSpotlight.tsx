@@ -33,6 +33,8 @@ interface TeamSpotlightProps {
   filtersKey: string;
   history: HistoryPoint[];
   anyPlayed: boolean;
+  /** Event is over: hide the "next match" row and the likely-opponents panel. */
+  finished: boolean;
   onClose: () => void;
   onPrev?: () => void;
   onNext?: () => void;
@@ -106,7 +108,7 @@ function isTypingTarget(el: EventTarget | null): boolean {
 
 export default function TeamSpotlight({
   event, run, team, players, matches, teamsById, standing, participants, odds, baseline, isScenario, filtersKey, history,
-  anyPlayed, onClose, onPrev, onNext, onStale,
+  anyPlayed, finished, onClose, onPrev, onNext, onStale,
 }: TeamSpotlightProps) {
   const requestKey = `detail|${event}|${run.runId}|${team.teamId}|${filtersKey}`;
   const [result, setResult] = useState<{ key: string; data?: TeamDetailData; error?: string } | null>(null);
@@ -201,6 +203,7 @@ export default function TeamSpotlight({
             )}
             {isScenario && <span className="text-gold-ink"> · scenario odds</span>}
           </div>
+          {!(finished && !nextMatch) && (
           <div className="mt-1 text-xs text-[var(--text-secondary)] flex items-center gap-1.5 min-w-0">
             <span className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] shrink-0">Next</span>
             {nextMatch ? (
@@ -223,6 +226,7 @@ export default function TeamSpotlight({
               <span className="italic text-[var(--text-muted)]">pairings not published yet</span>
             )}
           </div>
+          )}
         </div>
         {trend.length >= 2 && (
           <div className="hidden md:flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-[var(--text-muted)]" title="Gold odds after each completed round">
@@ -350,7 +354,7 @@ export default function TeamSpotlight({
               <p className="text-xs text-[var(--text-muted)] italic">No matches played yet.</p>
             )}
           </div>
-          <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} isScenario={isScenario} onStale={onStale} playedNextResult={playedNext?.outcome ?? null} />
+          {!finished && <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} isScenario={isScenario} onStale={onStale} playedNextResult={playedNext?.outcome ?? null} />}
           </div>
         </Section>
 

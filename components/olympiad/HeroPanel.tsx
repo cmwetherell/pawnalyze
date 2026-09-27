@@ -24,6 +24,9 @@ interface HeroPanelProps {
   nextRound: number;
   resultsRound: number | null;
   anyLive: boolean;
+  finished: boolean;
+  /** rounds_completed of the run behind `rows` -- N_ROUNDS - 1 once the event is over. */
+  oddsRound: number;
   selectedTeamId: number | null;
   onSelect: (teamId: number) => void;
   onPrefetch?: (teamId: number) => void;
@@ -32,7 +35,7 @@ interface HeroPanelProps {
 
 export default function HeroPanel({
   run, rows, odds, baseline, teamsById, isScenario, history, matches, standings, roundOdds, nextRound, resultsRound,
-  anyLive, selectedTeamId, onSelect, onPrefetch, applyResults,
+  anyLive, finished, oddsRound, selectedTeamId, onSelect, onPrefetch, applyResults,
 }: HeroPanelProps) {
   const trendAvailable = useMemo(() => new Set(history.map(h => h.roundsCompleted)).size >= 2, [history]);
   const resultsDefault = anyLive || (resultsRound !== null && resultsRound > run.roundsCompleted);
@@ -40,7 +43,7 @@ export default function HeroPanel({
   const baseId = useId();
 
   const tabs: { key: Tab; label: string; disabled?: boolean; hint?: string }[] = [
-    { key: 'race', label: 'Gold race' },
+    { key: 'race', label: finished ? 'Final-round odds' : 'Gold race' },
     { key: 'results', label: resultsRound !== null ? `Round ${resultsRound}` : `Round ${nextRound} preview` },
     { key: 'trend', label: 'Trend' },
   ];
@@ -55,7 +58,10 @@ export default function HeroPanel({
     <section className="surface-card p-4 sm:p-6" aria-label="Medal picture">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="text-xl font-heading text-[var(--text-primary)]">
-          {tab === 'race' ? 'Gold Medal Race' : tab === 'trend' ? 'Odds Over Time' : resultsRound !== null ? `Round ${resultsRound} Results` : `Round ${nextRound} Preview`}
+          {tab === 'race'
+            ? finished ? `Gold Race — Going Into Round ${oddsRound + 1}` : 'Gold Medal Race'
+            : tab === 'trend' ? 'Odds Over Time'
+            : resultsRound !== null ? `Round ${resultsRound} Results` : `Round ${nextRound} Preview`}
         </h2>
         <div role="tablist" aria-label="Hero view" className="inline-flex rounded-lg bg-[var(--bg-surface-2)] p-0.5 text-xs">
           {tabs.map(t => (
@@ -83,8 +89,8 @@ export default function HeroPanel({
       <div id={`${baseId}-panel`} role="tabpanel" aria-labelledby={`${baseId}-tab-${tab}`}>
         {tab === 'race' && (
           <>
-            <MoversStrip history={history} teamsById={teamsById} onSelect={onSelect} roundLabel={roundLabel} />
-            <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} selectedTeamId={selectedTeamId} onSelect={onSelect} onPrefetch={onPrefetch} />
+            {!finished && <MoversStrip history={history} teamsById={teamsById} onSelect={onSelect} roundLabel={roundLabel} />}
+            <MedalHero rows={rows} baseline={baseline} teamsById={teamsById} isScenario={isScenario} selectedTeamId={selectedTeamId} onSelect={onSelect} onPrefetch={onPrefetch} asOfRound={finished ? oddsRound : undefined} />
           </>
         )}
         {tab === 'trend' && (trendAvailable ? (

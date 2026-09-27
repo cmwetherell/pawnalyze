@@ -32,13 +32,17 @@ interface OlympiadDashboardProps {
   history: HistoryPoint[];
   roundOdds: RoundOdds | null;
   anyLive: boolean;
+  /** Every round has a result: retire the scenario tooling and label the odds as historical. */
+  finished: boolean;
+  /** rounds_completed of the run the odds come from (= N_ROUNDS - 1 once finished). */
+  oddsRound: number;
   officialStandings: OfficialStandings | null;
 }
 
 const LIVE_REFRESH_MS = 5 * 60 * 1000;
 
 export default function OlympiadDashboard({
-  event, run, teams, players, matches, summary, history, roundOdds: baseRoundOdds, anyLive, officialStandings,
+  event, run, teams, players, matches, summary, history, roundOdds: baseRoundOdds, anyLive, finished, oddsRound, officialStandings,
 }: OlympiadDashboardProps) {
   const router = useRouter();
   const teamsById = useMemo(() => new Map(teams.map(t => [t.teamId, t])), [teams]);
@@ -82,16 +86,20 @@ export default function OlympiadDashboard({
 
   const markStale = useCallback(() => setStaleRun(true), []);
   const filtersKey = isScenario ? scenarioKey : '';
-  const prefetch = useCallback((teamId: number) => prefetchTeam(event, run.runId, teamId, filtersKey), [event, run.runId, filtersKey]);
+  const prefetch = useCallback(
+    (teamId: number) => { if (!finished) prefetchTeam(event, run.runId, teamId, filtersKey); },
+    [event, run.runId, filtersKey, finished],
+  );
 
   // Warm the top eight (the hero) while the browser is idle so opening them is instant.
   useEffect(() => {
+    if (finished) return;   // opponents endpoint has nothing to say once every round is played
     const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 8).map(s => s.teamId);
     const run_ = () => top.forEach(id => prefetchTeam(event, run.runId, id, ''));
     const hasIdle = typeof window.requestIdleCallback === 'function';
     const handle = hasIdle ? window.requestIdleCallback(run_) : window.setTimeout(run_, 1500);
     return () => { if (hasIdle) window.cancelIdleCallback(handle); else clearTimeout(handle); };
-  }, [event, run.runId, summary]);
+  }, [event, run.runId, summary, finished]);
 
   const runSimulation = useCallback(async (key: string, extraTeam: number | null) => {
     if (key === '') {
@@ -282,7 +290,7 @@ export default function OlympiadDashboard({
   }, [isScenario, scenario, picks, matches, teamsById, odds, baseline]);
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 pb-28 lg:pb-6 space-y-6">
+    <div className={`max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 ${finished ? '' : 'pb-28 lg:pb-6'}`}>
       <div aria-live="polite" className="space-y-3">
         {staleRun && (
           <div className="rounded-lg border border-chess-gold/40 bg-chess-gold/10 px-4 py-3 text-sm text-[var(--text-primary)] flex flex-wrap items-center gap-3">
@@ -314,6 +322,8 @@ export default function OlympiadDashboard({
         nextRound={nextRound}
         resultsRound={resultsRound}
         anyLive={anyLive}
+        finished={finished}
+        oddsRound={oddsRound}
         selectedTeamId={selectedTeamId}
         onSelect={id => selectTeam(id)}
         onPrefetch={prefetch}
@@ -338,6 +348,7 @@ export default function OlympiadDashboard({
             filtersKey={isScenario ? scenarioKey : ''}
             history={history}
             anyPlayed={anyPlayed}
+            finished={finished}
             onClose={() => selectTeam(null)}
             onPrev={prevTeam !== null ? () => selectTeam(prevTeam, false) : undefined}
             onNext={nextTeam !== null ? () => selectTeam(nextTeam, false) : undefined}
@@ -346,8 +357,8 @@ export default function OlympiadDashboard({
         </div>
       )}
 
-      <div className="lg:grid lg:grid-cols-5 lg:gap-6 space-y-6 lg:space-y-0">
-        <div className="lg:col-span-3 space-y-4">
+      <div className={finished ? 'space-y-6' : 'lg:grid lg:grid-cols-5 lg:gap-6 space-y-6 lg:space-y-0'}>
+        <div className={finished ? 'space-y-4' : 'lg:col-span-3 space-y-4'}>
           <div ref={summaryRef} className="scroll-mt-20 space-y-3" aria-live="polite">
             {isScenario && scenario && (
               <ScenarioSummary pickCount={picks.size} matched={scenario.matched} nSims={run.nSims} sentence={sentence} onClear={handleReset} />
@@ -356,7 +367,7 @@ export default function OlympiadDashboard({
               <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-400">{error}</div>
             )}
           </div>
-          <SpotlightHint hasSelected={pickedByUser} />
+          {!finished && <SpotlightHint hasSelected={pickedByUser} />}
           <div className={`transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : ''}`} aria-busy={loading}>
             <TeamTable
               teams={participants}
@@ -365,6 +376,7 @@ export default function OlympiadDashboard({
               baseline={baseline}
               isScenario={isScenario}
               anyPlayed={anyPlayed}
+              finished={finished}
               selectedTeamId={selectedTeamId}
               onSelect={id => selectTeam(id === selectedTeamId ? null : id)}
               onPrefetch={prefetch}
@@ -373,6 +385,7 @@ export default function OlympiadDashboard({
           </div>
         </div>
 
+        {!finished && (
         <div className="hidden lg:block lg:col-span-2">
           <div className="surface-card overflow-hidden lg:sticky lg:top-20">
             <OlympiadScenarioBuilder
@@ -392,9 +405,12 @@ export default function OlympiadDashboard({
             />
           </div>
         </div>
+        )}
       </div>
 
       {/* Mobile: sticky action bar + builder in a bottom sheet */}
+      {!finished && (
+      <>
       <div
         className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg-surface-1)]/95 backdrop-blur"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -447,6 +463,8 @@ export default function OlympiadDashboard({
           inSheet
         />
       </BottomSheet>
+      </>
+      )}
     </div>
   );
 }

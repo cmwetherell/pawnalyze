@@ -17,6 +17,8 @@ interface TeamTableProps {
   baseline: Map<number, TeamOdds>;
   isScenario: boolean;
   anyPlayed: boolean;
+  /** Event is over: the row hint should not promise likely opponents. */
+  finished?: boolean;
   selectedTeamId: number | null;
   onSelect: (teamId: number) => void;
   /** Warm the spotlight data for a team the user is about to open */
@@ -42,11 +44,12 @@ const CHEVRON_COL = 'w-7';
 const HIDE: Record<Hide, string> = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell', xl: 'hidden xl:table-cell' };
 
 export default function TeamTable({
-  teams, standings, odds, baseline, isScenario, anyPlayed,
+  teams, standings, odds, baseline, isScenario, anyPlayed, finished = false,
   selectedTeamId, onSelect, onPrefetch, onOrderChange,
 }: TeamTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('pGold');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  // A finished event is a results table first: order by final position, not by the frozen odds.
+  const [sortKey, setSortKey] = useState<SortKey>(finished ? 'pos' : 'pGold');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(finished ? 'asc' : 'desc');
   const [query, setQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
 
@@ -112,7 +115,7 @@ export default function TeamTable({
         <div>
           <h2 className="text-xl font-heading text-[var(--text-primary)]">Team Odds</h2>
           <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {isScenario ? 'Scenario odds with change vs. baseline · select a team to open its spotlight' : anyPlayed ? 'Sorted by gold odds · click Pos or MP for the standings · select a team for its full profile' : 'Select a team for roster, results, finish odds and likely opponents'}
+            {isScenario ? 'Scenario odds with change vs. baseline · select a team to open its spotlight' : anyPlayed ? (finished ? 'Final standings · gold odds are as they stood before the last round · select a team for its full profile' : 'Sorted by gold odds · click Pos or MP for the standings · select a team for its full profile') : 'Select a team for roster, results, finish odds and likely opponents'}
           </p>
         </div>
         <input

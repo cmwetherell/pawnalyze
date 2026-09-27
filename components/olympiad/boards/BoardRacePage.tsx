@@ -5,7 +5,7 @@ import { BOARD_LABELS, OLYMPIAD_EVENTS, boardsHref, eventHref } from '@/lib/olym
 import { getOlympiadBoardRace, getOlympiadBoardRows, getOlympiadRun, getOlympiadStatus, getOlympiadTeams } from '@/lib/olympiad/queries';
 import { summarizeRace } from '@/lib/olympiad/race';
 import { teamsInRun } from '@/lib/olympiad/standings';
-import { statusPillFor } from '@/lib/olympiad/status';
+import { isFinished, statusPillFor } from '@/lib/olympiad/status';
 import { MIN_GAMES_FOR_PRIZE, displayName } from '@/lib/olympiad/tpr';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
@@ -38,11 +38,15 @@ export default async function BoardRacePage({ event }: { event: OlympiadEvent })
   return (
     <main className="flex-1 flex flex-col min-h-screen">
       <TournamentHeader
-        name="Board Prize Race"
+        name={isFinished(status) ? 'Board Prizes' : 'Board Prize Race'}
         crumbs={[{ label: cfg.shortTitle, href: eventHref(event) }, { label: 'Board prizes' }]}
         website={cfg.chessResultsUrl}
         websiteLabel="chess-results"
-        description="Individual gold, silver and bronze on each board go to the best performance rating among players who complete eight games. Who is on course?"
+        description={
+          isFinished(status)
+            ? 'Individual gold, silver and bronze on each board went to the best performance rating among players who completed eight games. Final standings for all five boards.'
+            : 'Individual gold, silver and bronze on each board go to the best performance rating among players who complete eight games. Who is on course?'
+        }
         format="5 boards · TPR · 8-game minimum"
         flags={leaders}
         statusPill={statusPillFor(status, cfg.startDate)}

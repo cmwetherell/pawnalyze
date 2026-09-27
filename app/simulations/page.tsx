@@ -12,9 +12,9 @@ export default async function SimPage() {
         </p>
       </div>
 
-      {/* Live / upcoming */}
+      {/* Most recent */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Chess Olympiad 2026</h2>
+        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Chess Olympiad 2026 · Final</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <OlympiadCards />
         </div>

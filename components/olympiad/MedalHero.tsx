@@ -13,9 +13,11 @@ interface MedalHeroProps {
   onSelect?: (teamId: number) => void;
   onPrefetch?: (teamId: number) => void;
   topN?: number;
+  /** Set when the odds are historical: the round they were computed after. */
+  asOfRound?: number;
 }
 
-export default function MedalHero({ rows, baseline, teamsById, isScenario, selectedTeamId, onSelect, onPrefetch, topN = 8 }: MedalHeroProps) {
+export default function MedalHero({ rows, baseline, teamsById, isScenario, selectedTeamId, onSelect, onPrefetch, topN = 8, asOfRound }: MedalHeroProps) {
   const top = [...rows]
     .sort((a, b) => b.pGold - a.pGold || b.pMedal - a.pMedal || a.teamId - b.teamId)
     .slice(0, topN);
@@ -23,7 +25,14 @@ export default function MedalHero({ rows, baseline, teamsById, isScenario, selec
   return (
     <div>
       <p className="text-xs text-[var(--text-muted)] mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span>{isScenario ? 'Chance of winning gold under your scenario.' : 'Chance of winning gold.'} Bar shows the full podium out of 100%.</span>
+        <span>
+          {isScenario
+            ? 'Chance of winning gold under your scenario.'
+            : asOfRound !== undefined
+              ? `Chance of winning gold as it stood after round ${asOfRound}, with one round left to play.`
+              : 'Chance of winning gold.'}{' '}
+          Bar shows the full podium out of 100%.
+        </span>
         <span className="inline-flex items-center gap-2 text-[11px] uppercase tracking-wider">
           <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-medal-gold" />Gold</span>
           <span className="inline-flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-medal-silver" />Silver</span>

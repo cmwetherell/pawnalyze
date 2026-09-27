@@ -52,16 +52,16 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Live now */}
+      {/* Just finished */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 w-full pb-14">
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <h2 className="font-heading text-2xl text-[var(--text-primary)] flex items-center gap-3">
+            <h2 className="font-heading text-2xl text-[var(--text-primary)]">
               Chess Olympiad 2026
-              <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse-live" />
             </h2>
             <p className="text-sm text-[var(--text-muted)] mt-1">
-              Live gold-medal odds from 10,000 simulations, updated after every round in Samarkand.
+              Uzbekistan and China took gold in Samarkand. Final standings, board prizes, and how our
+              odds moved across all 11 rounds.
             </p>
           </div>
         </div>

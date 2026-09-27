@@ -3,18 +3,26 @@ import Link from 'next/link';
 import Flag from '@/components/ui/Flag';
 import { formatPct } from '@/components/ui/ProbBar';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
-import { getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadTeams } from '@/lib/olympiad/queries';
+import { getOlympiadOfficialStandings, getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadTeams } from '@/lib/olympiad/queries';
 import { teamsInRun } from '@/lib/olympiad/standings';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 
 async function GoldPanel({ event }: { event: OlympiadEvent }) {
   const cfg = OLYMPIAD_EVENTS[event];
   const href = eventHref(event);
-  const [run, allTeams, status] = await Promise.all([getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event)]);
+  const [run, allTeams, status, standings] = await Promise.all([
+    getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event), getOlympiadOfficialStandings(event),
+  ]);
+  const finished = status.lastFinalRound >= N_ROUNDS;
   const teams = teamsInRun(allTeams, run);
   const summary = run ? await getOlympiadSummary(event, run.runId) : [];
   const teamsById = new Map(teams.map(t => [t.teamId, t]));
-  const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 5);
+  const top = finished && standings
+    ? standings.rows.filter(r => r.rank <= 5).sort((a, b) => a.rank - b.rank)
+        .map(r => ({ teamId: r.teamId, pGold: 0, mp: r.mp, gp: r.gpHalf / 2 }))
+    : [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 5)
+        .map(s2 => ({ teamId: s2.teamId, pGold: s2.pGold, mp: null as number | null, gp: null as number | null }));
+  const maxMp = Math.max(1, ...top.map(t => t.mp ?? 0));
   const stage = status.lastFinalRound >= N_ROUNDS
     ? 'Final'
     : status.anyLive
@@ -32,7 +40,7 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
             {event === 'open' ? 'Open' : "Women's"} · {stage}
           </p>
           <h3 className="font-heading text-lg text-[var(--text-primary)] group-hover:text-gold-ink transition-colors">
-            Who wins gold?
+            {finished ? 'Final standings' : 'Who wins gold?'}
           </h3>
         </div>
         {run && (
@@ -54,10 +62,15 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="text-sm font-medium text-[var(--text-primary)] truncate">{team.name}</span>
-                    <span className="text-sm font-heading text-gold-ink tabular-nums shrink-0">{formatPct(s.pGold)}</span>
+                    <span className="text-sm font-heading text-gold-ink tabular-nums shrink-0">
+                      {s.mp !== null ? `${s.mp} MP` : formatPct(s.pGold)}
+                    </span>
                   </div>
                   <div className="mt-1 h-1.5 rounded-full bg-[var(--bg-surface-3)] overflow-hidden">
-                    <div className="h-full bg-medal-gold rounded-full" style={{ width: `${Math.min(100, s.pGold * 100)}%` }} />
+                    <div
+                      className={`h-full rounded-full ${i === 0 ? 'bg-medal-gold' : i === 1 && s.mp !== null ? 'bg-medal-silver' : i === 2 && s.mp !== null ? 'bg-medal-bronze' : 'bg-medal-gold'}`}
+                      style={{ width: `${s.mp !== null ? (s.mp / maxMp) * 100 : Math.min(100, s.pGold * 100)}%` }}
+                    />
                   </div>
                 </div>
               </li>
@@ -71,13 +84,13 @@ async function GoldPanel({ event }: { event: OlympiadEvent }) {
       )}
 
       <p className="mt-4 text-sm text-gold-ink group-hover:translate-x-1 transition-transform inline-block">
-        {top.length > 0 ? `Explore all ${summary.length} teams & build scenarios` : 'See the field'} &rarr;
+        {top.length === 0 ? 'See the field' : finished ? `Full results for all ${summary.length} teams` : `Explore all ${summary.length} teams & build scenarios`} &rarr;
       </p>
     </Link>
   );
 }
 
-/** Home-page teaser: top-5 gold odds for both Olympiad events, linking to the simulations. */
+/** Home-page teaser: top-5 for both Olympiad events -- gold odds while running, final table once over. */
 export default async function OlympiadGoldSummary() {
   return (
     <>
