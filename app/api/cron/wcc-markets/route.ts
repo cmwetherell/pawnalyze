@@ -1,5 +1,5 @@
 import { revalidateTag } from 'next/cache';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, connection } from 'next/server';
 
 import { TAGS } from '@/lib/wcc/config';
 import { fetchLiveMarkets } from '@/lib/wcc/markets';
@@ -15,6 +15,8 @@ const MIN_GAP_MS = 20 * 60_000;
  * If CRON_SECRET is set, Vercel Cron sends it as a bearer token and nothing else may call this.
  */
 export async function GET(req: NextRequest) {
+  // Always run at request time: never prerender this at build (it reads the clock and writes rows).
+  await connection();
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get('authorization') !== `Bearer ${secret}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });

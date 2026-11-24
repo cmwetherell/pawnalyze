@@ -66,6 +66,8 @@ export async function withMatchRatings<T extends (WccSummary | null)[]>(
   state: MatchState,
 ): Promise<{ run: WccRun; summaries: T }> {
   if (usesMatchRatings(run)) return { run, summaries: summaries as T };
+  // Never pull the (large) model grid while a deploy is building pages: show the stored odds instead.
+  if (process.env.NEXT_PHASE === 'phase-production-build') return { run, summaries: summaries as T };
   let grid: ModelGrid | null = null;
   try {
     grid = await getWccGrid(run.modelVersion);
