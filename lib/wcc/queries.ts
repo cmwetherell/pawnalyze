@@ -106,6 +106,18 @@ export async function getWccGames(): Promise<WccGame[]> {
   'use cache';
   cacheLife('hours');
   cacheTag(TAGS.ref);
+  return loadGames();
+}
+
+/** The games table, uncached (for the sync cron). */
+export async function getWccGamesFresh(): Promise<(WccGame & { source: string | null })[]> {
+  const games = await loadGames();
+  const rows = await db().selectFrom('wcc_2026_games').select(['game_no', 'stage', 'source']).execute();
+  const src = new Map(rows.map(r => [`${r.stage}:${r.game_no}`, r.source]));
+  return games.map(g => ({ ...g, source: src.get(`${g.stage}:${g.gameNo}`) ?? null }));
+}
+
+async function loadGames(): Promise<WccGame[]> {
   return orEmpty('games', [], async () => {
     const rows = await db()
       .selectFrom('wcc_2026_games')
@@ -358,4 +370,38 @@ export async function insertMarketSnapshot(row: {
     })
     .onConflict(oc => oc.doNothing())
     .execute();
+}
+
+/**
+ * Write one classical game from the Lichess broadcast. Never touches a row another writer (the
+ * pipeline) has finalised; rows this sync wrote itself (source = 'lichess') can be corrected.
+ * Returns true if a row was inserted or changed.
+ */
+export async function upsertClassicalGame(g: {
+  gameNo: number; startsAt: string | null; whitePlayerId: PlayerId; result: GameResult | null; status: 'live' | 'final'; pgn: string;
+}): Promise<boolean> {
+  const values = {
+    white_player_id: g.whitePlayerId,
+    result: g.result,
+    status: g.status,
+    pgn: g.pgn,
+    source: 'lichess',
+    updated_at: new Date(),
+  };
+  const updated = await db()
+    .updateTable('wcc_2026_games')
+    .set(values)
+    .where('stage', '=', 'classical')
+    .where('game_no', '=', g.gameNo)
+    .where(eb => eb.or([eb('status', '!=', 'final'), eb('source', '=', 'lichess')]))
+    .executeTakeFirst();
+  if (Number(updated.numUpdatedRows) > 0) return true;
+  const exists = await db().selectFrom('wcc_2026_games').select('game_no').where('stage', '=', 'classical').where('game_no', '=', g.gameNo).executeTakeFirst();
+  if (exists) return false;
+  const inserted = await db()
+    .insertInto('wcc_2026_games')
+    .values({ game_no: g.gameNo, stage: 'classical', stage_game: g.gameNo, starts_at: g.startsAt ? new Date(g.startsAt) : null, ...values })
+    .onConflict(oc => oc.doNothing())
+    .executeTakeFirst();
+  return Number(inserted.numInsertedOrUpdatedRows ?? 0) > 0;
 }
