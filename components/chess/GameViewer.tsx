@@ -3,6 +3,8 @@
 import { Chess } from 'chess.js';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import BoardSvg from './BoardSvg';
+
 interface Side {
   name: string;
   rating?: number;
@@ -27,7 +29,6 @@ interface Ply {
   to: string;
 }
 
-const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 function parsePlies(moves: string): { plies: Ply[]; error: boolean } {
@@ -39,21 +40,6 @@ function parsePlies(moves: string): { plies: Ply[]; error: boolean } {
   } catch {
     return { plies: [], error: true };
   }
-}
-
-function piecesFromFen(fen: string): { square: string; piece: string }[] {
-  const out: { square: string; piece: string }[] = [];
-  const rows = fen.split(' ')[0].split('/');
-  rows.forEach((row, r) => {
-    let f = 0;
-    for (const ch of row) {
-      if (/\d/.test(ch)) { f += Number(ch); continue; }
-      const colour = ch === ch.toUpperCase() ? 'w' : 'b';
-      out.push({ square: `${FILES[f]}${8 - r}`, piece: `${colour}${ch.toUpperCase()}` });
-      f++;
-    }
-  });
-  return out;
 }
 
 export function lichessAnalysisHref(moves: string): string {
@@ -70,7 +56,6 @@ export default function GameViewer({ moves, white, black, result, orientation = 
 
   const fen = ply === 0 ? START_FEN : plies[ply - 1].fen;
   const last = ply === 0 ? null : plies[ply - 1];
-  const pieces = useMemo(() => piecesFromFen(fen), [fen]);
 
   useEffect(() => {
     const el = listRef.current?.querySelector<HTMLElement>('[aria-current="step"]');
@@ -88,12 +73,6 @@ export default function GameViewer({ moves, white, black, result, orientation = 
     else if (e.key === 'f') setFlipped(v => !v);
   };
 
-  const sq = (file: number, rank: number) => {
-    const x = flipped ? 7 - file : file;
-    const y = flipped ? rank : 7 - rank;
-    return { x: x * 12.5, y: y * 12.5 };
-  };
-  const coords = (square: string) => sq(FILES.indexOf(square[0]), Number(square[1]) - 1);
   const top = flipped ? white : black;
   const bottom = flipped ? black : white;
   const ctrl = 'h-10 w-10 inline-flex items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:hover:bg-transparent';
@@ -106,35 +85,7 @@ export default function GameViewer({ moves, white, black, result, orientation = 
     <div ref={rootRef} tabIndex={0} onKeyDown={onKey} className="grid gap-3 md:grid-cols-[minmax(0,380px)_minmax(11rem,1fr)] outline-none focus-visible:ring-2 focus-visible:ring-chess-gold rounded-lg" aria-label="Game replay; use the arrow keys to step through the moves">
       <div>
         <SideLabel side={top} />
-        <svg viewBox="0 0 100 100" className="w-full aspect-square rounded-md overflow-hidden select-none" role="img" aria-label={`Position after ${ply} ${ply === 1 ? 'ply' : 'plies'}`}>
-          {Array.from({ length: 64 }, (_, i) => {
-            const file = i % 8;
-            const rank = 7 - Math.floor(i / 8);
-            const { x, y } = sq(file, rank);
-            const dark = (file + rank) % 2 === 0;
-            const square = `${FILES[file]}${rank + 1}`;
-            const hl = last && (last.from === square || last.to === square);
-            return (
-              <g key={square}>
-                <rect x={x} y={y} width={12.5} height={12.5} fill={dark ? 'var(--board-dark)' : 'var(--board-light)'} />
-                {hl && <rect x={x} y={y} width={12.5} height={12.5} fill="#C9A84C" fillOpacity={0.45} />}
-              </g>
-            );
-          })}
-          {pieces.map(p => {
-            const { x, y } = coords(p.square);
-            return <image key={p.square} href={`/img/chesspieces/${p.piece}.svg`} x={x + 0.6} y={y + 0.6} width={11.3} height={11.3} />;
-          })}
-          {/* coordinates */}
-          {FILES.map((f, i) => {
-            const { x } = sq(i, 0);
-            return <text key={f} x={x + 10.6} y={99} fontSize={2.6} fill="var(--board-dark)" opacity={0.9}>{f}</text>;
-          })}
-          {Array.from({ length: 8 }, (_, r) => {
-            const { y } = sq(0, r);
-            return <text key={r} x={0.7} y={y + 3.2} fontSize={2.6} fill={(r % 2 === 0) === !flipped ? 'var(--board-light)' : 'var(--board-dark)'} opacity={0.9}>{r + 1}</text>;
-          })}
-        </svg>
+        <BoardSvg fen={fen} from={last?.from} to={last?.to} flipped={flipped} label={`Position after ${ply} ${ply === 1 ? 'ply' : 'plies'}`} />
         <SideLabel side={bottom} />
         <div className="mt-2 flex items-center gap-1">
           <button type="button" onClick={() => go(0)} disabled={ply === 0} className={ctrl} aria-label="First move">⏮</button>

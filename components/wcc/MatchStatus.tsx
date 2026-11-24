@@ -1,8 +1,9 @@
 'use client';
 
+import Link from 'next/link';
 import { useSyncExternalStore } from 'react';
 
-import { CLASSICAL_SCHEDULE, OPENING_CEREMONY, TIEBREAK_START } from '@/lib/wcc/config';
+import { CLASSICAL_SCHEDULE, OPENING_CEREMONY, TIEBREAK_START, WCC_HREF } from '@/lib/wcc/config';
 import { fmtPoints, type MatchState } from '@/lib/wcc/status';
 import type { Players } from './ui';
 
@@ -117,6 +118,9 @@ export default function MatchStatus({ state, players }: { state: MatchState; pla
           {state.lastFinal > 0 ? `Score after game ${state.lastFinal}` : 'Match score'}
         </p>
         <p className="text-sm text-[var(--text-secondary)] mt-0.5">{line}</p>
+        <Link href={`${WCC_HREF}/live`} className="inline-block mt-1 text-sm text-gold-ink hover:text-chess-gold-light underline decoration-chess-gold/30">
+          Live board, evaluation and complexity
+        </Link>
       </div>
       {score}
     </div>
