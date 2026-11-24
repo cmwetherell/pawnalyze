@@ -31,7 +31,7 @@ async function renderWccOg() {
   const state = matchState(games, run?.params.g1_white ?? null);
   const rebased = run ? await withMatchRatings(run, [stored], state) : null;
   const summary = rebased?.summaries[0] ?? null;
-  const p1 = rebased && summary ? currentOdds(summary, rebased.run, state).pWin1 : null;
+  const p1 = state.winner ? (state.winner === 1 ? 1 : 0) : rebased && summary ? currentOdds(summary, rebased.run, state).pWin1 : null;
   const g = fileDataUri(`public${WCC_PHOTOS.gukesh.og.src}`, 'image/jpeg');
   const s = fileDataUri(`public${WCC_PHOTOS.sindarov.og.src}`, 'image/jpeg');
   const flagIn = fileDataUri('node_modules/flag-icons/flags/4x3/in.svg', 'image/svg+xml');

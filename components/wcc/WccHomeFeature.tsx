@@ -24,7 +24,7 @@ export default async function WccHomeFeature() {
   const shownRun = rebased?.run ?? null;
   const summary = rebased?.summaries[0] ?? null;
   const players = resolvePlayers(rows, shownRun);
-  const p1 = shownRun && summary ? currentOdds(summary, shownRun, state).pWin1 : null;
+  const p1 = state.winner ? (state.winner === 1 ? 1 : 0) : shownRun && summary ? currentOdds(summary, shownRun, state).pWin1 : null;
   const started = state.lastFinal > 0 || state.anyLive;
 
   const side = (id: PlayerId) => {

@@ -111,8 +111,17 @@ export function isLagging(run: WccRun, state: MatchState): boolean {
  * the same exact computation with them applied (identical to what the pipeline would store).
  */
 export function currentOdds(summary: WccSummary, run: WccRun, state: MatchState): MatchOdds {
+  if (state.winner !== null) return frozenOdds(summary, run, state);
   if (!isLagging(run, state)) return summary;
   return exact({ wdl: summary.wdl, fixed: state.fixed, g1White: state.g1White, tb: state.tbFixed });
+}
+
+/** Once decided: the odds as they stood before the decisive classical game, or at 7–7 before the tiebreaks. */
+export function frozenOdds(summary: WccSummary, run: WccRun, state: MatchState): MatchOdds {
+  const at = state.decidedStage === 'classical' && state.decidedAt !== null ? state.decidedAt - 1 : N_CLASSICAL;
+  if (run.afterGame === at && run.tbGames === 0) return summary;
+  const fixed = new Map([...state.fixed].filter(([g]) => g <= at));
+  return exact({ wdl: summary.wdl, fixed, g1White: state.g1White, tb: [] });
 }
 
 /** A classical game is assumed over this long after its start, even before its result is recorded. */

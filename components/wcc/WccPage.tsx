@@ -1,7 +1,7 @@
 import { EVENT } from '@/lib/wcc/config';
 import { exact } from '@/lib/wcc/match';
 import {
-  getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSimSample, getWccSimStats, getWccSummary,
+  getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSummary,
 } from '@/lib/wcc/queries';
 import { withMatchRatings } from '@/lib/wcc/rebase';
 import { currentOdds, matchState } from '@/lib/wcc/status';
@@ -48,14 +48,12 @@ export default async function WccPage() {
     oddsRun = frozen ?? run;
   }
 
-  const [storedSummary, storedRaw, simStats, simSample] = oddsRun
+  const [storedSummary, storedRaw] = oddsRun
     ? await Promise.all([
         getWccSummary(oddsRun.runId, oddsRun.headlineVariant === 'model' ? 'model' : 'wcc'),
         getWccSummary(oddsRun.runId, 'model'),
-        run ? getWccSimStats(run.runId) : Promise.resolve(null),
-        run ? getWccSimSample(run.runId, 1) : Promise.resolve([]),
       ])
-    : [null, null, null, []];
+    : [null, null];
 
   if (oddsRun && storedSummary) parityCheck(oddsRun, storedSummary, state);
 
@@ -92,11 +90,9 @@ export default async function WccPage() {
           summary={summary}
           history={history}
           markets={market}
-          simStats={simStats}
-          simSample={simSample}
           finished={finished}
           slots={{
-            markets: <ModelVsMarkets modelPWin1={finished ? summary.pWin1 : currentOdds(summary, oddsRun, state).pWin1} players={players} stored={market} ratingGap={ratingGap} drawRate={drawRate} />,
+            markets: <ModelVsMarkets modelPWin1={currentOdds(summary, oddsRun, state).pWin1} players={players} stored={market} ratingGap={ratingGap} drawRate={drawRate} />,
             h2h,
             methodology,
           }}

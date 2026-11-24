@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { LADDER, TB_STAGE_GAMES } from '@/lib/wcc/config';
+import type { FixedTbGame } from '@/lib/wcc/match';
+import { N_BROWSER_SIMS, simulateMatch, simulateStats } from '@/lib/wcc/simulate';
 import { fmtPoints, fmtScore } from '@/lib/wcc/status';
-import type { HalfPoints, SimRow, SimStats, TbStage } from '@/lib/wcc/types';
+import type { HalfPoints, PlayerId, SimRow, TbStage, WdlSet } from '@/lib/wcc/types';
 import { usePrefersReducedMotion } from './motion';
 import { Section, type Players } from './ui';
 
@@ -36,89 +38,80 @@ function tbStageOf(i: number): TbStage {
 }
 
 export default function SimReplay({
-  runId, nSims, stats, sample, players,
+  wdl, fixed, g1White, tb, players,
 }: {
-  runId: number;
-  nSims: number;
-  stats: SimStats | null;
-  sample: SimRow[];
+  wdl: WdlSet;
+  /** Classical results so far (P1 half-points): every simulation keeps them. */
+  fixed: ReadonlyMap<number, HalfPoints>;
+  g1White: PlayerId | null;
+  tb: FixedTbGame[];
   players: Players;
 }) {
   const reduced = usePrefersReducedMotion();
-  const [sim, setSim] = useState<SimRow | null>(sample[0] ?? null);
+  const input = useMemo(() => ({ wdl, fixed, g1White, tb }), [wdl, fixed, g1White, tb]);
+  const stats = useMemo(() => simulateStats(input), [input]);
   const [index, setIndex] = useState<number | null>(null);
+  const sim: SimRow = useMemo(() => simulateMatch(input, index ?? 0), [input, index]);
   const [shown, setShown] = useState<number>(Infinity);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => () => { if (timer.current) clearInterval(timer.current); }, []);
 
-  const total = sim ? sim.classical.filter(v => v !== null).length + sim.tb.length : 0;
+  const total = sim.classical.filter(v => v !== null).length + sim.tb.length;
 
-  const deal = async () => {
+  const deal = () => {
     if (timer.current) clearInterval(timer.current);
-    setLoading(true);
-    setError(null);
-    const k = Math.floor(Math.random() * nSims);
-    try {
-      const res = await fetch(`/api/sims/wcc-2026/sim?run=${runId}&id=${k}`);
-      if (!res.ok) throw new Error(res.status === 410 ? 'New simulations are available; reload the page.' : `HTTP ${res.status}`);
-      const next = (await res.json()) as SimRow;
-      setSim(next);
-      setIndex(k);
-      const steps = next.classical.filter(v => v !== null).length + next.tb.length;
-      if (reduced) { setShown(Infinity); return; }
-      setShown(0);
-      let i = 0;
-      timer.current = setInterval(() => {
-        i += 1;
-        setShown(i);
-        if (i >= steps && timer.current) clearInterval(timer.current);
-      }, STEP_MS);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not load a simulation');
-    } finally {
-      setLoading(false);
-    }
+    const k = Math.floor(Math.random() * N_BROWSER_SIMS);
+    const next = simulateMatch(input, k);
+    setIndex(k);
+    const steps = next.classical.filter(v => v !== null).length + next.tb.length;
+    if (reduced) { setShown(Infinity); return; }
+    setShown(0);
+    let i = 0;
+    timer.current = setInterval(() => {
+      i += 1;
+      setShown(i);
+      if (i >= steps && timer.current) clearInterval(timer.current);
+    }, STEP_MS);
   };
+  const playedSoFar = fixed.size;
 
-  const played = sim ? sim.classical.map((v, i) => ({ v, i })).filter(x => x.v !== null) : [];
+  const played = sim.classical.map((v, i) => ({ v, i })).filter(x => x.v !== null);
   const revealedClassical = Math.min(shown, played.length);
-  const revealedTb = Math.max(0, Math.min(shown - played.length, sim?.tb.length ?? 0));
+  const revealedTb = Math.max(0, Math.min(shown - played.length, sim.tb.length));
   let s1 = 0, s2 = 0;
   for (let i = 0; i < revealedClassical; i++) { s1 += played[i].v!; s2 += 2 - played[i].v!; }
   const finished = shown >= total;
-  const animating = sim !== null && !finished;
-  const winner = sim ? players[sim.winner] : null;
-  const decided = sim?.decidedStage === 'classical'
+  const animating = !finished;
+  const winner = players[sim.winner];
+  const decided = sim.decidedStage === 'classical'
     ? `${fmtScore(Math.max(sim.p1Hp, sim.p2Hp), Math.min(sim.p1Hp, sim.p2Hp))} after game ${sim.endGame}`
-    : sim ? `7–7, then won the ${LADDER[sim.decidedStage].label.toLowerCase()} ${sim.decidedStage === 'sd' ? `after ${sim.tb.length - 8} sudden-death game${sim.tb.length - 8 === 1 ? '' : 's'}` : 'stage'}` : '';
+    : `7–7, then won the ${LADDER[sim.decidedStage].label.toLowerCase()} ${sim.decidedStage === 'sd' ? `after ${sim.tb.length - 8} sudden-death game${sim.tb.length - 8 === 1 ? '' : 's'}` : 'stage'}`;
 
   return (
     <Section
       id="replay"
-      eyebrow={`One of ${nSims.toLocaleString('en-US')} simulated matches`}
+      eyebrow={`One of ${N_BROWSER_SIMS.toLocaleString('en-US')} simulated matches`}
       title="Deal a simulated match"
-      description="Every simulated match is stored. Deal one and watch it play out game by game — it's what the odds are made of."
+      description={playedSoFar > 0
+        ? `Every simulation keeps the ${playedSoFar} game${playedSoFar === 1 ? '' : 's'} already played and draws the rest from the model's odds. Deal one and watch it play out game by game.`
+        : "Each game is drawn from the model's odds. Deal one and watch it play out game by game — it's what the odds are made of."}
       action={
         <button
           type="button"
           onClick={deal}
-          disabled={loading}
           className="h-11 px-4 rounded-lg bg-chess-gold text-chess-dark text-sm font-semibold hover:bg-chess-gold-light hover:shadow-gold transition-all disabled:opacity-60 inline-flex items-center gap-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden><rect x="4" y="3" width="12" height="16" rx="2" /><path d="M8 21h10a2 2 0 002-2V7" /></svg>
-          {loading ? 'Dealing…' : sim && index !== null ? 'Deal another' : 'Deal a match'}
+          {index !== null ? 'Deal another' : 'Deal a match'}
         </button>
       }
     >
-      {sim ? (
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_260px] gap-5">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_260px] gap-5">
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs text-[var(--text-muted)]">
-                {index !== null ? <>Simulation #{(index + 1).toLocaleString('en-US')}</> : 'A sample simulation'}
+                Simulation #{((index ?? 0) + 1).toLocaleString('en-US')}
                 {' · '}{players[sim.g1White].shortName} White in game 1
               </p>
               <p className="font-heading text-2xl text-[var(--text-primary)] whitespace-nowrap" aria-live="polite">
@@ -163,11 +156,9 @@ export default function SimReplay({
                 Skip to the end
               </button>
             )}
-            {error && <p className="mt-2 text-xs text-rose-500">{error}</p>}
           </div>
 
-          {stats && (
-            <dl className="grid grid-cols-2 lg:grid-cols-1 gap-2 content-start">
+          <dl className="grid grid-cols-2 lg:grid-cols-1 gap-2 content-start">
               {[
                 { k: 'Went all the way to sudden death', v: `${stats.toSd.toLocaleString('en-US')} sims` },
                 { k: 'Longest sudden-death run', v: stats.longestSd > 0 ? `${stats.longestSd} games` : '—' },
@@ -179,12 +170,8 @@ export default function SimReplay({
                   <dd className="text-sm font-semibold text-[var(--text-primary)] tabular-nums">{x.v}</dd>
                 </div>
               ))}
-            </dl>
-          )}
+          </dl>
         </div>
-      ) : (
-        <p className="text-sm text-[var(--text-muted)]">Simulated matches appear here once the first run is uploaded.</p>
-      )}
     </Section>
   );
 }

@@ -12,7 +12,7 @@ import {
 } from '@/lib/wcc/scenario';
 import { currentOdds, fmtScore, isLagging, matchState } from '@/lib/wcc/status';
 import type {
-  HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, SimRow, SimStats, WccGame, WccRun, WccSummary,
+  HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, WccGame, WccRun, WccSummary,
 } from '@/lib/wcc/types';
 import ClinchTimeline from './ClinchTimeline';
 import ColourDrawToggle from './ColourDrawToggle';
@@ -36,8 +36,6 @@ interface Props {
   summary: WccSummary;
   history: HistoryPoint[];
   markets: MarketRow[];
-  simStats: SimStats | null;
-  simSample: SimRow[];
   /** The match is decided; odds are frozen as they stood before the decisive game. */
   finished: boolean;
   slots: { markets: ReactNode; h2h: ReactNode; methodology: ReactNode };
@@ -59,7 +57,7 @@ const NAV = [
   { id: 'methodology', label: 'Method' },
 ];
 
-export default function WccDashboard({ players, games, run, summary, history, markets, simStats, simSample, finished, slots }: Props) {
+export default function WccDashboard({ players, games, run, summary, history, markets, finished, slots }: Props) {
   const router = useRouter();
   const state = useMemo(() => matchState(games, run.params.g1_white ?? null), [games, run.params.g1_white]);
   const colourKnown = state.g1White !== null;
@@ -136,17 +134,27 @@ export default function WccDashboard({ players, games, run, summary, history, ma
 
   // Baseline: the stored summary, or (if results arrived after the last run) the same exact
   // computation with those results applied.
-  const baseline: MatchOdds = useMemo(() => (finished ? summary : currentOdds(summary, run, state)), [finished, summary, run, state]);
+  // Once decided, currentOdds freezes them as they stood before the decisive game (or at 7–7).
+  const baseline: MatchOdds = useMemo(() => currentOdds(summary, run, state), [summary, run, state]);
 
-  // Odds over time: until the pipeline stores a run for the latest result, add it from the exact computation.
+  // Odds over time: a point for every game since the last stored run, computed exactly from the
+  // results up to that game (the same numbers a pipeline run would store).
   const historyNow: HistoryPoint[] = useMemo(() => {
-    if (!lagging || state.lastFinal <= run.afterGame || state.tbFixed.length > 0) return history;
-    const game = state.classical[state.lastFinal - 1];
-    return [...history, {
-      runId: -1, afterGame: state.lastFinal, tbGames: 0,
-      createdAt: game?.startsAt ?? new Date(0).toISOString(), pWin1: baseline.pWin1, pTb: baseline.pTb,
-    }];
-  }, [lagging, history, state, run.afterGame, baseline]);
+    const extra: HistoryPoint[] = [];
+    const known = new Set(history.map(h => `${h.afterGame}:${h.tbGames}`));
+    for (let g = run.afterGame + 1; g <= state.lastFinal; g++) {
+      if (known.has(`${g}:0`)) continue;
+      const fixed = new Map([...state.fixed].filter(([n]) => n <= g));
+      const o = exact({ wdl: summary.wdl, fixed, g1White: state.g1White, tb: [] });
+      const game = state.classical[g - 1];
+      extra.push({ runId: -g, afterGame: g, tbGames: 0, createdAt: game?.startsAt ?? new Date(0).toISOString(), pWin1: o.pWin1, pTb: o.pTb });
+    }
+    if (state.tbFixed.length > run.tbGames && !known.has(`${N_CLASSICAL}:${state.tbFixed.length}`)) {
+      const o = exact({ wdl: summary.wdl, fixed: state.fixed, g1White: state.g1White, tb: state.tbFixed });
+      extra.push({ runId: -100, afterGame: N_CLASSICAL, tbGames: state.tbFixed.length, createdAt: new Date().toISOString(), pWin1: o.pWin1, pTb: o.pTb });
+    }
+    return extra.length ? [...history, ...extra] : history;
+  }, [history, state, run.afterGame, run.tbGames, summary.wdl]);
 
   const fixedAll = useMemo(() => {
     const m = new Map<number, HalfPoints>(state.fixed);
@@ -349,7 +357,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
           <ScoreDistribution odds={odds} players={players} />
         </div>
         <ClinchTimeline odds={odds} players={players} />
-        {!finished && <SimReplay runId={run.runId} nSims={run.nSims} stats={simStats} sample={simSample} players={players} />}
+        {!finished && <SimReplay wdl={summary.wdl} fixed={state.fixed} g1White={state.g1White} tb={state.tbFixed} players={players} />}
         <WinProbHistoryChart history={historyNow} markets={markets} players={players} />
         {slots.markets}
         {!finished && (
