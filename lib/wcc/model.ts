@@ -43,7 +43,7 @@ export const ZERO_OFFSETS: RatingOffsets = { g: 0, s: 0 };
 
 const TC_KEY: Record<TimeControl, 'c' | 'r' | 'b'> = { classical: 'c', rapid: 'r', blitz: 'b' };
 
-function add(a: Triplet, b: Triplet, c: Triplet): Triplet {
+export function add(a: Triplet, b: Triplet, c: Triplet): Triplet {
   // a + (b - c), clipped and renormalised
   const raw = [0, 1, 2].map(k => Math.max(1e-9, a[k] + b[k] - c[k])) as Triplet;
   const s = raw[0] + raw[1] + raw[2];

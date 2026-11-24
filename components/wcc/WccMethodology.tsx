@@ -39,8 +39,9 @@ export default function WccMethodology({
             Olympiad forecasts. It takes both ratings and who has White.
           </p>
           <p>
-            Ratings are the <strong>live ratings after the Olympiad</strong>: {p1.shortName} {p1.ratings.classical || '—'}, {p2.shortName} {p2.ratings.classical || '—'} classical
-            {run?.params.rating_source ? <> (source: {run.params.rating_source})</> : null}. They are refreshed when FIDE publishes a new list.
+            Ratings are the ones in force when the match started: {p1.shortName} {p1.ratings.classical || '—'}, {p2.shortName} {p2.ratings.classical || '—'} classical
+            {run?.params.rating_source ? <> (source: {run.params.rating_source})</> : null}. They stay fixed for the whole match.
+            {run?.rebasedFrom ? <> The last simulation run used {p1.shortName} {run.rebasedFrom['1'].c}, {p2.shortName} {run.rebasedFrom['2'].c}; its odds are moved onto these ratings with the model’s rating grid until a new run is stored.</> : null}
           </p>
         </Card>
 

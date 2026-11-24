@@ -233,6 +233,13 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   const scenarioLabel = scenarioActive && joined ? `With ${joined}:` : null;
   const byColour = { '1': odds.byColour['1']?.p_win1 ?? odds.pWin1, '2': odds.byColour['2']?.p_win1 ?? odds.pWin1 };
   const champion = finished && state.winner ? players[state.winner] : null;
+  // What the headline includes beyond the stored run.
+  const freshness = [
+    run.rebasedFrom ? `the match-start ratings (${players[1].shortName} ${players[1].ratings.classical}, ${players[2].shortName} ${players[2].ratings.classical})` : null,
+    lagging && state.lastFinal > run.afterGame
+      ? `results since the last simulation run (game ${run.afterGame + 1}${state.lastFinal > run.afterGame + 1 ? `–${state.lastFinal}` : ''})`
+      : lagging ? `the colour draw (${players[state.g1White ?? 1].shortName} White in game 1)` : null,
+  ].filter((x): x is string => x !== null);
 
   return (
     <>
@@ -263,14 +270,12 @@ export default function WccDashboard({ players, games, run, summary, history, ma
             pWin1={odds.pWin1}
             pTb={odds.pTb}
             base={scenarioActive ? { pWin1: baseline.pWin1, pTb: baseline.pTb } : null}
-            nSims={run.nSims}
+            nSims={run.rebasedFrom || lagging ? null : run.nSims}
             scenarioLabel={scenarioLabel}
           />
-          {lagging && !scenarioActive && (
+          {freshness.length > 0 && !scenarioActive && (
             <p className="mt-2 text-xs text-[var(--text-muted)]">
-              {state.lastFinal > run.afterGame
-                ? <>Includes results since the last simulation run (game {run.afterGame + 1}{state.lastFinal > run.afterGame + 1 ? `–${state.lastFinal}` : ''}), computed exactly on this page.</>
-                : <>Includes the colour draw ({players[state.g1White ?? 1].shortName} White in game 1), computed exactly on this page.</>}
+              Uses {freshness.join(' and ')}, computed exactly on this page; the simulations catch up at the next run.
             </p>
           )}
         </section>

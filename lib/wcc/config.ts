@@ -1,4 +1,4 @@
-import type { GameResult, PlayerId, Stage, TbStage, TimeControl } from './types';
+import type { GameResult, PlayerId, PlayerKey, RunRatings, Stage, TbStage, TimeControl } from './types';
 
 export const WCC_SLUG = 'world-chess-championship-2026';
 export const WCC_HREF = `/${WCC_SLUG}`;
@@ -47,6 +47,17 @@ export const CLASSICAL_SCHEDULE: { gameNo: number; startsAt: string }[] = [
   ['2026-12-10', 13], ['2026-12-11', 14],
 ].map(([d, n]) => ({ gameNo: n as number, startsAt: g(d as string) }));
 export const TIEBREAK_START = g('2026-12-12');
+
+/**
+ * Ratings at the start of the match: FIDE's November 2026 list (Wikipedia's match article agrees).
+ * The site's odds use these. A run computed from other ratings is re-based onto them (lib/wcc/rebase.ts)
+ * until the pipeline stores a run with exactly these numbers.
+ */
+export const MATCH_RATINGS: Record<PlayerKey, RunRatings> = {
+  '1': { c: 2710, r: 2686, b: 2659 },
+  '2': { c: 2782, r: 2755, b: 2725 },
+};
+export const MATCH_RATING_SOURCE = 'FIDE rating list, November 2026 (in force at the start of the match)';
 
 /** From the 22 Nov colour draw: Sindarov has White in game 1, and so in every odd game. */
 export const G1_WHITE: PlayerId = 2;

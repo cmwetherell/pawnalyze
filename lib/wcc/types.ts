@@ -60,6 +60,8 @@ export interface WccRun {
   source: 'pipeline' | 'synthetic';
   createdAt: string;
   notes: string | null;
+  /** Set by the site when the stored odds were re-based onto MATCH_RATINGS: the ratings the run actually used. */
+  rebasedFrom?: Record<PlayerKey, RunRatings> | null;
 }
 
 /** Key = player id who has White; white-perspective triplets. */

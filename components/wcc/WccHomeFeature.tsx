@@ -6,6 +6,7 @@ import { formatPct } from '@/components/ui/ProbBar';
 import { CLASSICAL_SCHEDULE, WCC_HREF } from '@/lib/wcc/config';
 import { WCC_PHOTOS } from '@/lib/wcc/photos';
 import { getWccGames, getWccPlayers, getWccRun, getWccSummary } from '@/lib/wcc/queries';
+import { withMatchRatings } from '@/lib/wcc/rebase';
 import { currentOdds, fmtScore, matchState } from '@/lib/wcc/status';
 import type { PlayerId } from '@/lib/wcc/types';
 import { CompactCountdown } from './MatchStatus';
@@ -17,10 +18,13 @@ const AVATAR: Record<PlayerId, string> = { 1: WCC_PHOTOS.gukesh.portrait.src, 2:
 /** Home-page flagship card: face-off, split bar, countdown or score, CTA. */
 export default async function WccHomeFeature() {
   const [rows, games, run] = await Promise.all([getWccPlayers(), getWccGames(), getWccRun()]);
-  const summary = run ? await getWccSummary(run.runId, 'wcc') : null;
-  const players = resolvePlayers(rows, run);
+  const stored = run ? await getWccSummary(run.runId, 'wcc') : null;
   const state = matchState(games, run?.params.g1_white ?? null);
-  const p1 = run && summary ? currentOdds(summary, run, state).pWin1 : null;
+  const rebased = run ? await withMatchRatings(run, [stored], state) : null;
+  const shownRun = rebased?.run ?? null;
+  const summary = rebased?.summaries[0] ?? null;
+  const players = resolvePlayers(rows, shownRun);
+  const p1 = shownRun && summary ? currentOdds(summary, shownRun, state).pWin1 : null;
   const started = state.lastFinal > 0 || state.anyLive;
 
   const side = (id: PlayerId) => {

@@ -3,6 +3,7 @@ import { exact } from '@/lib/wcc/match';
 import {
   getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSimSample, getWccSimStats, getWccSummary,
 } from '@/lib/wcc/queries';
+import { withMatchRatings } from '@/lib/wcc/rebase';
 import { currentOdds, matchState } from '@/lib/wcc/status';
 import type { WccRun, WccSummary } from '@/lib/wcc/types';
 import FaceOffHero from './FaceOffHero';
@@ -29,13 +30,12 @@ function parityCheck(run: WccRun, summary: WccSummary, state: ReturnType<typeof 
 }
 
 export default async function WccPage() {
-  const [rows, games, run, market, history] = await Promise.all([
+  const [rows, games, run, market, storedHistory] = await Promise.all([
     getWccPlayers(), getWccGames(), getWccRun(), getWccMarket(), getWccHistory(),
   ]).catch((err: unknown) => {
     console.error('[wcc] data load failed:', err instanceof Error ? err.stack : JSON.stringify(err));
     throw err;
   });
-  const players = resolvePlayers(rows, run);
   const state = matchState(games, run?.params.g1_white ?? null);
   const finished = state.winner !== null;
 
@@ -48,7 +48,7 @@ export default async function WccPage() {
     oddsRun = frozen ?? run;
   }
 
-  const [summary, rawSummary, simStats, simSample] = oddsRun
+  const [storedSummary, storedRaw, simStats, simSample] = oddsRun
     ? await Promise.all([
         getWccSummary(oddsRun.runId, oddsRun.headlineVariant === 'model' ? 'model' : 'wcc'),
         getWccSummary(oddsRun.runId, 'model'),
@@ -57,7 +57,24 @@ export default async function WccPage() {
       ])
     : [null, null, null, []];
 
-  if (oddsRun && summary) parityCheck(oddsRun, summary, state);
+  if (oddsRun && storedSummary) parityCheck(oddsRun, storedSummary, state);
+
+  // Odds at the match-start ratings (a no-op once the pipeline's run uses them).
+  let summary = storedSummary;
+  let rawSummary = storedRaw;
+  let history = storedHistory;
+  if (oddsRun) {
+    const rebased = await withMatchRatings(oddsRun, [storedSummary, storedRaw], state);
+    [summary, rawSummary] = rebased.summaries;
+    if (rebased.run.rebasedFrom && summary) {
+      // The run's own point on the odds-over-time chart moves with it.
+      const { runId } = oddsRun;
+      const { pWin1, pTb } = summary;
+      history = storedHistory.map(h => (h.runId === runId ? { ...h, pWin1, pTb } : h));
+    }
+    oddsRun = rebased.run;
+  }
+  const players = resolvePlayers(rows, oddsRun);
 
   const ratingGap = players[2].ratings.classical - players[1].ratings.classical;
   const drawRate = summary ? (summary.wdl.classical['1'][1] + summary.wdl.classical['2'][1]) / 2 : null;

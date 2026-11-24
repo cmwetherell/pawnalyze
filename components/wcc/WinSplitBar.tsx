@@ -9,7 +9,8 @@ interface Props {
   pTb: number;
   /** Baseline odds; a delta chip shows when a scenario moves them. */
   base: { pWin1: number; pTb: number } | null;
-  nSims: number;
+  /** Null when the odds are newer than the stored simulations. */
+  nSims: number | null;
   scenarioLabel?: string | null;
 }
 
@@ -67,7 +68,7 @@ export default function WinSplitBar({ players, pWin1, pTb, base, nSims, scenario
         {' '}<span className="text-[var(--text-muted)]">
           {scenarioLabel
             ? 'Exact probabilities, recomputed instantly for this scenario.'
-            : `Exact probabilities, confirmed by ${nSims.toLocaleString('en-US')} simulations.`}
+            : nSims !== null ? `Exact probabilities, confirmed by ${nSims.toLocaleString('en-US')} simulations.` : 'Exact probabilities.'}
         </span>
       </p>
     </div>
