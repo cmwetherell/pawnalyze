@@ -10,7 +10,7 @@ import { ZERO_OFFSETS, adjustedWdl, drawRate, type RatingOffsets } from '@/lib/w
 import {
   PICK_HP, encodePicks, parseColour, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome,
 } from '@/lib/wcc/scenario';
-import { fmtScore, matchState } from '@/lib/wcc/status';
+import { currentOdds, fmtScore, isLagging, matchState } from '@/lib/wcc/status';
 import type {
   HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, SimRow, SimStats, WccGame, WccRun, WccSummary,
 } from '@/lib/wcc/types';
@@ -132,14 +132,21 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     () => (labActive ? adjustedWdl(summary.wdl, run.params, grid, offsets, theta) : summary.wdl),
     [labActive, summary.wdl, run.params, grid, offsets, theta],
   );
-  const lagging = !finished && (state.lastFinal > run.afterGame || state.tbFixed.length > run.tbGames);
+  const lagging = !finished && isLagging(run, state);
 
   // Baseline: the stored summary, or (if results arrived after the last run) the same exact
   // computation with those results applied.
-  const baseline: MatchOdds = useMemo(
-    () => (lagging ? exact({ wdl: summary.wdl, fixed: state.fixed, g1White: state.g1White, tb: state.tbFixed }) : summary),
-    [lagging, summary, state],
-  );
+  const baseline: MatchOdds = useMemo(() => (finished ? summary : currentOdds(summary, run, state)), [finished, summary, run, state]);
+
+  // Odds over time: until the pipeline stores a run for the latest result, add it from the exact computation.
+  const historyNow: HistoryPoint[] = useMemo(() => {
+    if (!lagging || state.lastFinal <= run.afterGame || state.tbFixed.length > 0) return history;
+    const game = state.classical[state.lastFinal - 1];
+    return [...history, {
+      runId: -1, afterGame: state.lastFinal, tbGames: 0,
+      createdAt: game?.startsAt ?? new Date(0).toISOString(), pWin1: baseline.pWin1, pTb: baseline.pTb,
+    }];
+  }, [lagging, history, state, run.afterGame, baseline]);
 
   const fixedAll = useMemo(() => {
     const m = new Map<number, HalfPoints>(state.fixed);
@@ -261,7 +268,9 @@ export default function WccDashboard({ players, games, run, summary, history, ma
           />
           {lagging && !scenarioActive && (
             <p className="mt-2 text-xs text-[var(--text-muted)]">
-              Includes results since the last simulation run (game {run.afterGame + 1}{state.lastFinal > run.afterGame + 1 ? `–${state.lastFinal}` : ''}), computed exactly on this page.
+              {state.lastFinal > run.afterGame
+                ? <>Includes results since the last simulation run (game {run.afterGame + 1}{state.lastFinal > run.afterGame + 1 ? `–${state.lastFinal}` : ''}), computed exactly on this page.</>
+                : <>Includes the colour draw ({players[state.g1White ?? 1].shortName} White in game 1), computed exactly on this page.</>}
             </p>
           )}
         </section>
@@ -336,7 +345,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
         </div>
         <ClinchTimeline odds={odds} players={players} />
         {!finished && <SimReplay runId={run.runId} nSims={run.nSims} stats={simStats} sample={simSample} players={players} />}
-        <WinProbHistoryChart history={history} markets={markets} players={players} />
+        <WinProbHistoryChart history={historyNow} markets={markets} players={players} />
         {slots.markets}
         {!finished && (
           <WhatIfLab

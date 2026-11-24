@@ -1,4 +1,4 @@
-import type { PlayerId, Stage, TbStage, TimeControl } from './types';
+import type { GameResult, PlayerId, Stage, TbStage, TimeControl } from './types';
 
 export const WCC_SLUG = 'world-chess-championship-2026';
 export const WCC_HREF = `/${WCC_SLUG}`;
@@ -47,6 +47,17 @@ export const CLASSICAL_SCHEDULE: { gameNo: number; startsAt: string }[] = [
   ['2026-12-10', 13], ['2026-12-11', 14],
 ].map(([d, n]) => ({ gameNo: n as number, startsAt: g(d as string) }));
 export const TIEBREAK_START = g('2026-12-12');
+
+/** From the 22 Nov colour draw: Sindarov has White in game 1, and so in every odd game. */
+export const G1_WHITE: PlayerId = 2;
+
+/**
+ * Official classical results, for when the pipeline's games table has not caught up yet.
+ * A final result in the DB always wins over these.
+ */
+export const KNOWN_RESULTS: Record<number, GameResult> = {
+  1: '1/2-1/2',
+};
 export const OPENING_CEREMONY = '2026-11-22';
 
 export type DayKind = 'ceremony' | 'game' | 'rest' | 'tiebreak' | 'free' | 'departure';

@@ -1,6 +1,6 @@
-import { CLASSICAL_SCHEDULE, CLINCH_HP, N_CLASSICAL, TB_STAGE_GAMES } from './config';
-import { resultToHp, type FixedTbGame } from './match';
-import type { HalfPoints, PlayerId, Stage, TbStage, WccGame } from './types';
+import { CLASSICAL_SCHEDULE, CLINCH_HP, G1_WHITE, KNOWN_RESULTS, N_CLASSICAL, TB_STAGE_GAMES } from './config';
+import { exact, resultToHp, whiteInGame, type FixedTbGame } from './match';
+import type { HalfPoints, MatchOdds, PlayerId, Stage, TbStage, WccGame, WccRun, WccSummary } from './types';
 
 export interface MatchState {
   /** Classical games 1..14, always 14 entries (falls back to the published schedule). */
@@ -24,9 +24,20 @@ function placeholder(gameNo: number, startsAt: string): WccGame {
   return { gameNo, stage: 'classical', stageGame: gameNo, startsAt, whitePlayerId: null, result: null, status: 'scheduled', hasPgn: false };
 }
 
+/**
+ * Fill in what the pipeline's games table may not have yet: who has White (from the colour draw)
+ * and official classical results. Anything the table already has wins.
+ */
+function withKnown(g: WccGame): WccGame {
+  const whitePlayerId = g.whitePlayerId ?? whiteInGame(g.gameNo, G1_WHITE);
+  const known = KNOWN_RESULTS[g.gameNo];
+  if (g.status === 'final' || !known) return { ...g, whitePlayerId };
+  return { ...g, whitePlayerId, result: known, status: 'final' };
+}
+
 export function matchState(games: WccGame[], runG1White: PlayerId | null = null): MatchState {
   const byNo = new Map(games.filter(g => g.stage === 'classical').map(g => [g.gameNo, g]));
-  const classical = CLASSICAL_SCHEDULE.map(s => byNo.get(s.gameNo) ?? placeholder(s.gameNo, s.startsAt));
+  const classical = CLASSICAL_SCHEDULE.map(s => withKnown(byNo.get(s.gameNo) ?? placeholder(s.gameNo, s.startsAt)));
   const tiebreak = games.filter(g => g.stage !== 'classical').sort((a, b) => a.gameNo - b.gameNo);
 
   const g1 = classical[0];
@@ -80,11 +91,28 @@ export function matchState(games: WccGame[], runG1White: PlayerId | null = null)
     }
   }
 
-  const live = games.find(g => g.status === 'live') ?? null;
+  const live = [...classical, ...tiebreak].find(g => g.status === 'live') ?? null;
   return {
     classical, tiebreak, fixed, tbFixed, score1, score2, lastFinal, g1White, live,
     winner, decidedStage, decidedAt, anyLive: live !== null,
   };
+}
+
+/** True when results (or the colour draw) are newer than the run the stored odds come from. */
+export function isLagging(run: WccRun, state: MatchState): boolean {
+  if (state.winner !== null) return false;
+  return state.lastFinal > run.afterGame
+    || state.tbFixed.length > run.tbGames
+    || ((run.params.g1_white ?? null) === null && state.g1White !== null);
+}
+
+/**
+ * The odds as they stand now: the stored summary, or, when results have arrived since that run,
+ * the same exact computation with them applied (identical to what the pipeline would store).
+ */
+export function currentOdds(summary: WccSummary, run: WccRun, state: MatchState): MatchOdds {
+  if (!isLagging(run, state)) return summary;
+  return exact({ wdl: summary.wdl, fixed: state.fixed, g1White: state.g1White, tb: state.tbFixed });
 }
 
 function derivedG1(classical: WccGame[]): PlayerId | null {

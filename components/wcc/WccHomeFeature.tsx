@@ -6,7 +6,7 @@ import { formatPct } from '@/components/ui/ProbBar';
 import { CLASSICAL_SCHEDULE, WCC_HREF } from '@/lib/wcc/config';
 import { WCC_PHOTOS } from '@/lib/wcc/photos';
 import { getWccGames, getWccPlayers, getWccRun, getWccSummary } from '@/lib/wcc/queries';
-import { fmtScore, matchState } from '@/lib/wcc/status';
+import { currentOdds, fmtScore, matchState } from '@/lib/wcc/status';
 import type { PlayerId } from '@/lib/wcc/types';
 import { CompactCountdown } from './MatchStatus';
 import { resolvePlayers } from './players';
@@ -20,7 +20,7 @@ export default async function WccHomeFeature() {
   const summary = run ? await getWccSummary(run.runId, 'wcc') : null;
   const players = resolvePlayers(rows, run);
   const state = matchState(games, run?.params.g1_white ?? null);
-  const p1 = summary?.pWin1 ?? null;
+  const p1 = run && summary ? currentOdds(summary, run, state).pWin1 : null;
   const started = state.lastFinal > 0 || state.anyLive;
 
   const side = (id: PlayerId) => {

@@ -3,7 +3,7 @@ import { exact } from '@/lib/wcc/match';
 import {
   getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSimSample, getWccSimStats, getWccSummary,
 } from '@/lib/wcc/queries';
-import { matchState } from '@/lib/wcc/status';
+import { currentOdds, matchState } from '@/lib/wcc/status';
 import type { WccRun, WccSummary } from '@/lib/wcc/types';
 import FaceOffHero from './FaceOffHero';
 import HeadToHead from './HeadToHead';
@@ -79,7 +79,7 @@ export default async function WccPage() {
           simSample={simSample}
           finished={finished}
           slots={{
-            markets: <ModelVsMarkets modelPWin1={summary.pWin1} players={players} stored={market} ratingGap={ratingGap} drawRate={drawRate} />,
+            markets: <ModelVsMarkets modelPWin1={finished ? summary.pWin1 : currentOdds(summary, oddsRun, state).pWin1} players={players} stored={market} ratingGap={ratingGap} drawRate={drawRate} />,
             h2h,
             methodology,
           }}

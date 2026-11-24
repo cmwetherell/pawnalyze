@@ -6,7 +6,7 @@ import { OG_SIZE, safeOg } from '../og';
 import { PLAYER_DEFAULTS } from './config';
 import { WCC_PHOTOS } from './photos';
 import { getWccGames, getWccRun, getWccSummary } from './queries';
-import { fmtScore, matchState } from './status';
+import { currentOdds, fmtScore, matchState } from './status';
 
 function fileDataUri(rel: string, mime: string): string | null {
   try {
@@ -28,7 +28,7 @@ async function renderWccOg() {
   const [run, games] = await Promise.all([getWccRun(), getWccGames()]);
   const summary = run ? await getWccSummary(run.runId, run.headlineVariant === 'model' ? 'model' : 'wcc') : null;
   const state = matchState(games, run?.params.g1_white ?? null);
-  const p1 = summary?.pWin1 ?? null;
+  const p1 = run && summary ? currentOdds(summary, run, state).pWin1 : null;
   const g = fileDataUri(`public${WCC_PHOTOS.gukesh.og.src}`, 'image/jpeg');
   const s = fileDataUri(`public${WCC_PHOTOS.sindarov.og.src}`, 'image/jpeg');
   const flagIn = fileDataUri('node_modules/flag-icons/flags/4x3/in.svg', 'image/svg+xml');
