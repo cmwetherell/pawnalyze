@@ -329,3 +329,33 @@ export async function getWccSimStats(runId: number): Promise<SimStats | null> {
   });
 }
 
+
+// ---- writes (the market snapshot cron only)
+
+/** When the newest stored snapshot for a market source was taken (uncached). */
+export async function getLastMarketAt(source: string): Promise<Date | null> {
+  const row = await db()
+    .selectFrom('wcc_2026_market')
+    .select(sql<Date | null>`max(as_of)`.as('last'))
+    .where('source', '=', source)
+    .executeTakeFirst();
+  return row?.last ? new Date(row.last) : null;
+}
+
+export async function insertMarketSnapshot(row: {
+  source: string; asOf: Date; pWin1: number; url: string | null; raw: Record<string, unknown>;
+}): Promise<void> {
+  await db()
+    .insertInto('wcc_2026_market')
+    .values({
+      source: row.source,
+      as_of: row.asOf,
+      p_win1: row.pWin1,
+      p_win2: 1 - row.pWin1,
+      url: row.url,
+      // Sent as text; Postgres casts it to the column's json/jsonb type.
+      raw: JSON.stringify(row.raw),
+    })
+    .onConflict(oc => oc.doNothing())
+    .execute();
+}

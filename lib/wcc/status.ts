@@ -1,4 +1,4 @@
-import { CLASSICAL_SCHEDULE, CLINCH_HP, G1_WHITE, KNOWN_RESULTS, N_CLASSICAL, TB_STAGE_GAMES } from './config';
+import { CLASSICAL_SCHEDULE, CLINCH_HP, G1_WHITE, KNOWN_RESULTS, N_CLASSICAL, TB_STAGE_GAMES, TIEBREAK_START } from './config';
 import { exact, resultToHp, whiteInGame, type FixedTbGame } from './match';
 import type { HalfPoints, MatchOdds, PlayerId, Stage, TbStage, WccGame, WccRun, WccSummary } from './types';
 
@@ -113,6 +113,27 @@ export function isLagging(run: WccRun, state: MatchState): boolean {
 export function currentOdds(summary: WccSummary, run: WccRun, state: MatchState): MatchOdds {
   if (!isLagging(run, state)) return summary;
   return exact({ wdl: summary.wdl, fixed: state.fixed, g1White: state.g1White, tb: state.tbFixed });
+}
+
+/** A classical game is assumed over this long after its start, even before its result is recorded. */
+const GAME_SETTLED_MS = 8 * 3_600_000;
+
+/**
+ * Which "after game N" a market snapshot taken at `atMs` belongs to, or null when it should not be
+ * recorded: the match is decided, a game is (or may still be) in progress, or it is tiebreak day.
+ * Games are counted by result or, if the result is not in yet, by the clock.
+ */
+export function snapshotAfterGame(state: MatchState, atMs: number): number | null {
+  if (state.winner !== null || atMs >= new Date(TIEBREAK_START).getTime()) return null;
+  let afterGame = state.lastFinal;
+  for (const g of state.classical) {
+    if (!g.startsAt || g.status === 'not_played') continue;
+    const start = new Date(g.startsAt).getTime();
+    if (start > atMs) continue;
+    if (g.status !== 'final' && atMs < start + GAME_SETTLED_MS) return null;
+    afterGame = Math.max(afterGame, g.gameNo);
+  }
+  return afterGame;
 }
 
 function derivedG1(classical: WccGame[]): PlayerId | null {

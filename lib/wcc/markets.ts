@@ -84,6 +84,11 @@ export async function getLiveMarkets(): Promise<LiveMarkets | null> {
   // market card streams in at request time inside its <Suspense> boundary.
   cacheLife({ stale: 60, revalidate: 60, expire: 180 });
   cacheTag(TAGS.markets);
+  return fetchLiveMarkets();
+}
+
+/** The same, uncached (for the snapshot cron). */
+export async function fetchLiveMarkets(): Promise<LiveMarkets | null> {
   const [kalshi, polymarket] = await Promise.all([
     settle('Kalshi', fetchKalshi()),
     settle('Polymarket', fetchPolymarket()),

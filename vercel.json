@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/cron/wcc-markets", "schedule": "0 23 * * *" }
+  ]
+}

@@ -10,6 +10,12 @@ const slotOf = (h: { afterGame: number; tbGames: number }) => (h.tbGames > 0 ? 1
 const MARKET_SHAPES: Record<string, 'circle' | 'square' | 'triangle'> = { kalshi: 'circle', polymarket: 'square', bet365: 'triangle' };
 const MARKET_LABEL: Record<string, string> = { kalshi: 'Kalshi', polymarket: 'Polymarket', bet365: 'bet365' };
 
+/** raw.after_game written by the market snapshot cron, if any. */
+function taggedSlot(raw: unknown): number | null {
+  const v = raw && typeof raw === 'object' ? (raw as { after_game?: unknown }).after_game : undefined;
+  return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 14 ? v : null;
+}
+
 function Marker({ shape, x, y, r = 4.5 }: { shape: 'circle' | 'square' | 'triangle'; x: number; y: number; r?: number }) {
   const common = { fill: 'var(--bg-surface-1)', stroke: 'var(--text-secondary)', strokeWidth: 1.75 };
   if (shape === 'square') return <rect x={x - r} y={y - r} width={r * 2} height={r * 2} rx={1.5} {...common} />;
@@ -27,17 +33,23 @@ export default function WinProbHistoryChart({ history, markets, players }: { his
     const bySlot = new Map<number, HistoryPoint>();
     for (const h of [...history].sort((a, b) => a.createdAt.localeCompare(b.createdAt))) bySlot.set(slotOf(h), h);
     const points = Array.from(bySlot.entries()).sort((a, b) => a[0] - b[0]).map(([slot, h]) => ({ slot, h }));
-    // Each market snapshot belongs to the match state in force when it was taken.
+    // Each market snapshot belongs to the match state in force when it was taken: the game it was
+    // tagged with by the snapshot cron, else the latest run before it. The latest snapshot per slot wins.
     const runs = [...history].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     const dots = new Map<string, { slot: number; source: string; p: number }>();
-    for (const m of markets) {
+    for (const m of [...markets].sort((a, b) => a.asOf.localeCompare(b.asOf))) {
       if (!MARKET_SHAPES[m.source]) continue;
-      const before = runs.filter(r => r.createdAt <= m.asOf).pop() ?? runs[0];
-      if (!before) continue;
-      const slot = slotOf(before);
+      let slot = taggedSlot(m.raw);
+      if (slot === null) {
+        const before = runs.filter(r => r.createdAt <= m.asOf).pop() ?? runs[0];
+        if (!before) continue;
+        slot = slotOf(before);
+      }
       dots.set(`${m.source}-${slot}`, { slot, source: m.source, p: m.pWin1 });
     }
-    return { points, dots: Array.from(dots.values()) };
+    const dotList = Array.from(dots.values()).sort((a, b) => a.slot - b.slot);
+    const slots = Array.from(new Set([...points.map(p => p.slot), ...dotList.map(d => d.slot)])).sort((a, b) => a - b);
+    return { points, dots: dotList, slots };
   }, [history, markets]);
 
   const show = model.points.length >= 2;
@@ -50,7 +62,7 @@ export default function WinProbHistoryChart({ history, markets, players }: { his
   }, [show]);
 
   if (!show) return null;
-  const { points, dots } = model;
+  const { points, dots, slots } = model;
   const sources = Array.from(new Set(dots.map(d => d.source)));
 
   const narrow = width < 560;
@@ -66,11 +78,12 @@ export default function WinProbHistoryChart({ history, markets, players }: { his
   const areaBelow = `M${x(first.slot)},${y(0)} L${line.replace(/ /g, ' L')} L${x(last.slot)},${y(0)} Z`;
   const areaAbove = `M${x(first.slot)},${y(1)} L${line.replace(/ /g, ' L')} L${x(last.slot)},${y(1)} Z`;
   const hoverPt = hover !== null ? points.find(p => p.slot === hover) : undefined;
+  const marketLines = sources.map(src => ({ src, pts: dots.filter(d => d.source === src) })).filter(l => l.pts.length >= 2);
 
   const onMove = (clientX: number, rect: DOMRect) => {
     const px = clientX - rect.left;
-    let best = points[0].slot, bestD = Infinity;
-    for (const p of points) { const d = Math.abs(px - x(p.slot)); if (d < bestD) { bestD = d; best = p.slot; } }
+    let best = slots[0], bestD = Infinity;
+    for (const sl of slots) { const d = Math.abs(px - x(sl)); if (d < bestD) { bestD = d; best = sl; } }
     setHover(best);
   };
 
@@ -106,16 +119,22 @@ export default function WinProbHistoryChart({ history, markets, players }: { his
             {points.map(p => (
               <circle key={p.slot} cx={x(p.slot)} cy={y(p.h.pWin1)} r={hover === p.slot ? 5 : 3.5} fill="var(--wcc-p1)" stroke="var(--bg-surface-1)" strokeWidth={2} />
             ))}
+            {marketLines.map(l => (
+              <polyline key={l.src} points={l.pts.map(d => `${x(d.slot).toFixed(1)},${y(d.p).toFixed(1)}`).join(' ')}
+                fill="none" stroke="var(--text-secondary)" strokeOpacity={0.45} strokeWidth={1.25} strokeDasharray="4 4" />
+            ))}
             {dots.map(d => <Marker key={`${d.source}-${d.slot}`} shape={MARKET_SHAPES[d.source]} x={x(d.slot)} y={y(d.p)} />)}
           </svg>
         )}
-        {hoverPt && (
+        {hover !== null && (
           <div className="pointer-events-none absolute z-10 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-1)]/95 backdrop-blur px-2.5 py-2 text-[11px] shadow-lg"
-            style={{ left: Math.min(Math.max(x(hoverPt.slot) + 12, 4), Math.max(4, W - 176)), top: 8, width: 168 }}>
-            <p className="text-[var(--text-muted)] mb-1">{hoverPt.slot === 0 ? 'Before the match' : hoverPt.slot === 15 ? 'During the tiebreaks' : `After game ${hoverPt.slot}`}</p>
-            <p className="flex justify-between"><span>{players[1].shortName}</span><span className="tabular-nums text-[var(--text-primary)]">{formatPct(hoverPt.h.pWin1)}</span></p>
-            <p className="flex justify-between"><span>{players[2].shortName}</span><span className="tabular-nums text-[var(--text-primary)]">{formatPct(1 - hoverPt.h.pWin1)}</span></p>
-            {dots.filter(d => d.slot === hoverPt.slot).map(d => (
+            style={{ left: Math.min(Math.max(x(hover) + 12, 4), Math.max(4, W - 176)), top: 8, width: 168 }}>
+            <p className="text-[var(--text-muted)] mb-1">{hover === 0 ? 'Before the match' : hover === 15 ? 'During the tiebreaks' : `After game ${hover}`}</p>
+            {hoverPt && <>
+              <p className="flex justify-between"><span>{players[1].shortName}</span><span className="tabular-nums text-[var(--text-primary)]">{formatPct(hoverPt.h.pWin1)}</span></p>
+              <p className="flex justify-between"><span>{players[2].shortName}</span><span className="tabular-nums text-[var(--text-primary)]">{formatPct(1 - hoverPt.h.pWin1)}</span></p>
+            </>}
+            {dots.filter(d => d.slot === hover).map(d => (
               <p key={d.source} className="flex justify-between text-[var(--text-muted)]"><span>{MARKET_LABEL[d.source]}</span><span className="tabular-nums">{formatPct(d.p)}</span></p>
             ))}
           </div>
@@ -134,12 +153,15 @@ export default function WinProbHistoryChart({ history, markets, players }: { his
         <table className="w-full text-[11px]">
           <thead><tr><th className={thCls}>After</th><th className={thCls}>{players[1].shortName}</th><th className={thCls}>Tiebreak</th>{sources.map(s => <th key={s} className={thCls}>{MARKET_LABEL[s]}</th>)}</tr></thead>
           <tbody>
-            {points.map(p => (
-              <tr key={p.slot} className="border-t border-[var(--border)]">
-                <td className={tdCls}>{SLOTS[p.slot]}</td><td className={tdCls}>{formatPct(p.h.pWin1)}</td><td className={tdCls}>{formatPct(p.h.pTb)}</td>
-                {sources.map(s => { const d = dots.find(z => z.slot === p.slot && z.source === s); return <td key={s} className={tdCls}>{d ? formatPct(d.p) : '—'}</td>; })}
-              </tr>
-            ))}
+            {slots.map(sl => {
+              const p = points.find(z => z.slot === sl);
+              return (
+                <tr key={sl} className="border-t border-[var(--border)]">
+                  <td className={tdCls}>{SLOTS[sl]}</td><td className={tdCls}>{p ? formatPct(p.h.pWin1) : '—'}</td><td className={tdCls}>{p ? formatPct(p.h.pTb) : '—'}</td>
+                  {sources.map(s => { const d = dots.find(z => z.slot === sl && z.source === s); return <td key={s} className={tdCls}>{d ? formatPct(d.p) : '—'}</td>; })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </TableFallback>
