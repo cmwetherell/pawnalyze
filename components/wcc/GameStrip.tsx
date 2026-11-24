@@ -210,7 +210,7 @@ export default function GameStrip({
 }) {
   return (
     <ol
-      className="-mx-4 px-4 sm:mx-0 sm:px-0 flex lg:grid lg:grid-cols-7 gap-2 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scroll-px-4 pb-2 lg:pb-0 scrollbar-none"
+      className="relative -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:grid lg:grid-cols-7 gap-2 overflow-x-auto lg:overflow-visible snap-x snap-mandatory scroll-px-4 pb-2 lg:pb-0 scrollbar-none"
       aria-label="Classical games"
     >
       {views.map(v => (
