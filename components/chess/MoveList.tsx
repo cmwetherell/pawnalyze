@@ -11,11 +11,13 @@ interface MoveListProps {
   ply: number;
   onGo: (ply: number) => void;
   maxHeight: number | string;
+  /** From 768: as tall as what is left beside the board. */
+  fill?: boolean;
   className?: string;
 }
 
 /** Two columns of moves. Follows the current one by scrolling itself, never the page. */
-export function MoveList({ moves, ply, onGo, maxHeight, className }: MoveListProps) {
+export function MoveList({ moves, ply, onGo, maxHeight, fill, className }: MoveListProps) {
   const cell = (m: MoveItem | undefined, n: number) => {
     if (!m) return <span />;
     const on = ply === n;
@@ -35,7 +37,7 @@ export function MoveList({ moves, ply, onGo, maxHeight, className }: MoveListPro
     );
   };
   return (
-    <ScrollArea label="Moves" maxHeight={maxHeight} follow='[aria-current="step"]' followKey={`${ply}-${moves.length}`} className={className}>
+    <ScrollArea label="Moves" maxHeight={maxHeight} fill={fill} follow='[aria-current="step"]' followKey={`${ply}-${moves.length}`} className={className}>
       <ol aria-label="Moves" className="grid grid-cols-[2.5rem_minmax(0,1fr)_minmax(0,1fr)] gap-x-1">
         {Array.from({ length: Math.ceil(moves.length / 2) }, (_, i) => (
           <li key={i} className="contents">

@@ -19,6 +19,8 @@ export interface FaceOffSide {
   rating: number | null;
   /** Federation code. */
   flag: string;
+  /** Names the flag. */
+  country?: string;
   portrait: { src: string; alt: string; cutout: boolean };
 }
 
@@ -39,6 +41,8 @@ export interface FaceOffProps {
   notes?: [ReactNode, ReactNode];
   actions?: ReactNode;
   next?: ReactNode;
+  /** A ruled row over the portraits, with `next` at its right end: where the page has no title of its own for the match. */
+  heading?: ReactNode;
   credit?: ReactNode;
   /** Finished state. */
   champion?: { name: string; line: string } | null;
@@ -46,7 +50,7 @@ export interface FaceOffProps {
 }
 
 /** Two portraits on one rule, the two odds, a hundred pawns. Not a link; its buttons are. */
-export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, verdict, notes, actions, next, credit, champion, className }: FaceOffProps) {
+export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, verdict, notes, actions, next, heading, credit, champion, className }: FaceOffProps) {
   const titleId = useId();
   const [a, b] = sides;
   const hero = variant === 'hero';
@@ -59,10 +63,11 @@ export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, 
       <div className="type-label text-ink-2 md:type-small">{scoreLabel}</div>
     </div>
   );
-  const foot = (next || actions) && (
+  const foot = ((next && !heading) || actions) && (
     <>
-      {next && <div className="min-w-0 type-small text-ink-2">{next}</div>}
-      {actions && <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">{actions}</div>}
+      {next && !heading && <div className="min-w-0 type-small text-ink-2">{next}</div>}
+      {/* On phones two short buttons share the line and fill it; longer ones take a line each. */}
+      {actions && <div className="flex flex-wrap gap-3 [&>*]:grow sm:[&>*]:grow-0">{actions}</div>}
     </>
   );
 
@@ -71,6 +76,13 @@ export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, 
       <p id={titleId} className="sr-only">
         {p1 === null ? `${a.name} against ${b.name}` : `${a.name} ${formatPct(p1)}, ${b.name} ${formatPct(1 - p1)} to win the match`}
       </p>
+
+      {heading && (
+        <div className="mb-4 mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line pt-4 md:mb-6 md:mt-0">
+          {heading}
+          {next && <div className="type-small text-ink-2">{next}</div>}
+        </div>
+      )}
 
       <div
         className={cn(
@@ -123,7 +135,7 @@ function Portrait({ side, className }: { side: FaceOffSide; className?: string }
   const field = side.id === 1 ? 'bg-p1-field' : 'bg-p2-field';
   const { src, alt, cutout } = side.portrait;
   return (
-    <div className={cn('relative aspect-[1/1.2] overflow-hidden md:aspect-[1/1.1]', className)}>
+    <div className={cn('relative aspect-square overflow-hidden md:aspect-[1/1.1]', className)}>
       <span aria-hidden className={cn('absolute inset-x-0 bottom-0 top-[13%] origin-bottom group-data-[enter]/enter:animate-grow', field)} />
       {cutout ? (
         <Image src={src} alt={alt} width={704} height={948} priority sizes="(min-width: 768px) 268px, 34vw" className="absolute inset-x-0 top-0 h-auto w-full origin-bottom grayscale group-data-[enter]/enter:animate-settle" />
@@ -144,7 +156,7 @@ function Name({ side, finished, right = false }: { side: FaceOffSide; /** The ma
       <p className="truncate pb-0.5 type-h2 text-ink">{side.name}</p>
       <p className={cn('flex items-center gap-x-2 whitespace-nowrap type-label text-ink-2 sm:type-small', right && 'justify-end')}>
         {side.isChampion && !finished && <Icon name="crown" size={14} className="text-brand-mark" />}
-        <Flag code={side.flag} size="xs" decorative className="hidden shrink-0 [@container_(min-width:40rem)]:inline-block" />
+        <Flag code={side.flag} size="xs" title={side.country} decorative={!side.country} className="hidden shrink-0 [@container_(min-width:40rem)]:inline-block" />
         <span className="min-w-0 truncate">
           {/* Long words wait for room between the portraits; a finished match has the longest, and in a narrow one keeps only the rating. */}
           <span className={finished && side.rating ? 'hidden [@container_(min-width:40rem)]:inline' : undefined}>{first && <span className="hidden [@container_(min-width:40rem)]:inline">{first}</span>}{rest}{side.rating ? ', ' : ''}</span>

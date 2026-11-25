@@ -32,7 +32,7 @@ function Item({ href, label, external, children }: NavLink & { children?: ReactN
 /** Last thing on the page, so it is what makes room for the phone bottom bar. */
 export function SiteFooter() {
   return (
-    <footer className="border-t-2 border-rule bg-canvas pb-bottom-bar lg:pb-0">
+    <footer className="border-t-2 border-rule bg-canvas pb-bottom-bar lg:pb-0 lg:group-has-[[data-bottom-bar=xl]]/body:pb-bottom-bar xl:!pb-0">
       <Container className="pb-6 pt-12">
         <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-x-6 gap-y-8 md:grid-cols-12">
           <div className="col-span-2 md:col-span-12 lg:col-span-4">

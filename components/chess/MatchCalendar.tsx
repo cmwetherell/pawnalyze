@@ -47,10 +47,11 @@ export function MatchCalendar({ days, games, players, hrefFor, className }: Matc
           const off = game?.status === 'not_played';
           const event = c.kind === 'ceremony' || c.kind === 'tiebreak';
           const next = c.gameNo !== undefined && c.gameNo === nextNo;
+          const name = c.label.replace(' · ', ', ');
           const outcome = done ? (game.result === '1/2-1/2' ? '½' : winner ? players[winner].shortName[0] : null) : null;
           const inner = (
             <>
-              {done && <span aria-hidden className={cn('absolute -top-px left-1 right-1.5 h-[3px] sm:left-2 sm:right-2', winner === 1 ? 'bg-p1' : winner === 2 ? 'bg-p2' : 'bg-draw')} />}
+              {done && <span aria-hidden className={cn('absolute -top-px left-2 right-1 h-[3px] sm:right-2', winner === 1 ? 'bg-p1' : winner === 2 ? 'bg-p2' : 'bg-draw')} />}
               {next && <span aria-hidden className="pointer-events-none absolute inset-x-0 -bottom-px -top-px border-2 border-ink" />}
               <span className="flex items-center justify-between gap-1">
                 <span className={cn('type-label tnum sm:type-small', c.date === today ? 'font-semibold text-ink' : 'text-ink-3')}>
@@ -60,14 +61,14 @@ export function MatchCalendar({ days, games, players, hrefFor, className }: Matc
                 {outcome && <span aria-hidden className="type-label font-semibold text-ink">{outcome}</span>}
               </span>
               <span className={cn('mt-auto type-label sm:type-data', off ? 'text-ink-3' : c.kind === 'game' ? cn('font-medium text-ink group-hover/day:underline', goldLine) : event ? 'font-medium text-brand' : 'text-ink-3')}>
-                <span className="sm:hidden">{c.kind === 'game' ? `G${c.gameNo}` : SHORT[c.kind]}</span>
-                <span className="hidden sm:inline">{c.kind === 'game' ? `Game ${c.gameNo}` : c.label}</span>
+                <span className="whitespace-nowrap sm:hidden">{c.kind === 'game' ? `G${c.gameNo}` : SHORT[c.kind]}</span>
+                <span className="hidden sm:inline">{c.kind === 'game' ? `Game ${c.gameNo}` : name}</span>
               </span>
             </>
           );
           // The ground and the outline stand outside the words: the cell starts a little left of its column.
-          const cls = 'group/day relative -ml-1 mr-1 flex h-full min-h-14 flex-col gap-1 py-2 pl-1 pr-1.5 sm:-ml-2 sm:mr-2 sm:min-h-24 sm:px-2';
-          const label = `${day} ${month}: ${c.label}${done ? `, played${outcome === '½' ? ', draw' : winner ? `, ${players[winner].shortName} won` : ''}` : ''}${live ? ', live now' : ''}${off ? ', not played' : ''}${next ? ', next game' : ''}`;
+          const cls = 'group/day relative -ml-2 mr-2 flex h-full min-h-14 flex-col gap-1 py-2 pl-2 pr-1 sm:min-h-24 sm:pr-2';
+          const label = `${day} ${month}: ${name}${done ? `, played${outcome === '½' ? ', draw' : winner ? `, ${players[winner].shortName} won` : ''}` : ''}${live ? ', live now' : ''}${off ? ', not played' : ''}${next ? ', next game' : ''}`;
           return (
             <li key={c.date} aria-current={c.date === today ? 'date' : undefined} className="min-w-0 border-b border-line">
               {c.gameNo !== undefined

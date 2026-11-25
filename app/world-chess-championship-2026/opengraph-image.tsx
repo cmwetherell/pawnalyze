@@ -1,4 +1,4 @@
-import { OG_SIZE } from '@/lib/og';
+import { OG_SIZE } from '@/lib/og/kit';
 import { wccOgImage } from '@/lib/wcc/ogImage';
 
 export const alt = 'World Chess Championship 2026: Gukesh vs Sindarov match odds';

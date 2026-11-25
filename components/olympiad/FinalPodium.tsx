@@ -1,100 +1,83 @@
-import Flag from '@/components/ui/Flag';
-import { formatPct } from '@/components/ui/ProbBar';
-import type { OfficialStandings, Team } from '@/lib/olympiad/types';
+'use client';
 
-const MEDAL = [
-  { label: 'Gold', pip: 'bg-medal-gold text-chess-dark', ring: 'border-chess-gold/60 bg-chess-gold/[0.07] shadow-gold' },
-  { label: 'Silver', pip: 'bg-medal-silver text-chess-dark', ring: 'border-[var(--border)] bg-[var(--bg-surface-2)]' },
-  { label: 'Bronze', pip: 'bg-medal-bronze text-white', ring: 'border-[var(--border)] bg-[var(--bg-surface-2)]' },
-];
+import { Section } from '@/components/layout/Section';
+import { Podium, type PodiumPlace } from '@/components/ui/Podium';
+import { formatPct } from '@/lib/format';
+import type { HistoryPoint, OfficialStandings, Team } from '@/lib/olympiad/types';
+import { goldStory, podiumRows } from './podium';
+import { MedalHistoryChart, hasTrend } from './MedalHistoryChart';
+import { sentenceName, shortTeamName } from './teams';
 
-interface Props {
+interface FinalPodiumProps {
   standings: OfficialStandings;
-  teams: Team[];
-  /** Pre-tournament gold odds by team id, from the rounds_completed = 0 run. */
-  preTournamentGold: Map<number, number>;
+  teamsById: Map<number, Team>;
+  history: HistoryPoint[];
   eventLabel: string;
+  selectedTeamId: number | null;
+  onSelect: (teamId: number) => void;
+}
+
+/** A medal decided on tiebreak: level on match points with the team right below. */
+function tiebreakNote(standings: OfficialStandings, rank: number, teamsById: Map<number, Team>): string | null {
+  const here = standings.rows.find(r => r.rank === rank);
+  const below = standings.rows.find(r => r.rank === rank + 1);
+  if (!here || !below || here.mp !== below.mp) return null;
+  const other = teamsById.get(below.teamId);
+  if (!other) return null;
+  const level = here.gpHalf === below.gpHalf ? 'match points and game points' : 'match points';
+  const ahead = here.sb !== null && below.sb !== null ? `, ahead by ${Math.abs(here.sb - below.sb).toFixed(1)} on Sonneborn-Berger` : '';
+  return `Decided on tiebreak: level with ${shortTeamName(other.name)} on ${level}${ahead}.`;
 }
 
 /**
- * Final medalists, shown once every round has a result. Ranks and tiebreaks are the official
- * chess-results values; the odds quoted alongside are what the model gave each team before round 1,
- * which is the honest comparison (the post-event run has them all at 100%).
+ * The finished event's first screen: the medalists beside how the gold odds moved. Ranks and tiebreaks are the official
+ * chess-results values; the odds quoted are from before round 1 (after the last round the model has the medalists at 100%).
  */
-export default function FinalPodium({ standings, teams, preTournamentGold, eventLabel }: Props) {
-  const byId = new Map(teams.map(t => [t.teamId, t]));
-  const podium = standings.rows.filter(r => r.rank <= 3).sort((a, b) => a.rank - b.rank);
-  if (podium.length < 3) return null;
+export function FinalPodium({ standings, teamsById, history, eventLabel, selectedTeamId, onSelect }: FinalPodiumProps) {
+  const rows = podiumRows(standings);
+  const champion = rows.length ? teamsById.get(rows[0].teamId) : undefined;
+  if (!champion) return null;
 
-  // A medal decided on tiebreak: level on match points with the team immediately below it.
-  const rowAt = (rank: number) => standings.rows.find(r => r.rank === rank);
-  const tiebreakNote = (rank: number): string | null => {
-    const here = rowAt(rank);
-    const below = rowAt(rank + 1);
-    if (!here || !below || here.mp !== below.mp) return null;
-    const other = byId.get(below.teamId);
-    if (!other) return null;
-    const sameGp = here.gpHalf === below.gpHalf;
-    const margin = here.sb !== null && below.sb !== null ? Math.abs(here.sb - below.sb) : null;
-    return `Decided on tiebreak — level with ${other.name} on match points${sameGp ? ' and game points' : ''}${
-      margin !== null ? `, ahead by ${margin.toFixed(1)} on Sonneborn-Berger` : ''
-    }.`;
-  };
+  const before = new Map(history.filter(h => h.roundsCompleted === 0).map(h => [h.teamId, h.pGold]));
+  const places = rows.flatMap((r): PodiumPlace[] => {
+    const team = teamsById.get(r.teamId);
+    if (!team) return [];
+    const first = r.rank === 1;
+    const pre = before.get(r.teamId);
+    return [{
+      rank: r.rank as 1 | 2 | 3, name: shortTeamName(team.name), flag: team.fedCode,
+      stats: [
+        { label: first ? 'Match points' : 'MP', value: r.mp },
+        { label: first ? 'Game points' : 'GP', value: (r.gpHalf / 2).toFixed(1) },
+        ...(r.sb !== null ? [{ label: first ? 'Sonneborn-Berger' : 'SB', value: r.sb.toFixed(1) }] : []),
+      ],
+      pre: pre !== undefined && `${formatPct(pre)} gold odds before round 1`,
+      note: tiebreakNote(standings, r.rank, teamsById),
+    }];
+  });
+
+  const story = goldStory(history, champion.teamId);
+  const favourite = story && teamsById.get(story.favouriteId);
+  const name = sentenceName(champion.name);
 
   return (
-    <section className="surface-card p-4 sm:p-6" aria-label={`${eventLabel} final medalists`}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 mb-4">
-        <h2 className="text-xl font-heading text-[var(--text-primary)]">
-          <span className="gold-gradient-text">Champions</span>
-        </h2>
-        <p className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">
-          Final standings · 11 rounds · Samarkand
-        </p>
-      </div>
-
-      <ol className="grid gap-3 sm:grid-cols-3">
-        {podium.map((row, i) => {
-          const team = byId.get(row.teamId);
-          if (!team) return null;
-          const note = tiebreakNote(row.rank);
-          const pre = preTournamentGold.get(row.teamId);
-          return (
-            <li key={row.teamId} className={`rounded-xl border p-4 flex flex-col gap-3 ${MEDAL[i].ring}`}>
-              <div className="flex items-center gap-2">
-                <span
-                  className={`w-5 h-5 rounded-full text-[11px] font-bold inline-flex items-center justify-center shrink-0 ${MEDAL[i].pip}`}
-                  aria-hidden
-                >
-                  {row.rank}
-                </span>
-                <span className="text-[11px] uppercase tracking-wider text-[var(--text-muted)]">{MEDAL[i].label}</span>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Flag code={team.fedCode} size="xl" aria-hidden />
-                <div className="min-w-0">
-                  <p className={`font-heading leading-tight truncate ${i === 0 ? 'text-lg text-gold-ink' : 'text-base text-[var(--text-primary)]'}`}>
-                    {team.name}
-                  </p>
-                  <p className="text-xs text-[var(--text-muted)] tabular-nums">
-                    {row.mp} MP · {(row.gpHalf / 2).toFixed(1)} GP
-                    {row.sb !== null ? <> · {row.sb.toFixed(1)} SB</> : null}
-                  </p>
-                </div>
-              </div>
-
-              {note ? <p className="text-[11px] leading-snug text-[var(--text-secondary)]">{note}</p> : null}
-
-              {pre !== undefined ? (
-                <p className="text-[11px] leading-snug text-[var(--text-muted)] mt-auto">
-                  Pre-tournament gold odds:{' '}
-                  <span className="text-[var(--text-secondary)] tabular-nums font-medium">{formatPct(pre)}</span>
-                </p>
-              ) : null}
-            </li>
-          );
-        })}
-      </ol>
-    </section>
+    <Section
+      id="podium" rule={false} className="pt-6 md:pt-0" layout={hasTrend(history) ? 'split' : 'plain'} ratio="5/7"
+      title={`${name} won gold`}
+      finding={story && favourite && (
+        story.favouriteId === champion.teamId
+          ? <>{name} started as favourite at {formatPct(story.favouriteP)} {story.ledFrom === 0
+              ? <strong className="text-ink">and led after every round.</strong>
+              : <>and lost the lead, <strong className="text-ink">then took it back for good after round {story.ledFrom}.</strong></>}</>
+          : <>{sentenceName(favourite.name)} started as favourite at {formatPct(story.favouriteP)}. <strong className="text-ink">{name} {story.ledFrom === story.lastRound
+              ? 'went ahead in the last round.'
+              : `took the lead after round ${story.ledFrom} and never gave it back.`}</strong></>
+      )}
+    >
+      <Podium places={places} label={`${eventLabel} final medalists`} />
+      {hasTrend(history) && (
+        <MedalHistoryChart history={history} teamsById={teamsById} extraTeamId={selectedTeamId} medalists={rows.map(r => r.teamId)} onSelect={onSelect} />
+      )}
+    </Section>
   );
 }

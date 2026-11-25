@@ -23,11 +23,12 @@ export function LadderChart({ rungs, ariaLabel, table, className }: LadderChartP
               i === 0 ? 'pt-0' : 'border-t border-line',
             )}
           >
-            <div className="min-w-0">
+            {/* Narrow: one line. With room: a column of its own. */}
+            <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 [@container_(min-width:40rem)]:block">
               <p className="type-ui text-ink">{r.label}</p>
               {r.sub && <p className="type-small text-ink-2">{r.sub}</p>}
             </div>
-            <div className="text-right [@container_(min-width:40rem)]:order-last">
+            <div className="flex flex-wrap items-baseline justify-end gap-x-2 text-right [@container_(min-width:40rem)]:order-last [@container_(min-width:40rem)]:block">
               <p className={cn('type-data font-semibold', r.reach > 0 ? 'text-ink' : 'text-ink-3')}>{formatPct(r.reach)}</p>
               <p className="type-label text-ink-3">reach it</p>
             </div>

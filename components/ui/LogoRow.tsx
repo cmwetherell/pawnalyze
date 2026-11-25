@@ -2,12 +2,12 @@ import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 
-/** `width` and `height` as drawn, in the ratio of the file. */
-export interface LogoItem { src: string; alt: string; width: number; height: number; href?: string }
+/** `width` and `height` as drawn, in the ratio of the file. `colour`: the logo has its own colours and is never turned white. */
+export interface LogoItem { src: string; alt: string; width: number; height: number; href?: string; colour?: boolean }
 
 /** One publication logo; `press` turns it white in dark. SVGs skip the optimizer. */
 export function Logo({ logo, className }: { logo: LogoItem; className?: string }) {
-  return <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} unoptimized className={cn('press object-contain object-left', className)} style={{ width: logo.width, height: logo.height }} />;
+  return <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} unoptimized className={cn(!logo.colour && 'press', 'object-contain object-left', className)} style={{ width: logo.width, height: logo.height }} />;
 }
 
 export function LogoRow({ label, logos, className }: { label: string; logos: LogoItem[]; className?: string }) {

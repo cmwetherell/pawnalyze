@@ -18,24 +18,3 @@ export type SiteConfig = {
     outcome?: null | string;
     round?: number;
   };
-export type PercentageData = {
-    name: string;
-    value: number;
-  };
-
-export type PlayerColorsMap = {
-    [key: string]: string;
-  };
-
-export type CurrentPredictionsProps = {
-    nsims: number;
-    gameFilters: Game[];
-    updateTrigger?: number; // Add an optional updateTrigger prop
-    eventTable: string;
-    onLoadingChange?: (loading: boolean) => void;
-    initialData?: any[];
-  };
-
-  export type eventTableProps = {
-    eventTable: string;
-  };

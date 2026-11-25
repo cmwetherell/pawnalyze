@@ -11,6 +11,7 @@ import { LineChart } from '@/components/charts/LineChart';
 import { PawnBar } from '@/components/charts/PawnBar';
 import { RaceRows } from '@/components/charts/RaceRows';
 import { Sparkline } from '@/components/charts/Sparkline';
+import { SplitRows } from '@/components/charts/SplitRows';
 import { Section } from '@/components/layout/Section';
 import { Delta } from '@/components/ui/Delta';
 import { Legend } from '@/components/ui/Legend';
@@ -94,6 +95,17 @@ export function ChartSpecimens() {
           <ButterflyChart leftTone="p1" rightTone="p2" names={['Gukesh', 'Sindarov']} format="pct" ariaLabel="Final classical score" rows={SCORES.map(([label, sub, left, right], i) => ({ key: label, label, sub, left, right, divider: i === 0 }))} />
         </Specimen>
         <Specimen name="LadderChart" from="charts/LadderChart"><LadderChart rungs={RUNGS} /></Specimen>
+        <Specimen name="SplitRows" from="charts/SplitRows" note="The same split from several sources, bars aligned. Our own row is the one gold wash on the page.">
+          <SplitRows
+            label="Match odds by source" head="Source" names={['Gukesh', 'Sindarov']} tones={['p1', 'p2']} columns={['Traded', 'Updated']}
+            rows={[
+              { key: 'own', title: 'Pawnalyze model', meta: 'Exact match odds from ratings', left: P1, own: true },
+              { key: 'kalshi', title: 'Kalshi', href: 'https://kalshi.com', meta: 'Mid-price', left: 0.274, cells: ['995k contracts', '2 min ago'] },
+              { key: 'bet365', title: 'bet365', meta: 'Bookmaker reference, margin removed', left: 0.313, cells: [null, '27 Sept 2026'] },
+              { key: 'none', title: 'Polymarket', meta: 'Prices are unavailable right now.', left: null },
+            ]}
+          />
+        </Specimen>
         <Specimen name="RaceRows" from="charts/RaceRows" note="Tick: the value before the scenario.">
           <RaceRows
             ruled ariaLabel="Gold race"
@@ -106,6 +118,7 @@ export function ChartSpecimens() {
         </Specimen>
         <Specimen name="BarRows" from="charts/BarRows">
           <BarRows format="percent" rows={CAND_SERIES.slice(0, 5).map((s, i) => ({ key: s.id, label: s.label, value: s.values[0] ?? 0, tone: seriesTone(i) }))} />
+          <Variant label="size sm"><BarRows className="w-72" size="sm" format="percent" rows={CAND_SERIES.slice(0, 3).map((x, i) => ({ key: x.id, label: x.label, value: x.values[0] ?? 0, tone: seriesTone(i) }))} /></Variant>
         </Specimen>
         <Specimen name="PawnBar" from="charts/PawnBar" note="A hundred pawns, dealt once.">
           <div className="grid gap-8"><PawnBar p1={P1} names={['Gukesh', 'Sindarov']} deal /><Variant label="Champion"><PawnBar p1={0} names={['Gukesh', 'Sindarov']} /></Variant></div>

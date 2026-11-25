@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 
 import { formatter, type Formatter } from '@/lib/format';
 import { token } from '@/lib/theme/css';
@@ -32,6 +32,10 @@ export interface LineSeries {
   labelAt?: 'end' | 'start' | 'none' | number;
   /** With `points="all"`: a second line under each printed value ("3rd"). */
   notes?: (string | null)[];
+  /** What to print for each value, where the plotted number is not it: a capped evaluation, a mate. */
+  texts?: (string | null)[];
+  /** After the end label instead of the last value: "avg 46". */
+  endValue?: string;
 }
 
 export interface LineMarker {
@@ -70,8 +74,11 @@ export interface LineChartProps {
   /** Rows added to the tooltip at an index (a complement, a tiebreak chance). */
   extraRows?(i: number): { label: string; value: string; tone?: Tone }[];
   caption?: string;
+  /** A control that changes the figure (a metric switch), at the right end of the caption line. */
+  tools?: ReactNode;
   ariaLabel: string;
-  table: ChartTable;
+  /** Every chart has one; in a ChartGroup the last chart may carry the table of all of them. */
+  table?: ChartTable;
   /** What the chart sits on. It finds a Panel or a surface group by itself; a Sheet has to say `raised`. */
   ground?: Ground;
   className?: string;
@@ -88,9 +95,9 @@ const SECOND_LINE = 17;
 const GROUP_EDGE = { desktop: { L: 44, R: 140 }, phone: { L: 36, R: 92 } };
 
 export function LineChart(props: LineChartProps) {
-  const { series, x, height = { desktop: 420, phone: 300 }, caption, ariaLabel, table, className } = props;
+  const { series, x, height = { desktop: 420, phone: 300 }, caption, tools, ariaLabel, table, className } = props;
   return (
-    <ChartFrame caption={caption} ariaLabel={ariaLabel} height={height} table={table} className={className}>
+    <ChartFrame caption={caption} tools={tools} ariaLabel={ariaLabel} height={height} table={table} className={className}>
       {size => (series.length > 0 && x.labels.length > 0 ? <Plot {...props} size={size} /> : null)}
     </ChartFrame>
   );
@@ -122,7 +129,8 @@ function Plot({
   const ticks = tickLabels(dom.ticks, fmt);
   const name = (s: LineSeries) => (phone ? s.short ?? s.label : s.label);
   // With every point printed, the last one already says it.
-  const valueText = (s: LineSeries, v: number) => (values && points === 'none' && !s.label.includes(fmt(v)) ? fmt(v) : undefined);
+  const printed = (s: LineSeries, i: number, v: number) => s.texts?.[i] ?? fmt(v);
+  const valueText = (s: LineSeries, v: number) => s.endValue ?? s.texts?.[s.values.lastIndexOf(v)] ?? (values && points === 'none' && !s.label.includes(fmt(v)) ? fmt(v) : undefined);
   const nameWidth = (s: LineSeries) => textWidth(name(s), isStrong(s) ? 15 : 14, isStrong(s));
   const fullWidth = (s: LineSeries, v?: string) => nameWidth(s) + (v === undefined ? 0 : 6 + textWidth(v, 14, isStrong(s)));
   const isStrong = (s: LineSeries) => s.emphasis === 'strong';
@@ -189,7 +197,7 @@ function Plot({
     ...all
       .flatMap(({ s }) => { const v = s.values[i]; return v === null || v === undefined ? [] : [{ s, v }]; })
       .sort((a, b) => b.v - a.v)
-      .map(({ s, v }): TooltipRow => ({ key: s.id, label: word(s), value: fmt(v), tone: isContext(s) ? 'context' : s.tone, strong: isStrong(s) || s.id === promoted })),
+      .map(({ s, v }): TooltipRow => ({ key: s.id, label: word(s), value: printed(s, i, v), tone: isContext(s) ? 'context' : s.tone, strong: isStrong(s) || s.id === promoted })),
     ...(extraRows?.(i) ?? []).map((r): TooltipRow => ({ key: `x-${r.label}`, ...r })),
     ...markers.filter(m => m.x === i).map((m): TooltipRow => ({ key: `m-${m.group}`, label: m.group, value: fmt(m.y), marker: m.shape })),
   ];
@@ -245,9 +253,9 @@ function Plot({
       const strong = isStrong(s);
       const size = strong ? 15 : 14;
       // A long name keeps its letters and gives up its number, which the tooltip and the table still have.
-      const printed = valueText(s, v);
-      const under = stack && s.emphasis !== 'context' && printed !== undefined;
-      const value = under || fullWidth(s, printed) <= labelRoom + 2 ? printed : undefined;
+      const own = valueText(s, v);
+      const under = stack && s.emphasis !== 'context' && own !== undefined;
+      const value = under || fullWidth(s, own) <= labelRoom + 2 ? own : undefined;
       const text = fitText(name(s), labelRoom, size, strong);
       return {
         id: s.id, text, value, extra: under ? SECOND_LINE : undefined, y: Y(v), strong, plain: s.emphasis !== 'context', color: color(s),
@@ -287,7 +295,7 @@ function Plot({
   const labelBox = (l: EndLabel): Box => ({ x: labelX + labelInset - 6, y: (solved.get(l.id) ?? l.y) - gap / 2, w: textWidth(l.extra ? l.text : `${l.text}  ${l.value ?? ''}`, 15, l.strong) + 12, h: gap + (l.extra ?? 0) });
   const taken: Box[] = [
     ...markers.map(m => ({ x: X(m.x) - 8, y: Y(m.y) - 8, w: 16, h: 16 })),
-    ...(points === 'all' ? all.flatMap(({ pts }) => pts.map(p => ({ x: X(p.i) - 14, y: Y(p.v) - 26, w: 28, h: 32 }))) : []),
+    ...(points === 'all' ? all.flatMap(({ s, pts }) => pts.map(p => ({ x: X(p.i) - 14, y: Y(p.v) - 26, w: 28, h: s.notes ? 52 : 32 }))) : []),
     ...column.map(labelBox),
   ];
   const spots = placeInline(inline, lines.flatMap(l => l.parts), taken, { x: L, y: 0, w: W - L - 2, h: H - B });

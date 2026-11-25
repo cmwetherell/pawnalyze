@@ -1,137 +1,66 @@
-'use client'
+import type { Metadata } from 'next';
 
-import { useState } from "react";
-import UnifiedAnalyzer from "@/components/elocator/UnifiedAnalyzer";
+import { Board } from '@/components/chess/Board';
+import { ComplexityScale } from '@/components/chess/ComplexityScale';
+import { Analyzer } from '@/components/elocator/Analyzer';
+import { Page } from '@/components/layout/Page';
+import { PageHead } from '@/components/layout/PageHead';
+import { Section } from '@/components/layout/Section';
+import { SectionGroup } from '@/components/layout/SectionGroup';
+import { CopyButton } from '@/components/ui/CopyButton';
+import { Explainer } from '@/components/ui/Explainer';
+import { Row, Rows } from '@/components/ui/Rows';
+import { ScrollArea } from '@/components/ui/ScrollArea';
+import { EXAMPLE_GAME, EXAMPLE_POSITIONS } from '@/lib/elocator/examples';
 
-const GAME_OF_THE_CENTURY = `[Event "Third Rosenwald Trophy"]
-[Site "New York, NY USA"]
-[Date "1956.10.17"]
-[EventDate "1956.10.07"]
-[Round "8"]
-[Result "0-1"]
-[White "Donald Byrne"]
-[Black "Robert James Fischer"]
-[ECO "D92"]
-[WhiteElo "?"]
-[BlackElo "?"]
-[PlyCount "82"]
+export const metadata: Metadata = { title: 'Elocator: Chess Complexity Calculator | Pawnalyze' };
 
-1. Nf3 Nf6 2. c4 g6 3. Nc3 Bg7 4. d4 O-O 5. Bf4 d5
-6. Qb3 dxc4 7. Qxc4 c6 8. e4 Nbd7 9. Rd1 Nb6 10. Qc5 Bg4
-11. Bg5 Na4 12. Qa3 Nxc3 13. bxc3 Nxe4 14. Bxe7 Qb6 15. Bc4 Nxc3
-16. Bc5 Rfe8+ 17. Kf1 Be6 18. Bxb6 Bxc4+ 19. Kg1 Ne2+ 20. Kf1 Nxd4+
-21. Kg1 Ne2+ 22. Kf1 Nc3+ 23. Kg1 axb6 24. Qb4 Ra4 25. Qxb6 Nxd1
-26. h3 Rxa2 27. Kh2 Nxf2 28. Re1 Rxe1 29. Qd8+ Bf8 30. Nxe1 Bd5
-31. Nf3 Ne4 32. Qb8 b5 33. h4 h5 34. Ne5 Kg7 35. Kg1 Bc5+
-36. Kf1 Ng3+ 37. Ke1 Bb4+ 38. Kd1 Bb3+ 39. Kc1 Ne2+ 40. Kb1 Nc3+
-41. Kc1 Rc2# 0-1`;
-
-const GAME_OF_THE_CENTURY_MOVES = `1. Nf3 Nf6 2. c4 g6 3. Nc3 Bg7 4. d4 O-O 5. Bf4 d5 6. Qb3 dxc4 7. Qxc4 c6 8. e4 Nbd7 9. Rd1 Nb6 10. Qc5 Bg4 11. Bg5 Na4 12. Qa3 Nxc3 13. bxc3 Nxe4 14. Bxe7 Qb6 15. Bc4 Nxc3 16. Bc5 Rfe8+ 17. Kf1 Be6 18. Bxb6 Bxc4+ 19. Kg1 Ne2+ 20. Kf1 Nxd4+ 21. Kg1 Ne2+ 22. Kf1 Nc3+ 23. Kg1 axb6 24. Qb4 Ra4 25. Qxb6 Nxd1 26. h3 Rxa2 27. Kh2 Nxf2 28. Re1 Rxe1 29. Qd8+ Bf8 30. Nxe1 Bd5 31. Nf3 Ne4 32. Qb8 b5 33. h4 h5 34. Ne5 Kg7 35. Kg1 Bc5+ 36. Kf1 Ng3+ 37. Ke1 Bb4+ 38. Kd1 Bb3+ 39. Kc1 Ne2+ 40. Kb1 Nc3+ 41. Kc1 Rc2# 0-1`;
-
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      onClick={() => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
-      }}
-      className="shrink-0 px-2.5 py-1 rounded text-xs font-medium transition-all bg-[var(--bg-surface-2)] text-[var(--text-muted)] hover:text-chess-gold hover:bg-chess-gold/10 border border-[var(--border)]"
-      title="Copy to clipboard"
-    >
-      {copied ? "Copied!" : "Copy"}
-    </button>
-  );
-}
+const STEPS = [
+  { title: 'Position analysis', body: 'The neural network analyzes board state features to predict position difficulty.' },
+  { title: 'Expected error', body: 'Complexity is the expected change in win percentage after a grandmaster plays. Harder positions mean more error.' },
+  { title: '1 to 100 scale', body: 'Positions are scored from 1 (simple) to 100 (extreme), color-coded for quick reading.' },
+  { title: 'Game analysis', body: 'Paste a PGN for move-by-move complexity charts.' },
+];
 
 export default function ElocatorPage() {
   return (
-    <main className="flex-1 flex flex-col">
-      {/* Hero */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 pb-8 w-full">
-        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-chess-gold/10 text-chess-gold border border-chess-gold/20 mb-4">
-          AI-Powered
-        </span>
-        <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)] mb-3">
-          Elocator: Chess Complexity Calculator
-        </h1>
-        <p className="text-[var(--text-muted)] max-w-2xl">
-          Analyze the complexity of any chess position or game. Paste a FEN for single-position analysis
-          or a PGN for full game analysis with move-by-move complexity charts.
-        </p>
-      </section>
-
-      {/* Analyzer */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 w-full">
-        <div className="surface-card p-6">
-          <UnifiedAnalyzer />
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-6">How it works</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="surface-card p-4">
-            <div className="w-8 h-8 rounded-full bg-chess-gold/10 flex items-center justify-center text-chess-gold font-heading text-sm mb-3">1</div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Position Analysis</h3>
-            <p className="text-xs text-[var(--text-muted)]">The neural network analyzes board state features to predict position difficulty.</p>
-          </div>
-          <div className="surface-card p-4">
-            <div className="w-8 h-8 rounded-full bg-chess-gold/10 flex items-center justify-center text-chess-gold font-heading text-sm mb-3">2</div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Expected Error</h3>
-            <p className="text-xs text-[var(--text-muted)]">Complexity = expected change in win% after a GM plays. Harder positions = more error.</p>
-          </div>
-          <div className="surface-card p-4">
-            <div className="w-8 h-8 rounded-full bg-chess-gold/10 flex items-center justify-center text-chess-gold font-heading text-sm mb-3">3</div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">1&ndash;10 Scale</h3>
-            <p className="text-xs text-[var(--text-muted)]">Positions scored from 1 (simple) to 10 (extreme). Color-coded for quick reading.</p>
-          </div>
-          <div className="surface-card p-4">
-            <div className="w-8 h-8 rounded-full bg-chess-gold/10 flex items-center justify-center text-chess-gold font-heading text-sm mb-3">4</div>
-            <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-1">Game Analysis</h3>
-            <p className="text-xs text-[var(--text-muted)]">Paste a PGN for move-by-move complexity charts and evaluation graphs.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Example FENs */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Example positions</h2>
-        <div className="space-y-2">
-          {[
-            { label: "Low", badgeClass: "bg-emerald-500/10 text-emerald-400", fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" },
-            { label: "Med", badgeClass: "bg-amber-500/10 text-amber-400", fen: "r1bq1nk1/4r2p/pp2pNpQ/2ppP3/8/2PB4/PP3PPP/R3R1K1 b - - 2 21" },
-            { label: "High", badgeClass: "bg-red-500/10 text-red-400", fen: "2kr3r/ppqb4/3p1b1p/2pPnpp1/NPP1p1nP/6PB/PB2PPN1/2RQ1RK1 w - - 0 1" },
-          ].map(({ label, badgeClass, fen }) => (
-            <div key={label} className="surface-card p-3 flex items-center gap-3">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeClass}`}>{label}</span>
-              <code className="text-xs text-[var(--text-muted)] font-mono truncate flex-1 min-w-0">{fen}</code>
-              <CopyButton text={fen} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Example PGN - Game of the Century */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Example game</h2>
-        <div className="surface-card p-4">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div>
-              <p className="text-sm font-semibold text-[var(--text-primary)]">
-                &ldquo;The Game of the Century&rdquo;
-              </p>
-              <p className="text-xs text-[var(--text-muted)] mt-0.5">
-                Donald Byrne vs. Robert James Fischer &middot; Third Rosenwald Trophy, 1956
-              </p>
-            </div>
-            <CopyButton text={GAME_OF_THE_CENTURY} />
-          </div>
-          <pre className="text-xs text-[var(--text-muted)] font-mono whitespace-pre-wrap leading-relaxed overflow-x-auto">{GAME_OF_THE_CENTURY_MOVES}</pre>
-        </div>
-      </section>
-    </main>
+    <Page kind="landing">
+      <PageHead
+        enter title="Elocator: Chess Complexity Calculator"
+        lead="Analyze the complexity of any chess position or game. Paste a FEN for single-position analysis or a PGN for full game analysis with move-by-move complexity charts."
+        facts={['Simple to 25, moderate to 50, complex to 75, extreme above']}
+      />
+      <Section label="Analyze a position or a game" layout="plain" rule={false}>
+        <Analyzer />
+      </Section>
+      <Section title="How it works" layout="wide">
+        <Explainer columns={4} items={STEPS} />
+      </Section>
+      <SectionGroup label="Examples" ground="surface">
+        <Section title="Example positions" finding="Three positions and the score Elocator gives each. Copy a FEN and paste it above.">
+          <Rows label="Example positions">
+            {EXAMPLE_POSITIONS.map(p => (
+              <Row
+                key={p.fen}
+                lead={<span className="block w-24"><Board fen={p.fen} label={p.name} coords={false} /></span>}
+                title={p.label}
+                meta={<><span className="block">{p.name}</span><code className="mt-1 block truncate type-mono text-ink-3">{p.fen}</code></>}
+                figure={<ComplexityScale score={p.score} />}
+                action={<CopyButton kind="text" text={p.fen} label="Copy FEN" variant="icon" className="-mr-3" />}
+              />
+            ))}
+          </Rows>
+        </Section>
+        <Section
+          title="Example game"
+          finding={<><span className="block font-medium text-ink">&ldquo;{EXAMPLE_GAME.title}&rdquo;</span>{EXAMPLE_GAME.players}. {EXAMPLE_GAME.event}.</>}
+          actions={<CopyButton kind="text" text={EXAMPLE_GAME.pgn} label="Copy PGN" variant="secondary" />}
+        >
+          <ScrollArea label="Moves of the game" maxHeight={280}>
+            <p className="type-mono text-ink-2">{EXAMPLE_GAME.moves}</p>
+          </ScrollArea>
+        </Section>
+      </SectionGroup>
+    </Page>
   );
 }

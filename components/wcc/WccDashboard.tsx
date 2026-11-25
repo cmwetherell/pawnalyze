@@ -1,32 +1,43 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
-import CopyLink from '@/components/ui/CopyLink';
-import { LIVE_REFRESH_MS, N_CLASSICAL } from '@/lib/wcc/config';
+import { FaceOff } from '@/components/chess/FaceOff';
+import { GameSheet, type GameCellView } from '@/components/chess/GameSheet';
+import { OddsChip } from '@/components/chess/OddsChip';
+import { PieceDot } from '@/components/chess/PieceDot';
+import { BottomBar } from '@/components/layout/BottomBar';
+import { Container } from '@/components/layout/Container';
+import { HeroEnter } from '@/components/layout/HeroEnter';
+import { Section } from '@/components/layout/Section';
+import { SectionBar, type SectionBarProps } from '@/components/layout/SectionBar';
+import { SectionGroup } from '@/components/layout/SectionGroup';
+import { Button } from '@/components/ui/Button';
+import { Callout } from '@/components/ui/Callout';
+import { CopyButton } from '@/components/ui/CopyButton';
+import { Delta } from '@/components/ui/Delta';
+import { IconButton } from '@/components/ui/IconButton';
+import { PhotoCreditLine } from '@/components/ui/PhotoCredit';
+import { Segmented } from '@/components/ui/Segmented';
+import { StatStrip } from '@/components/ui/StatStrip';
+import { Swatch } from '@/components/ui/Swatch';
+import { formatPct, inHundred } from '@/lib/format';
+import { LIVE_REFRESH_MS, N_CLASSICAL, WCC_HREF } from '@/lib/wcc/config';
+import type { Players } from '@/lib/wcc/display';
 import { exact, gameOdds, whiteInGame } from '@/lib/wcc/match';
 import { ZERO_OFFSETS, adjustedWdl, drawRate, type RatingOffsets } from '@/lib/wcc/model';
-import {
-  PICK_HP, encodePicks, parseColour, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome,
-} from '@/lib/wcc/scenario';
+import { PICK_HP, parseColour, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome } from '@/lib/wcc/scenario';
 import { currentOdds, fmtScore, isLagging, matchState } from '@/lib/wcc/status';
-import type {
-  HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, WccGame, WccRun, WccSummary,
-} from '@/lib/wcc/types';
-import ClinchTimeline from './ClinchTimeline';
-import ColourDrawToggle from './ColourDrawToggle';
-import GameStrip, { type GameView } from './GameStrip';
-import HowItEnds from './HowItEnds';
-import MatchStatus from './MatchStatus';
-import PrizeCard from './PrizeCard';
-import ScheduleCalendar from './ScheduleCalendar';
-import ScoreDistribution from './ScoreDistribution';
-import SimReplay from './SimReplay';
-import WhatIfLab from './WhatIfLab';
-import WinProbHistoryChart from './WinProbHistoryChart';
-import WinSplitBar from './WinSplitBar';
-import { Crown, DeltaChip, formatPct, type Players } from './ui';
+import type { HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, WccGame, WccRun, WccSummary } from '@/lib/wcc/types';
+import { MatchEnding } from './MatchEnding';
+import { MatchScore, NextGame, scoreLabel } from './MatchNow';
+import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, faceOffSides, oddsSides } from './players';
+import { PrizeCard } from './PrizeCard';
+import { Schedule, liveHref } from './Schedule';
+import { SimReplay } from './SimReplay';
+import { WhatIfLab, type GridState } from './WhatIfLab';
+import { WinProbHistory } from './WinProbHistory';
 
 interface Props {
   players: Players;
@@ -36,28 +47,41 @@ interface Props {
   summary: WccSummary;
   history: HistoryPoint[];
   markets: MarketRow[];
+  /** Last stored Kalshi price for Gukesh, 0..1. */
+  kalshi: number | null;
   /** The match is decided; odds are frozen as they stood before the decisive game. */
   finished: boolean;
   slots: { markets: ReactNode; h2h: ReactNode; methodology: ReactNode };
 }
 
-type GridState = 'idle' | 'loading' | 'ready' | 'missing' | 'error';
+const HERO = 'headline';
+const COLOUR_UNKNOWN = '0';
 
-const NAV = [
-  { id: 'odds', label: 'Odds' },
-  { id: 'scenario', label: 'Scenarios' },
-  { id: 'how-it-ends', label: 'Tiebreaks' },
-  { id: 'scores', label: 'Scores' },
-  { id: 'when', label: 'When' },
-  { id: 'replay', label: 'Replay' },
-  { id: 'markets', label: 'Markets' },
-  { id: 'what-if', label: 'What-if' },
-  { id: 'head-to-head', label: 'Form' },
-  { id: 'schedule', label: 'Schedule' },
-  { id: 'methodology', label: 'Method' },
+const navFor = (finished: boolean): SectionBarProps['groups'] => [
+  {
+    label: 'Forecast',
+    items: [
+      { id: 'odds', label: 'Odds' },
+      { id: 'scenario', label: finished ? 'Games' : 'Scenarios' },
+      { id: 'when', label: 'Endings', also: ['scores', 'how-it-ends'] },
+    ],
+  },
+  ...(finished ? [] : [{ label: 'Play', items: [{ id: 'replay', label: 'Replay' }, { id: 'what-if', label: 'What-if' }] }]),
+  {
+    label: 'Context',
+    items: [
+      { id: 'markets', label: 'Markets', also: ['history'] },
+      { id: 'head-to-head', label: 'Form', also: ['prize'] },
+      { id: 'schedule', label: 'Schedule' },
+      { id: 'methodology', label: 'Method', also: ['photo-credits'] },
+    ],
+  },
 ];
 
-export default function WccDashboard({ players, games, run, summary, history, markets, finished, slots }: Props) {
+const genevaDate = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleDateString('en-GB', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' }).replace(',', '') : '';
+
+export default function WccDashboard({ players, games, run, summary, history, markets, kalshi, finished, slots }: Props) {
   const router = useRouter();
   const state = useMemo(() => matchState(games, run.params.g1_white ?? null), [games, run.params.g1_white]);
   const colourKnown = state.g1White !== null;
@@ -70,6 +94,8 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   const [grid, setGrid] = useState<ModelGrid | null>(null);
   const [gridState, setGridState] = useState<GridState>('idle');
   const [restoreNote, setRestoreNote] = useState<string | null>(null);
+  /** What a pointed-at pick would make Gukesh's odds. */
+  const [preview, setPreview] = useState<number | null>(null);
   const restored = useRef(false);
   const gridRequested = useRef(false);
 
@@ -183,19 +209,29 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     return out;
   }, [finished, state.fixed, state.tbFixed, fixedAll, wdl, effG1]);
 
-  const views: GameView[] = useMemo(() => state.classical.map(game => {
-    const white = game.whitePlayerId ?? (effG1 !== null ? whiteInGame(game.gameNo, effG1) : null);
-    return {
-      game,
-      white,
-      whiteAssumed: game.whitePlayerId === null && !colourKnown && white !== null,
-      odds: gameOdds(wdl, game.gameNo, effG1),
-      pPlayed: odds.gamePlayed[game.gameNo - 1] ?? 1,
-      finalHp: state.fixed.get(game.gameNo) ?? null,
-      pick: picks.get(game.gameNo),
-      swing: swings.get(game.gameNo) ?? null,
-    };
-  }), [state, effG1, colourKnown, wdl, odds.gamePlayed, picks, swings]);
+  const cells: GameCellView[] = useMemo(() => {
+    const nextNo = finished || state.anyLive ? undefined : state.classical.find(g => g.status === 'scheduled')?.gameNo;
+    return state.classical.map(game => {
+      const white = game.whitePlayerId ?? (effG1 !== null ? whiteInGame(game.gameNo, effG1) : null);
+      const result = state.fixed.get(game.gameNo) ?? null;
+      const pPlayed = odds.gamePlayed[game.gameNo - 1] ?? 1;
+      return {
+        gameNo: game.gameNo,
+        dateLabel: genevaDate(game.startsAt),
+        whiteName: white === null ? null : players[white].shortName,
+        whiteAssumed: game.whitePlayerId === null && !colourKnown && white !== null,
+        odds: gameOdds(wdl, game.gameNo, effG1),
+        pPlayed,
+        result,
+        live: game.status === 'live',
+        next: game.gameNo === nextNo,
+        unreachable: result === null && (finished || pPlayed < 1e-9),
+        pick: picks.get(game.gameNo),
+        swing: swings.get(game.gameNo) ?? null,
+        href: liveHref(game.gameNo),
+      };
+    });
+  }, [state, finished, effG1, colourKnown, wdl, odds.gamePlayed, picks, swings, players]);
 
   const breakEven = useMemo(() => {
     if (!grid) return null;
@@ -215,22 +251,25 @@ export default function WccDashboard({ players, games, run, summary, history, ma
 
   // ---- handlers
 
-  const setPick = (g: number, v: PickOutcome | null) => {
+  const setPick = useCallback((g: number, v: PickOutcome | null) => {
     setPicks(prev => {
       const next = new Map(prev);
       if (v === null) next.delete(g); else next.set(g, v);
       return next;
     });
-  };
-  const resetAll = () => {
+  }, []);
+  const resetAll = useCallback(() => {
     setPicks(new Map());
     setColour(null);
     setOffsets(ZERO_OFFSETS);
     setTheta(runTheta);
     setRestoreNote(null);
-  };
-  const onLab = (o: RatingOffsets, t: number) => { setOffsets(o); setTheta(t); };
+  }, [runTheta]);
+  const onLab = useCallback((o: RatingOffsets, t: number) => { setOffsets(o); setTheta(t); }, []);
 
+  // ---- words
+
+  const [p1, p2] = [players[1], players[2]];
   const pickCount = picks.size;
   const labelParts = [
     pickCount ? `your ${pickCount} pick${pickCount === 1 ? '' : 's'}` : null,
@@ -241,176 +280,191 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   const scenarioLabel = scenarioActive && joined ? `With ${joined}:` : null;
   const byColour = { '1': odds.byColour['1']?.p_win1 ?? odds.pWin1, '2': odds.byColour['2']?.p_win1 ?? odds.pWin1 };
   const champion = finished && state.winner ? players[state.winner] : null;
+  const fav = odds.pWin1 >= 0.5 ? p1 : p2;
+  const nSims = run.rebasedFrom || lagging ? null : run.nSims;
+  const draws = drawRate(wdl);
   // What the headline includes beyond the stored run.
   const freshness = [
-    run.rebasedFrom ? `the match-start ratings (${players[1].shortName} ${players[1].ratings.classical}, ${players[2].shortName} ${players[2].ratings.classical})` : null,
+    run.rebasedFrom ? `the match-start ratings (${p1.shortName} ${p1.ratings.classical}, ${p2.shortName} ${p2.ratings.classical})` : null,
     lagging && state.lastFinal > run.afterGame
-      ? `results since the last simulation run (game ${run.afterGame + 1}${state.lastFinal > run.afterGame + 1 ? `–${state.lastFinal}` : ''})`
+      ? `results since the last simulation run (${state.lastFinal > run.afterGame + 1 ? `games ${run.afterGame + 1}–${state.lastFinal}` : `game ${state.lastFinal}`})`
       : lagging ? `the colour draw (${players[state.g1White ?? 1].shortName} White in game 1)` : null,
   ].filter((x): x is string => x !== null);
+  const source = scenarioLabel
+    ? 'Exact odds, recomputed for this scenario.'
+    : nSims !== null ? `Exact odds, confirmed by ${nSims.toLocaleString('en-US')} simulations.`
+      : freshness.length > 0 ? `Exact odds. They include ${freshness.join(' and ')}; the simulations catch up at the next run.` : 'Exact odds.';
+
+  const last = state.lastFinal > 0 ? state.fixed.get(state.lastFinal) : undefined;
+  const lastGame = last === undefined
+    ? { value: 'None yet', sub: 'Game 1 is on 24 Nov' }
+    : { value: last === 1 ? 'Draw ½–½' : `${players[last === 2 ? 1 : 2].shortName} won`, sub: `Game ${state.lastFinal}, ${genevaDate(state.classical[state.lastFinal - 1].startsAt)}` };
+  const rating = (tc: 'classical' | 'rapid' | 'blitz', label: string) => ({
+    key: tc,
+    label: `${label} rating`,
+    value: (
+      <span className="inline-flex flex-wrap items-baseline gap-x-4">
+        {([1, 2] as const).map(id => (
+          <span key={id} className="inline-flex items-baseline gap-2">
+            <Swatch tone={id === 1 ? 'p1' : 'p2'} /><span className="sr-only">{players[id].shortName} </span>{players[id].ratings[tc] || '–'}
+          </span>
+        ))}
+      </span>
+    ),
+    sub: `${p1.shortName}, ${p2.shortName}`,
+  });
+
+  const groups = useMemo(() => navFor(finished), [finished]);
+  const sides = oddsSides(players, odds.pWin1);
+  const won = champion && (
+    state.decidedStage === 'classical'
+      ? `Won ${fmtScore(Math.max(state.score1, state.score2), Math.min(state.score1, state.score2))} after game ${state.decidedAt}.`
+      : 'Won in the tiebreaks after a 7–7 classical match.'
+  );
 
   return (
     <>
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6">
-        {/* Headline */}
-        <section id="odds" aria-label="Match odds" className="surface-card p-4 sm:p-6 -mt-16 sm:-mt-20 relative z-10 shadow-2xl shadow-black/20 scroll-mt-32">
-          {champion ? (
-            <div className="mb-5 pb-5 border-b border-[var(--border)] flex flex-wrap items-center gap-4">
-              <span className="w-12 h-12 rounded-full grid place-items-center bg-chess-gold/15 text-chess-gold ring-1 ring-chess-gold/50"><Crown className="w-6 h-6" /></span>
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)]">World Champion</p>
-                <p className="font-heading text-2xl sm:text-3xl gold-gradient-text">{champion.name}</p>
-                <p className="text-sm text-[var(--text-secondary)]">
-                  {state.decidedStage === 'classical'
-                    ? `Won ${fmtScore(Math.max(state.score1, state.score2), Math.min(state.score1, state.score2))} after game ${state.decidedAt}.`
-                    : 'Won in the tiebreaks after a 7–7 classical match.'}
-                  {' '}The odds below are frozen as they stood before the decisive game.
-                </p>
-              </div>
+      <section id="odds" aria-label="Match odds" className="scroll-mt-bar pb-8">
+        <Container>
+          <HeroEnter>
+            <div id={HERO}>
+              <FaceOff
+                variant="hero"
+                sides={faceOffSides(players)}
+                p1={odds.pWin1}
+                base={scenarioActive ? baseline.pWin1 : null}
+                preview={preview}
+                score={<MatchScore state={state} players={players} />}
+                scoreLabel={scoreLabel(state)}
+                champion={champion && won ? { name: champion.name, line: won } : null}
+                verdict={
+                  champion ? (
+                    <>Before the decisive game our odds were {p1.shortName} {formatPct(odds.pWin1)}, {p2.shortName} {formatPct(odds.pWin2)}. <span className="text-ink-3">Every number below is frozen as it stood then.</span></>
+                  ) : (
+                    <>
+                      {scenarioLabel && <>{scenarioLabel} </>}
+                      {fav.shortName} wins {inHundred(Math.max(odds.pWin1, odds.pWin2))} matches. {odds.pTb > 1 - 1e-6 ? 'The tiebreaks decide it.' : `${formatPct(odds.pTb)} go to tiebreaks.`}
+                      {!scenarioLabel && kalshi !== null && <> <span className="text-ink-3">Kalshi traders give {p1.shortName} {formatPct(kalshi)}.</span></>}
+                    </>
+                  )
+                }
+                notes={[champion ? 'Chance before the decisive game. Each pawn is 1 in 100.' : 'Chance to win the match. Each pawn is 1 in 100.', source]}
+                next={champion ? undefined : <><span className="block font-medium text-ink"><NextGame state={state} /></span>Live board, evaluation and complexity</>}
+                actions={
+                  champion ? (
+                    <>
+                      <Button variant="primary" href={`${WCC_HREF}/live`}>Replay the games</Button>
+                      <Button href="#scenario">Game by game</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="primary" live={state.anyLive} href={`${WCC_HREF}/live`}>
+                        {state.live?.stage === 'classical' ? `Watch game ${state.live.gameNo} live` : 'Watch live'}
+                      </Button>
+                      <Button href="#scenario">Pick results</Button>
+                    </>
+                  )
+                }
+                credit={<PhotoCreditLine photos={FACE_OFF_PHOTOS} changes={FACE_OFF_CHANGES} />}
+              />
             </div>
-          ) : (
-            <div className="mb-5 pb-5 border-b border-[var(--border)]">
-              <MatchStatus state={state} players={players} />
-            </div>
-          )}
-          <WinSplitBar
-            players={players}
-            pWin1={odds.pWin1}
-            pTb={odds.pTb}
-            base={scenarioActive ? { pWin1: baseline.pWin1, pTb: baseline.pTb } : null}
-            nSims={run.rebasedFrom || lagging ? null : run.nSims}
-            scenarioLabel={scenarioLabel}
+          </HeroEnter>
+          <StatStrip
+            className="mt-8"
+            columns={6}
+            items={[
+              rating('classical', 'Classical'),
+              rating('rapid', 'Rapid'),
+              rating('blitz', 'Blitz'),
+              { label: 'Goes to tiebreaks', value: formatPct(odds.pTb), delta: scenarioActive && <Delta value={odds.pTb} base={baseline.pTb} short quiet />, sub: 'of matches' },
+              { label: 'Last game', ...lastGame },
+              { label: 'Draw rate', value: formatPct(draws, 0), sub: 'of classical games' },
+            ]}
           />
-          {freshness.length > 0 && !scenarioActive && (
-            <p className="mt-2 text-xs text-[var(--text-muted)]">
-              Uses {freshness.join(' and ')}, computed exactly on this page; the simulations catch up at the next run.
-            </p>
-          )}
-        </section>
+        </Container>
+      </section>
 
-      </div>
+      <SectionBar
+        groups={groups}
+        heroId={HERO}
+        eventLabel="World Championship"
+        live={<OddsChip sides={sides} preview={preview} />}
+        actions={!finished && <>{scenarioActive && <Button size="sm" variant="quiet" icon="reset" onClick={resetAll}>Reset</Button>}<CopyButton kind="link" label="Share scenario" /></>}
+      />
 
-      {/* In-page navigation */}
-      <nav aria-label="Sections" className="sticky top-16 z-30 mt-6 border-y border-[var(--border)] bg-[var(--bg-base)]/90 backdrop-blur">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto scrollbar-none">
-          {NAV.map(n => (
-            <a key={n.id} href={`#${n.id}`} className="shrink-0 h-11 px-2.5 inline-flex items-center text-xs font-semibold text-[var(--text-muted)] hover:text-gold-ink transition-colors">
-              {n.label}
-            </a>
-          ))}
-        </div>
-      </nav>
-
-      <div className={`max-w-6xl w-full mx-auto px-4 sm:px-6 pt-6 space-y-6 ${finished ? 'pb-10' : 'pb-28 lg:pb-10'}`}>
+      <Container>
         <div aria-live="polite">
-          {restoreNote && (
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] px-4 py-2.5 text-xs text-[var(--text-secondary)] flex items-center gap-3">
-              <span className="flex-1">{restoreNote}</span>
-              <button type="button" onClick={() => setRestoreNote(null)} className="h-8 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]">Dismiss</button>
-            </div>
-          )}
+          {restoreNote && <Callout className="mb-section" onDismiss={() => setRestoreNote(null)}>{restoreNote}</Callout>}
         </div>
+      </Container>
 
-        {/* Scenario builder */}
-        <section id="scenario" aria-labelledby="scenario-title" className="surface-card p-4 sm:p-6 scroll-mt-32">
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
-            <div className="max-w-xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--text-muted)] mb-1">
-                {finished ? 'The classical games' : 'Scenario builder'}
-              </p>
-              <h2 id="scenario-title" className="font-heading text-xl sm:text-2xl text-[var(--text-primary)]">
-                {finished ? 'Game by game' : 'Pick the results'}
-              </h2>
-              {!finished && (
-                <p className="mt-1.5 text-sm text-[var(--text-muted)]">
-                  Choose a result for any game and every number on this page updates instantly. Hover a button to see where the match odds would go.
-                </p>
-              )}
-            </div>
-            {!finished && (
-              <div className="flex flex-wrap items-end gap-3">
-                {!colourKnown && (
-                  <ColourDrawToggle value={colour} onChange={setColour} players={players} byColour={byColour} />
-                )}
-                <div className="hidden lg:flex items-center gap-1">
-                  {scenarioActive && (
-                    <button type="button" onClick={resetAll} className="h-10 px-3 rounded-md text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-3)]">
-                      Reset
-                    </button>
-                  )}
-                  <CopyLink label="Share scenario" />
-                </div>
-              </div>
-            )}
-          </div>
-          <GameStrip views={views} players={players} onPick={setPick} locked={finished} />
-          {!finished && (
-            <p className="mt-3 text-[11px] text-[var(--text-muted)] flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="inline-flex items-center gap-1.5"><span aria-hidden className="w-2.5 h-2.5 rounded-full bg-white ring-1 ring-black/40" /> who has White{!colourKnown && colour !== null ? ' (italic: assumed until the 22 Nov draw)' : ''}</span>
-              <span>Bars: {players[1].shortName} win · draw · {players[2].shortName} win for that game{effG1 === null ? ', averaged over the colour draw' : ''}.</span>
-            </p>
+      <SectionGroup label="Forecast">
+        <Section
+          id="scenario"
+          layout="wide"
+          title={finished ? 'Game by game' : 'Pick the results'}
+          finding={finished ? 'Every classical game of the match. A game number opens its board and moves.' : 'Choose a result for any game and every number on this page updates at once. A game number opens its live board.'}
+          actions={!finished && <>{scenarioActive && <Button size="sm" icon="reset" onClick={resetAll}>Reset</Button>}<CopyButton kind="link" label="Share scenario" variant="secondary" /></>}
+          legend={!finished && (
+            <ul className="flex flex-wrap gap-x-6 gap-y-2 type-small text-ink-2">
+              <li className="inline-flex items-center gap-2"><PieceDot side="white" />Has White{!colourKnown && colour !== null ? ' (assumed until the 22 Nov draw)' : ''}</li>
+              <li>Percentages are {p1.shortName} win, draw, {p2.shortName} win for that game{effG1 === null ? ', averaged over the colour draw' : ''}.</li>
+            </ul>
           )}
-        </section>
-
-        <div className="grid lg:grid-cols-2 gap-6">
-          <HowItEnds odds={odds} players={players} />
-          <ScoreDistribution odds={odds} players={players} />
-        </div>
-        <ClinchTimeline odds={odds} players={players} />
-        {!finished && <SimReplay wdl={summary.wdl} fixed={state.fixed} g1White={state.g1White} tb={state.tbFixed} players={players} />}
-        <WinProbHistoryChart history={historyNow} markets={markets} players={players} />
-        {slots.markets}
-        {!finished && (
-          <WhatIfLab
-            players={players}
-            offsets={offsets}
-            theta={theta}
-            runTheta={runTheta}
-            onChange={onLab}
-            gridState={gridState}
-            requestGrid={requestGrid}
-            pWin1={odds.pWin1}
-            basePWin1={baseline.pWin1}
-            drawRate={drawRate(wdl)}
-            breakEven={breakEven}
-          />
-        )}
-        <PrizeCard prize={odds.prize} base={scenarioActive ? baseline.prize : null} players={players} />
-        {slots.h2h}
-        <ScheduleCalendar games={state.classical} players={players} />
-        {slots.methodology}
-      </div>
-
-      {/* Mobile: sticky scenario bar */}
-      {!finished && (
-        <div
-          className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg-surface-1)]/95 backdrop-blur"
-          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         >
-          <div className="max-w-6xl mx-auto px-3 py-2 flex items-center gap-2">
-            <a href="#scenario" className="flex-1 min-w-0 h-11 rounded-lg bg-[var(--bg-surface-2)] px-3 flex items-center justify-between gap-2" aria-label="Jump to the scenario builder">
-              <span className="min-w-0">
-                <span className="block text-[10px] uppercase tracking-wider text-[var(--text-muted)] truncate">
-                  {scenarioActive ? `${pickCount} pick${pickCount === 1 ? '' : 's'}${labActive ? ' · what-if' : ''}` : 'No picks yet'}
-                </span>
-                <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text-primary)] tabular-nums">
-                  <span aria-hidden className="w-2 h-2 rounded-sm" style={{ background: 'var(--wcc-p1)' }} />
-                  {players[1].shortName[0]} {formatPct(odds.pWin1)}
-                  <span className="text-[var(--text-muted)]">·</span>
-                  <span aria-hidden className="w-2 h-2 rounded-sm" style={{ background: 'var(--wcc-p2)' }} />
-                  {players[2].shortName[0]} {formatPct(odds.pWin2)}
-                </span>
-              </span>
-              {scenarioActive && <DeltaChip value={odds.pWin1} base={baseline.pWin1} className="shrink-0" />}
-            </a>
-            {scenarioActive && (
-              <button type="button" onClick={resetAll} className="h-11 px-3 rounded-lg border border-[var(--border)] text-xs font-semibold text-[var(--text-secondary)]">
-                Reset
-              </button>
-            )}
-            <CopyLink label="Share" className="!h-11 border border-[var(--border)]" />
-          </div>
-        </div>
+          {!finished && !colourKnown && (
+            <div className="mb-6 flex flex-col items-start gap-2">
+              <p aria-hidden className="type-ui text-ink">White in game 1</p>
+              <Segmented
+                ariaLabel="White in game 1"
+                value={String(colour ?? 0)}
+                onChange={v => setColour(v === COLOUR_UNKNOWN ? null : Number(v) as PlayerId)}
+                items={[
+                  { value: COLOUR_UNKNOWN, label: 'Not drawn yet', hint: '50/50 average' },
+                  { value: '1', label: `${p1.shortName} (${p1.shortName} ${formatPct(byColour['1'])})` },
+                  { value: '2', label: `${p2.shortName} (${p1.shortName} ${formatPct(byColour['2'])})` },
+                ]}
+              />
+            </div>
+          )}
+          <GameSheet games={cells} players={players} locked={finished} onPick={setPick} onPreview={finished ? undefined : setPreview} />
+        </Section>
+        <MatchEnding odds={odds} players={players} finished={finished} />
+      </SectionGroup>
+
+      {!finished && (
+        <SectionGroup label="Play" ground="surface">
+          <SimReplay wdl={summary.wdl} fixed={state.fixed} g1White={state.g1White} tb={state.tbFixed} players={players} />
+          <WhatIfLab
+            players={players} offsets={offsets} theta={theta} runTheta={runTheta} onChange={onLab} gridState={gridState} requestGrid={requestGrid}
+            pWin1={odds.pWin1} basePWin1={baseline.pWin1} drawRate={draws} breakEven={breakEven}
+          />
+        </SectionGroup>
+      )}
+
+      <SectionGroup label="Context">
+        <WinProbHistory history={historyNow} markets={markets} players={players} />
+        {slots.markets}
+        <Section layout="split" label="Prize money and form">
+          <PrizeCard prize={odds.prize} base={scenarioActive ? baseline.prize : null} players={players} />
+          {slots.h2h}
+        </Section>
+        <Schedule games={state.classical} players={players} />
+        {slots.methodology}
+      </SectionGroup>
+
+      {!finished && (
+        <BottomBar label="Match odds" heroId={HERO}>
+          <a
+            href="#scenario"
+            aria-label={`Jump to the scenario builder. ${sides.map(s => `${s.name} ${formatPct(s.p)}`).join(', ')}`}
+            className="flex min-w-0 flex-1"
+          >
+            <OddsChip variant="halves" sides={sides} preview={preview} />
+          </a>
+          {scenarioActive && <IconButton icon="reset" label={pickCount ? `Reset ${pickCount} pick${pickCount === 1 ? '' : 's'}` : 'Reset'} onClick={resetAll} />}
+          <CopyButton kind="link" label="Share scenario" variant="icon" />
+        </BottomBar>
       )}
     </>
   );

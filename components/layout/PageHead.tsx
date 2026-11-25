@@ -18,6 +18,8 @@ interface PageHeadProps {
   facts?: ReactNode[];
   status?: ReactNode;
   actions?: ReactNode;
+  /** Small buttons at the right end of the breadcrumb line, for a page whose figure should start high. */
+  crumbActions?: ReactNode;
   switcher?: LinkItem[];
   tabs?: LinkItem[];
   media?: ReactNode;
@@ -27,13 +29,14 @@ interface PageHeadProps {
 
 const up = 'group-data-[enter]/enter:animate-up';
 
-export function PageHead({ title, size = 'h1', crumbs, lead, facts, status, actions, switcher, tabs, media, enter = false, className }: PageHeadProps) {
+export function PageHead({ title, size = 'h1', crumbs, lead, facts, status, actions, crumbActions, switcher, tabs, media, enter = false, className }: PageHeadProps) {
   const aside = Boolean(lead || actions || (facts && facts.length > 0));
   const body = (
     <Container className={cn('pb-2 md:pb-8 md:pt-4', crumbs || switcher ? 'pt-1' : 'pt-6 md:pt-12', className)}>
-      {(crumbs || switcher) && (
-        <div className="mb-1 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 md:mb-4">
-          {crumbs ? <Breadcrumb items={crumbs} compact={Boolean(switcher)} /> : <span />}
+      {(crumbs || switcher || crumbActions) && (
+        <div className={cn('flex flex-wrap items-center justify-between gap-x-3 gap-y-2 md:mb-4', switcher || crumbActions ? 'mb-3' : 'mb-1')}>
+          {crumbs ? <Breadcrumb items={crumbs} compact={Boolean(switcher || crumbActions)} /> : <span />}
+          {crumbActions && <div className="flex flex-wrap items-center gap-3">{crumbActions}</div>}
           {switcher && <Segmented role="nav" ariaLabel="Section" size="sm" value={switcher.find(s => s.active)?.href ?? ''} items={switcher.map(s => ({ value: s.href, label: s.label, href: s.href }))} />}
         </div>
       )}

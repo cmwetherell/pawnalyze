@@ -82,8 +82,8 @@ const VENUE_SOURCE = {
 // ── Processed files ──────────────────────────────────────────────────────────
 
 export const WCC_PHOTOS: {
-  gukesh: { portrait: PhotoCredit; og: PhotoCredit; avatar: PhotoCredit; board?: PhotoCredit };
-  sindarov: { portrait: PhotoCredit; og: PhotoCredit; avatar: PhotoCredit; board?: PhotoCredit };
+  gukesh: { portrait: PhotoCredit; cutout: PhotoCredit; og: PhotoCredit; cutoutOg: PhotoCredit; avatar: PhotoCredit; board?: PhotoCredit };
+  sindarov: { portrait: PhotoCredit; cutout: PhotoCredit; og: PhotoCredit; cutoutOg: PhotoCredit; avatar: PhotoCredit; board?: PhotoCredit };
   venue: PhotoCredit & { og: string };
 } = {
   gukesh: {
@@ -96,6 +96,23 @@ export const WCC_PHOTOS: {
       width: 720,
       height: 960,
       focal: '50% 35%',
+    },
+    // The portrait on its own, for the face-off.
+    cutout: {
+      ...GUKESH_PORTRAIT_SOURCE,
+      src: '/players/wcc/gukesh-cut.webp',
+      alt: 'Gukesh D at the board during the Tata Steel Chess Tournament 2024',
+      modified: 'Background removed, converted to black and white, resized and converted to WebP',
+      width: 704,
+      height: 948,
+    },
+    cutoutOg: {
+      ...GUKESH_PORTRAIT_SOURCE,
+      src: '/players/wcc/gukesh-cut-og.png',
+      alt: 'Gukesh D at the board during the Tata Steel Chess Tournament 2024',
+      modified: 'Background removed, converted to black and white, resized and converted to PNG',
+      width: 475,
+      height: 640,
     },
     og: {
       ...GUKESH_PORTRAIT_SOURCE,
@@ -136,6 +153,23 @@ export const WCC_PHOTOS: {
       width: 720,
       height: 960,
       focal: '50% 35%',
+    },
+    // The portrait on its own, for the face-off.
+    cutout: {
+      ...SINDAROV_PORTRAIT_SOURCE,
+      src: '/players/wcc/sindarov-cut.webp',
+      alt: 'Javokhir Sindarov at the Naroditsky Memorial Rapid and Blitz 2026',
+      modified: 'Background removed, converted to black and white, resized and converted to WebP',
+      width: 704,
+      height: 948,
+    },
+    cutoutOg: {
+      ...SINDAROV_PORTRAIT_SOURCE,
+      src: '/players/wcc/sindarov-cut-og.png',
+      alt: 'Javokhir Sindarov at the Naroditsky Memorial Rapid and Blitz 2026',
+      modified: 'Background removed, converted to black and white, resized and converted to PNG',
+      width: 475,
+      height: 640,
     },
     og: {
       ...SINDAROV_PORTRAIT_SOURCE,
@@ -178,23 +212,18 @@ export const WCC_PHOTOS: {
   },
 };
 
-/** One credit per source work (deduped by Commons page), for the page's photo credits section. */
+/** One credit per source work (deduped by Commons page), with every change made to it, for the page's photo credits section. */
 export const ALL_WCC_PHOTO_CREDITS: PhotoCredit[] = (() => {
-  const all: PhotoCredit[] = [
-    WCC_PHOTOS.gukesh.portrait,
-    WCC_PHOTOS.gukesh.og,
-    WCC_PHOTOS.gukesh.avatar,
-    ...(WCC_PHOTOS.gukesh.board ? [WCC_PHOTOS.gukesh.board] : []),
-    WCC_PHOTOS.sindarov.portrait,
-    WCC_PHOTOS.sindarov.og,
-    WCC_PHOTOS.sindarov.avatar,
-    ...(WCC_PHOTOS.sindarov.board ? [WCC_PHOTOS.sindarov.board] : []),
-    WCC_PHOTOS.venue,
-  ];
-  const seen = new Set<string>();
-  return all.filter((p) => {
-    if (seen.has(p.sourceUrl)) return false;
-    seen.add(p.sourceUrl);
-    return true;
-  });
+  const all: PhotoCredit[] = [WCC_PHOTOS.gukesh, WCC_PHOTOS.sindarov]
+    .flatMap(p => [p.portrait, p.cutout, p.cutoutOg, p.og, p.avatar, ...(p.board ? [p.board] : [])])
+    .concat(WCC_PHOTOS.venue);
+  // The same change in another file format is said once.
+  const change = (p: PhotoCredit) => p.modified.replace(/ and converted to \S+$/, '');
+  const bySource = new Map<string, PhotoCredit>();
+  for (const p of all) {
+    const seen = bySource.get(p.sourceUrl);
+    if (!seen) bySource.set(p.sourceUrl, p);
+    else if (!seen.modified.includes(change(p))) bySource.set(p.sourceUrl, { ...seen, modified: `${seen.modified}. ${p.modified}` });
+  }
+  return [...bySource.values()];
 })();

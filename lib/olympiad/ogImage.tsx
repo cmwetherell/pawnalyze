@@ -1,254 +1,185 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { ImageResponse } from 'next/og';
-
-import { OG_SIZE, safeOg } from '../og';
+import { OgFigure, OgFlag, OgFrame, OgMedal, OgPips, OgRow, OgTitle, clip, ogColor, ogDisplay, ogImage, ogMedalColor, ogPct } from '@/lib/og/kit';
 import { BOARD_LABELS, N_ROUNDS, OLYMPIAD_EVENTS, boardLabel } from './config';
+import { contenders, medalPlaces } from './medals';
 import { ordinal } from './odds';
-import { fedToIso } from './fedToIso';
-import { getOlympiadBoardRace, getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadTeams } from './queries';
+import { getOlympiadBoardRace, getOlympiadOfficialStandings, getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadSummaryHistory, getOlympiadTeams } from './queries';
 import { teamsInRun } from './standings';
 import { MIN_GAMES_FOR_PRIZE, displayName, formatScore } from './tpr';
-import type { OlympiadEvent } from './types';
+import type { OlympiadEvent, Team } from './types';
 
-export { OG_SIZE, safeOg } from '../og';
+export { OG_SIZE } from '../og/kit';
 
-/** Inline a flag from the installed flag-icons package (no network during prerender). */
-function flagDataUri(iso: string | null): string | null {
-  if (!iso) return null;
-  try {
-    const svg = readFileSync(path.join(process.cwd(), 'node_modules', 'flag-icons', 'flags', '4x3', `${iso}.svg`), 'utf8');
-    return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
-  } catch {
-    return null;
-  }
+const titleOf = (event: OlympiadEvent) => OLYMPIAD_EVENTS[event].shortTitle.replace("'", '’');
+
+const MEDAL_WORD = { 1: 'Gold', 2: 'Silver', 3: 'Bronze' } as const;
+
+/** A narrow column: "Nodirbek Abdusattorov" becomes "N. Abdusattorov". */
+function cardName(raw: string, max: number): string {
+  const full = displayName(raw);
+  const [last, first] = raw.split(',').map(s => s.trim());
+  return full.length <= max || !first ? clip(full, max) : clip(`${first[0]}. ${last}`, max);
 }
 
-/** Social card: top-5 gold odds with flags. Falls back to a title card before the first run. */
+const stageOf = (round: number, before: string) => (round >= N_ROUNDS ? 'Final' : round > 0 ? `After round ${round} of ${N_ROUNDS}` : before);
+
+/** Social card: the top five gold odds; once it is over, the podium. Falls back to a title card before the first run. */
 export function olympiadOgImage(event: OlympiadEvent) {
-  return safeOg(OLYMPIAD_EVENTS[event].shortTitle, () => renderOlympiadOg(event));
+  return ogImage(titleOf(event), () => renderOlympiadOg(event));
 }
 
 async function renderOlympiadOg(event: OlympiadEvent) {
-  const cfg = OLYMPIAD_EVENTS[event];
+  const title = titleOf(event);
   const [run, allTeams, status] = await Promise.all([getOlympiadRun(event), getOlympiadTeams(event), getOlympiadStatus(event)]);
-  const teams = teamsInRun(allTeams, run);
-  const summary = run ? await getOlympiadSummary(event, run.runId) : [];
-  const byId = new Map(teams.map(t => [t.teamId, t]));
-  const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 5);
-  const stage = status.lastFinalRound >= N_ROUNDS ? 'Final' : status.lastFinalRound > 0 ? `After round ${status.lastFinalRound} of ${N_ROUNDS}` : 'Pre-tournament';
+  const byId = new Map(teamsInRun(allTeams, run).map(t => [t.teamId, t]));
+  const stage = stageOf(status.lastFinalRound, 'Pre-tournament');
+  const sims = run ? `${run.nSims.toLocaleString('en-US')} simulations` : undefined;
 
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '44px 56px',
-          background: 'linear-gradient(135deg, #0F1116 0%, #1a1d23 100%)', color: '#f0f2f5', fontFamily: 'sans-serif',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', fontSize: 22, letterSpacing: 4, textTransform: 'uppercase', color: '#C9A84C' }}>Pawnalyze · Who wins gold?</div>
-            <div style={{ display: 'flex', fontSize: 44, fontWeight: 700, marginTop: 4 }}>{cfg.shortTitle}</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: '#8b949e', fontSize: 22 }}>
-            <div style={{ display: 'flex' }}>{stage}</div>
-            {run && <div style={{ display: 'flex' }}>{`${run.nSims.toLocaleString()} simulations`}</div>}
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', marginTop: 22, gap: 10, flex: 1 }}>
-          {top.length === 0 ? (
-            <div style={{ display: 'flex', fontSize: 30, color: '#c9d1d9' }}>Simulations arrive shortly before round 1.</div>
-          ) : (
-            top.map((s, i) => {
-              const team = byId.get(s.teamId);
-              const flag = flagDataUri(fedToIso(team?.fedCode));
-              const width = Math.max(2, s.pGold * 100);
-              return (
-                <div key={s.teamId} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-                  <div style={{ display: 'flex', width: 36, fontSize: 28, color: '#8b949e', justifyContent: 'flex-end' }}>{i + 1}</div>
-                  {flag ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={flag} alt="" width={56} height={42} style={{ borderRadius: 4 }} />
-                  ) : (
-                    <div style={{ display: 'flex', width: 60, height: 45, borderRadius: 4, background: '#2a2f38', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{team?.fedCode ?? ''}</div>
-                  )}
-                  <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <div style={{ display: 'flex', fontSize: 28, fontWeight: 600 }}>{team?.name ?? `Team ${s.teamId}`}</div>
-                      <div style={{ display: 'flex', fontSize: 30, fontWeight: 700, color: '#C9A84C' }}>{`${(s.pGold * 100).toFixed(1)}%`}</div>
-                    </div>
-                    <div style={{ display: 'flex', height: 10, borderRadius: 5, background: '#2a2f38', marginTop: 5, overflow: 'hidden' }}>
-                      <div style={{ display: 'flex', width: `${width}%`, background: '#C9A84C', borderRadius: 6 }} />
-                    </div>
-                  </div>
+  if (status.lastFinalRound >= N_ROUNDS) {
+    const places = await podium(event, byId);
+    if (places.length === 3) {
+      return (
+        <OgFrame stage={stage} stageNote={sims} footer="Gold odds before round 1, from Monte Carlo simulations updated after every round">
+          <OgTitle>{title}</OgTitle>
+          <div style={{ display: 'flex', gap: 24, marginTop: 36 }}>
+            {places.map(p => (
+              <div key={p.rank} style={{ display: 'flex', flexDirection: 'column', flex: 1, borderTop: `4px solid ${ogMedalColor(p.rank)}`, paddingTop: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <OgFlag code={p.team.fedCode} height={66} />
+                  <OgMedal rank={p.rank} size={40} />
                 </div>
-              );
-            })
-          )}
-        </div>
+                <div style={{ display: 'flex', height: 64, alignItems: 'flex-end', ...ogDisplay(p.team.name.length > 16 ? 30 : 46) }}>{clip(p.team.name, 26)}</div>
+                <div style={{ display: 'flex', marginTop: 14, fontSize: 21, color: ogColor['ink-2'] }}>{`${p.mp} match points, ${p.gpHalf / 2} game points`}</div>
+                {p.pre !== null && <div style={{ display: 'flex', marginTop: 4, fontSize: 21, color: ogColor['ink-3'] }}>{`${ogPct(p.pre)} before round 1`}</div>}
+              </div>
+            ))}
+          </div>
+        </OgFrame>
+      );
+    }
+  }
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: 18, marginTop: 14 }}>
-          <div style={{ display: 'flex' }}>Gold-medal probability · Monte Carlo simulations updated after every round</div>
-          <div style={{ display: 'flex' }}>pawnalyze.com</div>
+  const summary = run ? await getOlympiadSummary(event, run.runId) : [];
+  const top = [...summary].sort((a, b) => b.pGold - a.pGold).slice(0, 5);
+  return (
+    <OgFrame stage={stage} stageNote={sims} footer="Gold-medal probability, from Monte Carlo simulations updated after every round">
+      {top.length === 0 ? (
+        <OgTitle size={72} sub="Simulations arrive shortly before round 1.">{title}</OgTitle>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', marginBottom: 14, ...ogDisplay(46) }}>{`${title}: who wins gold?`}</div>
+          {top.map((s, i) => {
+            const team = byId.get(s.teamId);
+            return <OgRow key={s.teamId} rank={i + 1} code={team?.fedCode} name={team?.name ?? `Team ${s.teamId}`} share={s.pGold} value={ogPct(s.pGold)} color={ogColor.gold} />;
+          })}
         </div>
-      </div>
-    ),
-    { ...OG_SIZE },
+      )}
+    </OgFrame>
   );
 }
 
-const MEDAL_HEX = ['#C9A84C', '#A8B0BC', '#B87333'];
-
-/** Satori cannot ellipsize, so cap card names by length. */
-function clip(text: string, max: number): string {
-  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
+async function podium(event: OlympiadEvent, byId: Map<number, Team>) {
+  const [standings, history] = await Promise.all([getOlympiadOfficialStandings(event), getOlympiadSummaryHistory(event)]);
+  return (standings?.rows ?? []).filter(r => r.rank <= 3).sort((a, b) => a.rank - b.rank).flatMap(r => {
+    const team = byId.get(r.teamId);
+    return team ? [{ rank: r.rank as 1 | 2 | 3, team, mp: r.mp, gpHalf: r.gpHalf, pre: history.find(h => h.roundsCompleted === 0 && h.teamId === r.teamId)?.pGold ?? null }] : [];
+  });
 }
 
-/** Social card for the board-prize race: the current podium on each of the five boards. */
+/** Social card for the board prizes: gold, silver and bronze on each of the five boards. */
 export function boardRaceOgImage(event: OlympiadEvent) {
-  return safeOg(`${OLYMPIAD_EVENTS[event].shortTitle} board prizes`, () => renderBoardRaceOg(event));
+  return ogImage(`${titleOf(event)} board prizes`, () => renderBoardRaceOg(event));
 }
 
 async function renderBoardRaceOg(event: OlympiadEvent) {
-  const cfg = OLYMPIAD_EVENTS[event];
   const race = await getOlympiadBoardRace(event);
-  const stage = race.lastRound >= N_ROUNDS ? 'Final' : race.lastRound > 0 ? `After round ${race.lastRound} of ${N_ROUNDS}` : 'Before round 1';
+  const finished = race.lastRound >= N_ROUNDS;
 
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '40px 48px',
-          background: 'linear-gradient(135deg, #0F1116 0%, #1a1d23 100%)', color: '#f0f2f5', fontFamily: 'sans-serif',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', fontSize: 20, letterSpacing: 4, textTransform: 'uppercase', color: '#C9A84C' }}>Pawnalyze · Board prize race</div>
-            <div style={{ display: 'flex', fontSize: 40, fontWeight: 700, marginTop: 2 }}>{cfg.shortTitle}</div>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', color: '#8b949e', fontSize: 20 }}>
-            <div style={{ display: 'flex' }}>{stage}</div>
-            <div style={{ display: 'flex' }}>Performance rating · 8 games to qualify</div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: 14, marginTop: 26, flex: 1 }}>
-          {race.boards.map((rows, i) => (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid #2d333b', borderRadius: 14, padding: '14px 14px' }}>
-              <div style={{ display: 'flex', fontSize: 16, letterSpacing: 2, textTransform: 'uppercase', color: '#8b949e', marginBottom: 10 }}>{BOARD_LABELS[i]}</div>
-              {[0, 1, 2].map(k => {
-                const r = rows[k];
-                const flag = r ? flagDataUri(fedToIso(r.fedCode)) : null;
-                const name = r ? clip(displayName(r.name), k === 0 ? 19 : 22) : '—';
+  return (
+    <OgFrame stage={stageOf(race.lastRound, 'Before round 1')} footer={`Individual board medals: highest performance rating with at least ${MIN_GAMES_FOR_PRIZE} games`}>
+      <OgTitle size={46}>{`${titleOf(event)}: board ${finished ? 'prizes' : 'prize race'}`}</OgTitle>
+      <div style={{ display: 'flex', marginTop: 28, borderTop: `2px solid ${ogColor.rule}`, borderBottom: `1px solid ${ogColor.line}` }}>
+        {race.boards.map((rows, i) => {
+          const podium = contenders(rows).slice(0, 3);
+          return (
+            <div
+              key={i}
+              style={{
+                display: 'flex', flexDirection: 'column', width: 1088 / 5, padding: i === 0 ? '16px 12px 12px 0' : '16px 12px 12px 16px',
+                borderLeft: i === 0 ? `0px solid ${ogColor.line}` : `1px solid ${ogColor.line}`,
+              }}
+            >
+              <div style={{ display: 'flex', marginBottom: 14, ...ogDisplay(26) }}>{BOARD_LABELS[i]}</div>
+              {([1, 2, 3] as const).map(rank => {
+                const r = podium[rank - 1];
+                const first = rank === 1;
                 return (
-                  <div key={k} style={{ display: 'flex', flexDirection: 'column', marginBottom: k === 0 ? 22 : 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div style={{ display: 'flex', width: 18, height: 18, borderRadius: 9, background: MEDAL_HEX[k], color: '#0F1116', fontSize: 11, fontWeight: 700, alignItems: 'center', justifyContent: 'center' }}>{k + 1}</div>
-                      {flag ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={flag} alt="" width={k === 0 ? 30 : 22} height={k === 0 ? 22 : 16} style={{ borderRadius: 3 }} />
-                      ) : (
-                        <div style={{ display: 'flex', width: 22, height: 16, borderRadius: 3, background: '#2a2f38' }} />
-                      )}
-                      <div style={{ display: 'flex', fontSize: k === 0 ? 36 : 22, fontWeight: 700, color: k === 0 ? '#C9A84C' : '#c9d1d9', marginLeft: 'auto' }}>{r?.tpr ?? ''}</div>
-                    </div>
-                    <div style={{ display: 'flex', fontSize: k === 0 ? 21 : 16, fontWeight: k === 0 ? 700 : 500, marginTop: 6, color: k === 0 ? '#f0f2f5' : '#c9d1d9', whiteSpace: 'nowrap', overflow: 'hidden' }}>{name}</div>
-                    {r && <div style={{ display: 'flex', fontSize: 14, color: '#8b949e', marginTop: 2 }}>{`${r.fedCode} · ${formatScore(r.score, r.games)} · ${r.games} of 8 games`}</div>}
+                  <div key={rank} style={{ display: 'flex', height: first ? 108 : 78 }}>
+                    <div style={{ display: 'flex', width: 34, paddingTop: first ? 6 : 1 }}><OgMedal rank={rank} size={24} /></div>
+                    {r ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <OgFlag code={r.fedCode} height={first ? 24 : 18} />
+                          {first ? <span style={ogDisplay(38)}>{r.tpr}</span> : <span style={{ fontSize: 22, fontWeight: 600 }}>{r.tpr}</span>}
+                        </div>
+                        <div style={{ display: 'flex', marginTop: 4, fontSize: first ? 19 : 18, fontWeight: first ? 600 : 400, color: first ? ogColor.ink : ogColor['ink-2'], whiteSpace: 'nowrap' }}>{cardName(r.name, 16)}</div>
+                        {first && <div style={{ display: 'flex', marginTop: 2, fontSize: 16, color: ogColor['ink-3'] }}>{`${r.fedCode} ${formatScore(r.score, r.games)}`}</div>}
+                      </div>
+                    ) : <span style={{ fontSize: 20, color: ogColor['ink-3'] }}>Open</span>}
                   </div>
                 );
               })}
             </div>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: 18, marginTop: 12 }}>
-          <div style={{ display: 'flex' }}>Individual board medals · highest TPR with at least 8 games</div>
-          <div style={{ display: 'flex' }}>pawnalyze.com</div>
-        </div>
+          );
+        })}
       </div>
-    ),
-    { ...OG_SIZE },
+    </OgFrame>
   );
 }
 
-const PIP = { 1: '#10b981', 0.5: '#8b949e', 0: '#f43f5e' } as const;
-
 /** Social card for one player in the board-prize race. */
 export function playerOgImage(event: OlympiadEvent, fideId: number) {
-  return safeOg(`${OLYMPIAD_EVENTS[event].shortTitle} board prizes`, () => renderPlayerOg(event, fideId));
+  return ogImage(`${titleOf(event)} board prizes`, () => renderPlayerOg(event, fideId));
 }
 
 async function renderPlayerOg(event: OlympiadEvent, fideId: number) {
-  const cfg = OLYMPIAD_EVENTS[event];
   const race = await getOlympiadBoardRace(event);
   const p = race.boards.flat().find(r => r.fideId === fideId);
-  if (!p) return boardRaceOgImage(event);
-  const flag = flagDataUri(fedToIso(p.fedCode));
-  const name = clip(displayName(p.name), 26);
-  const rankText = p.rank !== null ? `${ordinal(p.rank)} of ${race.ranked[p.board - 1]}` : 'not yet ranked';
-  const elig = p.eligible ? 'Eligible for a medal' : p.canReach ? `Needs ${p.needed} more of ${MIN_GAMES_FOR_PRIZE} games` : `Cannot reach ${MIN_GAMES_FOR_PRIZE} games`;
-  const medalHex = p.rank !== null && p.rank <= 3 ? MEDAL_HEX[p.rank - 1] : null;
+  if (!p) return renderBoardRaceOg(event);
+  const name = displayName(p.name);
+  const board = boardLabel(p.board);
+  const rankText = p.rank !== null ? `${ordinal(p.rank)} of ${race.ranked[p.board - 1]}` : 'Not yet ranked';
+  const eligible = p.eligible ? 'Eligible for a medal' : p.canReach ? `Needs ${p.needed} more of ${MIN_GAMES_FOR_PRIZE} games` : `Cannot reach ${MIN_GAMES_FOR_PRIZE} games`;
+  const medal = medalPlaces(race.boards[p.board - 1]).get(fideId);
+  const results = Array.from({ length: N_ROUNDS }, (_, i) => p.form.find(f => f.round === i + 1)?.score ?? null);
 
-  return new ImageResponse(
-    (
-      <div
-        style={{
-          width: '100%', height: '100%', display: 'flex', flexDirection: 'column', padding: '44px 56px',
-          background: 'linear-gradient(135deg, #0F1116 0%, #1a1d23 100%)', color: '#f0f2f5', fontFamily: 'sans-serif',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', fontSize: 20, letterSpacing: 4, textTransform: 'uppercase', color: '#C9A84C' }}>{`Pawnalyze · ${cfg.shortTitle} · Board prize race`}</div>
-          <div style={{ display: 'flex', fontSize: 20, color: '#8b949e' }}>{race.lastRound > 0 ? `After round ${race.lastRound} of ${N_ROUNDS}` : 'Before round 1'}</div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 36, marginTop: 40, flex: 1 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-              {flag ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={flag} alt="" width={80} height={60} style={{ borderRadius: 6 }} />
-              ) : (
-                <div style={{ display: 'flex', width: 80, height: 60, borderRadius: 6, background: '#2a2f38' }} />
-              )}
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', fontSize: 50, fontWeight: 700, lineHeight: 1.1 }}>
-                  {p.title && <span style={{ color: '#C9A84C', marginRight: 14 }}>{p.title}</span>}
-                  {name}
-                </div>
-                <div style={{ display: 'flex', fontSize: 24, color: '#c9d1d9', marginTop: 6 }}>{`${p.teamName} · ${boardLabel(p.board)}${p.rating ? ` · rating ${p.rating}` : ''}`}</div>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, marginTop: 34, alignItems: 'center' }}>
-              {p.form.map(f => (
-                <div key={f.round} style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, background: PIP[f.score], alignItems: 'center', justifyContent: 'center', color: '#0F1116', fontSize: 15, fontWeight: 700 }}>{f.score === 1 ? 'W' : f.score === 0.5 ? 'D' : 'L'}</div>
-              ))}
-              {Array.from({ length: Math.max(0, N_ROUNDS - p.form.length) }, (_, i) => (
-                <div key={`e${i}`} style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, border: '2px solid #2d333b' }} />
-              ))}
-            </div>
-            <div style={{ display: 'flex', fontSize: 22, color: '#8b949e', marginTop: 16 }}>{`${formatScore(p.score, p.games)} · ${elig}`}</div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', minWidth: 300 }}>
-            <div style={{ display: 'flex', fontSize: 18, letterSpacing: 3, textTransform: 'uppercase', color: '#8b949e' }}>Performance rating</div>
-            <div style={{ display: 'flex', fontSize: 120, fontWeight: 800, lineHeight: 1, color: '#C9A84C', marginTop: 4 }}>{p.tpr ?? '–'}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
-              {medalHex && <div style={{ display: 'flex', width: 34, height: 34, borderRadius: 17, background: medalHex, color: '#0F1116', fontSize: 18, fontWeight: 800, alignItems: 'center', justifyContent: 'center' }}>{p.rank}</div>}
-              <div style={{ display: 'flex', fontSize: 28, color: '#f0f2f5', fontWeight: 600 }}>{`${rankText} · ${boardLabel(p.board).toLowerCase()}`}</div>
+  return (
+    <OgFrame stage={stageOf(race.lastRound, 'Before round 1')} stageNote={`${titleOf(event)}, board prizes`} footer={`Board medals go to the best performance rating with at least ${MIN_GAMES_FOR_PRIZE} games`}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+          <OgFlag code={p.fedCode} height={90} />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', ...ogDisplay(name.length > 24 ? 46 : 64) }}>{clip(name, 34)}</div>
+            <div style={{ display: 'flex', marginTop: 8, fontSize: 26, color: ogColor['ink-2'] }}>
+              {p.title && <span style={{ color: ogColor.brand, fontWeight: 600, marginRight: 12 }}>{p.title}</span>}
+              {`${p.teamName}, ${board.toLowerCase()}${p.rating ? `, rating ${p.rating}` : ''}`}
             </div>
           </div>
         </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#8b949e', fontSize: 18 }}>
-          <div style={{ display: 'flex' }}>Board medals go to the best performance rating with at least 8 games</div>
-          <div style={{ display: 'flex' }}>pawnalyze.com</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 40, paddingTop: 28, borderTop: `1px solid ${ogColor.line}` }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              {medal && <OgMedal rank={medal} size={40} />}
+              <span style={ogDisplay(40)}>{`${rankText} on ${board.toLowerCase()}`}</span>
+            </div>
+            <div style={{ display: 'flex', margin: '18px 0', fontSize: 24, color: ogColor['ink-2'] }}>{`${formatScore(p.score, p.games)}. ${medal && medal !== p.rank ? `${MEDAL_WORD[medal]} among players with ${MIN_GAMES_FOR_PRIZE} games` : eligible}`}</div>
+            <OgPips results={results} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <span style={{ fontSize: 24, color: ogColor['ink-2'], marginBottom: 14 }}>Performance rating</span>
+            <OgFigure value={p.tpr === null ? '–' : String(p.tpr)} size={150} />
+          </div>
         </div>
       </div>
-    ),
-    { ...OG_SIZE },
+    </OgFrame>
   );
 }

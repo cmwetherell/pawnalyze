@@ -1,21 +1,18 @@
+const OG_FILES = ['./assets/fonts/*-og.ttf', './node_modules/flag-icons/flags/4x3/*.svg', './public/players/wcc/*-og.png'];
+const OG_ROUTES = [
+  '/opengraph-image',
+  '/world-chess-championship-2026/opengraph-image',
+  '/world-chess-championship-2026/live/opengraph-image',
+  ...['/simulations/chess-olympiad-2026', '/simulations/womens-chess-olympiad-2026'].flatMap(event => [
+    `${event}/opengraph-image`, `${event}/boards/opengraph-image`, `${event}/players/*/opengraph-image`,
+  ]),
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     cacheComponents: true,
-    // The Olympiad OG images read flag SVGs from flag-icons at render time.
-    outputFileTracingIncludes: {
-      '/simulations/chess-olympiad-2026/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-      '/simulations/womens-chess-olympiad-2026/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-    '/simulations/chess-olympiad-2026/boards/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-    '/simulations/womens-chess-olympiad-2026/boards/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-    '/simulations/chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-    '/simulations/womens-chess-olympiad-2026/players/[fideId]/opengraph-image': ['./node_modules/flag-icons/flags/4x3/*.svg'],
-    // The World Championship OG image reads the player portraits and two flags from disk.
-    '/world-chess-championship-2026/opengraph-image': [
-      './public/players/wcc/*-og.jpg',
-      './node_modules/flag-icons/flags/4x3/in.svg',
-      './node_modules/flag-icons/flags/4x3/uz.svg',
-    ],
-    },
+    // Open Graph images read fonts, flags and player cut-outs from disk when they are drawn (lib/og/kit.tsx).
+    outputFileTracingIncludes: Object.fromEntries(OG_ROUTES.map(route => [route, OG_FILES])),
 
         async redirects() {
           return [

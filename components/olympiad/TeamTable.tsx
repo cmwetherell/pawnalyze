@@ -2,56 +2,66 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import Flag from '@/components/ui/Flag';
-import ProbBar from '@/components/ui/ProbBar';
-import { matchesTeam } from './TeamCombobox';
+import { Button } from '@/components/ui/Button';
+import { Delta } from '@/components/ui/Delta';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Flag } from '@/components/ui/Flag';
+import { Icon } from '@/components/ui/Icon';
+import { Medal } from '@/components/ui/Medal';
+import { Meter } from '@/components/ui/Meter';
+import { Table, TBody, Td, Th, THead, Tr, type Align, type Priority } from '@/components/ui/Table';
 import { formatRank } from '@/lib/olympiad/odds';
 import type { DerivedStanding, Team, TeamOdds } from '@/lib/olympiad/types';
+import { matchesTeam, shortTeamName } from './teams';
 
 type SortKey = 'pos' | 'name' | 'rating' | 'mp' | 'pGold' | 'pMedal' | 'expRank';
 
 interface TeamTableProps {
-  teams: Team[];                     // participants
+  /** Participants. */
+  teams: Team[];
   standings: Map<number, DerivedStanding>;
-  odds: Map<number, TeamOdds>;       // current
+  /** Current odds. */
+  odds: Map<number, TeamOdds>;
   baseline: Map<number, TeamOdds>;
   isScenario: boolean;
   anyPlayed: boolean;
-  /** Event is over: the row hint should not promise likely opponents. */
+  /** Event is over: a results table, so places 1 to 3 wear their medal. */
   finished?: boolean;
+  query: string;
   selectedTeamId: number | null;
   onSelect: (teamId: number) => void;
-  /** Warm the spotlight data for a team the user is about to open */
+  /** Warm the spotlight data for a team the reader is about to open. */
   onPrefetch?: (teamId: number) => void;
-  /** Reports the sorted, filtered order (on sort/search changes only) so the parent can offer prev/next. */
+  /** Reports the sorted, filtered order (on sort and search changes only) so the parent can offer previous and next. */
   onOrderChange?: (teamIds: number[]) => void;
 }
 
 const PAGE = 25;
 
-// Fixed-layout table at 100% width, never scrolls horizontally: columns appear by breakpoint.
-type Hide = 'sm' | 'md' | 'xl';
-const HEADERS: { key: SortKey; label: string; title?: string; className?: string; hide?: Hide; needsPlay?: boolean }[] = [
-  { key: 'pos', label: 'Pos', className: 'w-14 text-right', hide: 'md', needsPlay: true },
-  { key: 'name', label: 'Team', className: 'text-left' },
-  { key: 'rating', label: 'Rtg', title: 'Average rating', className: 'w-12 text-right', hide: 'xl' },
-  { key: 'mp', label: 'MP', title: 'Match points', className: 'w-11 text-right', needsPlay: true },
-  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', className: 'w-[7.5rem] sm:w-40 text-gold-ink' },
-  { key: 'pMedal', label: 'Podium', title: 'Probability of any medal', className: 'w-36', hide: 'sm' },
-  { key: 'expRank', label: 'Finish', title: 'Expected final position', className: 'w-14 text-right' },
-];
-const CHEVRON_COL = 'w-7';
-const HIDE: Record<Hide, string> = { sm: 'hidden sm:table-cell', md: 'hidden md:table-cell', xl: 'hidden xl:table-cell' };
+/** A bar starts clear of the numbers before it. */
+const BAR = 'sm:pl-6';
 
-export default function TeamTable({
-  teams, standings, odds, baseline, isScenario, anyPlayed, finished = false,
-  selectedTeamId, onSelect, onPrefetch, onOrderChange,
-}: TeamTableProps) {
+interface Column { key: SortKey; label: string; title?: string; align?: Align; priority?: Priority; width?: string | number; className?: string; needsPlay?: boolean }
+const COLUMNS: Column[] = [
+  { key: 'pos', label: 'Pos', priority: 2, width: 64, needsPlay: true },
+  { key: 'name', label: 'Team' },
+  { key: 'rating', label: 'Rating', title: 'Average rating', align: 'right', priority: 4 },
+  { key: 'mp', label: 'MP', title: 'Match points', align: 'right', needsPlay: true },
+  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', align: 'right', width: '19%', className: BAR },
+  { key: 'pMedal', label: 'Podium', title: 'Probability of any medal', align: 'right', priority: 2, width: '19%', className: BAR },
+  { key: 'expRank', label: 'Finish', title: 'Expected final position', align: 'right' },
+];
+const ASCENDING: SortKey[] = ['name', 'pos', 'expRank'];
+
+const POS_OFFICIAL = 'Official standing from chess-results after the last completed round: match points, then Olympiad Sonneborn-Berger, then game points.';
+const POS_DERIVED = 'Unofficial standing: match points, then game points, then seed. Early in the event many teams are tied on match points, so this order is decided by margin of victory.';
+
+export function TeamTable({ teams, standings, odds, baseline, isScenario, anyPlayed, finished = false, query, selectedTeamId, onSelect, onPrefetch, onOrderChange }: TeamTableProps) {
   // A finished event is a results table first: order by final position, not by the frozen odds.
   const [sortKey, setSortKey] = useState<SortKey>(finished ? 'pos' : 'pGold');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>(finished ? 'asc' : 'desc');
-  const [query, setQuery] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const searching = query.trim() !== '';
 
   const rows = useMemo(() => {
     const value = (t: Team, k: SortKey): number | string => {
@@ -67,166 +77,100 @@ export default function TeamTable({
         case 'expRank': return o?.expRank ?? baseline.get(t.teamId)?.expRank ?? 9999;
       }
     };
-    const filtered = query.trim() ? teams.filter(t => matchesTeam(t, query)) : teams;
     const dir = sortDir === 'asc' ? 1 : -1;
-    return [...filtered].sort((a, b) => {
+    return teams.filter(t => matchesTeam(t, query)).sort((a, b) => {
       const va = value(a, sortKey);
       const vb = value(b, sortKey);
-      let cmp = typeof va === 'string' && typeof vb === 'string' ? va.localeCompare(vb) : (va as number) - (vb as number);
-      if (cmp === 0) {
-        const oa = odds.get(a.teamId)?.pGold ?? 0;
-        const ob = odds.get(b.teamId)?.pGold ?? 0;
-        cmp = (ob - oa) * dir; // keep gold odds as the secondary order regardless of direction
-        if (cmp === 0) cmp = (a.teamId - b.teamId) * dir;
-      }
-      return cmp * dir;
+      const cmp = typeof va === 'string' && typeof vb === 'string' ? va.localeCompare(vb) : (va as number) - (vb as number);
+      // Ties keep the gold-odds order, then seed, whichever way the column is sorted.
+      return cmp * dir || (odds.get(b.teamId)?.pGold ?? 0) - (odds.get(a.teamId)?.pGold ?? 0) || a.teamId - b.teamId;
     });
   }, [teams, odds, standings, baseline, query, sortKey, sortDir]);
 
-  const visible = showAll || query.trim() ? rows : rows.slice(0, PAGE);
+  const visible = showAll || searching ? rows : rows.slice(0, PAGE);
 
-  // Only re-announce the browsing order when the user changes sort or search, not when odds refresh.
+  // Only re-announce the browsing order when the reader changes sort or search, not when odds refresh.
   const latestRows = useRef(rows);
   useEffect(() => { latestRows.current = rows; }, [rows]);
   useEffect(() => {
     onOrderChange?.(latestRows.current.map(t => t.teamId));
   }, [sortKey, sortDir, query, onOrderChange]);
 
-  const toggleSort = (key: SortKey) => {
-    if (key === sortKey) {
-      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
-    } else {
+  const sortBy = (key: SortKey) => {
+    if (key === sortKey) setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    else {
       setSortKey(key);
-      setSortDir(key === 'name' || key === 'pos' || key === 'expRank' ? 'asc' : 'desc');
+      setSortDir(ASCENDING.includes(key) ? 'asc' : 'desc');
     }
   };
 
-  const official = anyPlayed && Array.from(standings.values()).some(s => s.official);
-  const posTitle = official
-    ? 'Official standing from chess-results after the last completed round: match points, then Olympiad Sonneborn-Berger, then game points.'
-    : 'Unofficial standing: match points, then game points, then seed. Early in the event many teams are tied on match points, so this order is decided by margin of victory.';
-
-  const ariaSort = (key: SortKey): 'ascending' | 'descending' | 'none' =>
-    sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none';
+  const official = anyPlayed && [...standings.values()].some(s => s.official);
+  const columns = COLUMNS.filter(c => anyPlayed || !c.needsPlay);
 
   return (
-    <div className="surface-card overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 pt-4 pb-3">
-        <div>
-          <h2 className="text-xl font-heading text-[var(--text-primary)]">Team Odds</h2>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">
-            {isScenario ? 'Scenario odds with change vs. baseline · select a team to open its spotlight' : anyPlayed ? (finished ? 'Final standings · gold odds are as they stood before the last round · select a team for its full profile' : 'Sorted by gold odds · click Pos or MP for the standings · select a team for its full profile') : 'Select a team for roster, results, finish odds and likely opponents'}
-          </p>
-        </div>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder="Search teams…"
-          aria-label="Search teams"
-          className="h-10 rounded-lg bg-[var(--bg-surface-2)] border border-[var(--border)] px-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] w-full sm:w-56"
-        />
-      </div>
-
-      <table className="w-full text-sm table-fixed">
-        <thead>
-          <tr className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] border-y border-[var(--border)] bg-[var(--bg-surface-2)]/60">
-            {HEADERS.map(h => (
-              <th
-                key={h.key}
-                scope="col"
-                aria-sort={ariaSort(h.key)}
-                className={`px-1.5 sm:px-3 py-0 font-semibold whitespace-nowrap ${h.className ?? ''} ${
-                  h.needsPlay && !anyPlayed ? 'hidden' : h.hide ? HIDE[h.hide] : ''
-                }`}
+    <div>
+      <Table label="Teams" stickyHead>
+        <THead>
+          <tr>
+            {columns.map(c => (
+              <Th
+                key={c.key} align={c.align} priority={c.priority} width={c.width} className={c.className} sort={sortKey === c.key ? sortDir : null} onSort={() => sortBy(c.key)}
+                title={c.key === 'pos' ? (official ? POS_OFFICIAL : POS_DERIVED) : c.title}
               >
-                <button
-                  type="button"
-                  onClick={() => toggleSort(h.key)}
-                  title={h.key === 'pos' ? posTitle : h.title}
-                  className={`h-10 w-full inline-flex items-center gap-0.5 hover:text-[var(--text-secondary)] ${h.className?.includes('text-right') ? 'justify-end' : h.key === 'name' ? 'justify-start' : 'justify-start'}`}
-                >
-                  {h.label}
-                  {sortKey === h.key && <span aria-hidden>{sortDir === 'asc' ? '▲' : '▼'}</span>}
-                </button>
-              </th>
+                {c.label}
+              </Th>
             ))}
-            <th scope="col" className={`${CHEVRON_COL} py-0`}><span className="sr-only">Open details</span></th>
+            <Th width={16} priority={2}><span className="sr-only">Open details</span></Th>
           </tr>
-        </thead>
-        <tbody>
+        </THead>
+        <TBody>
           {visible.map(t => {
             const o = odds.get(t.teamId);
             const b = baseline.get(t.teamId);
             const s = standings.get(t.teamId);
             const selected = selectedTeamId === t.teamId;
-            const expRank = o?.expRank ?? null;
+            const base = isScenario ? b : undefined;
+            const medal = finished && s && s.rank <= 3 ? <Medal rank={s.rank as 1 | 2 | 3} size={28} /> : null;
+            const exp = o?.expRank ?? null;
+            const stale = isScenario && exp === null;
             return (
-              <tr
-                key={t.teamId}
-                tabIndex={0}
-                role="button"
-                aria-pressed={selected}
-                aria-label={`${team_label(t, selected)}`}
-                onClick={() => onSelect(t.teamId)}
-                onMouseEnter={() => onPrefetch?.(t.teamId)}
-                onFocus={() => onPrefetch?.(t.teamId)}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(t.teamId); } }}
-                className={`group cursor-pointer border-b border-[var(--border)]/60 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-chess-gold ${
-                  selected ? 'bg-chess-gold/10 ring-1 ring-inset ring-chess-gold/40' : 'hover:bg-[var(--bg-surface-2)]/60'
-                }`}
-              >
-                {anyPlayed && (
-                  <td className={`px-1.5 sm:px-3 py-2 text-right tabular-nums text-[var(--text-muted)] ${HIDE.md}`}>{s?.rank ?? '–'}</td>
-                )}
-                <td className="px-1.5 sm:px-3 py-2">
-                  <div className="flex items-center gap-2 min-w-0 overflow-hidden">
-                    <Flag code={t.fedCode} size="sm" title={t.name} className="!ring-0" aria-hidden />
-                    <span className={`font-medium truncate underline-offset-4 decoration-dotted decoration-[var(--text-muted)] group-hover:underline group-hover:text-gold-ink ${selected ? 'text-gold-ink' : 'text-[var(--text-primary)]'}`}>{t.name}</span>
-                    <span className="text-[11px] text-[var(--text-muted)] tabular-nums shrink-0" title={`Seed #${t.teamId}`}>#{t.teamId}</span>
-                  </div>
-                </td>
-                <td className={`px-1.5 sm:px-3 py-2 text-right tabular-nums text-[var(--text-secondary)] ${HIDE.xl}`}>{t.avgRating}</td>
-                {anyPlayed && (
-                  <td className="px-1.5 sm:px-3 py-2 text-right tabular-nums text-[var(--text-primary)] font-semibold">
-                    {s?.mp ?? 0}
-                    <span className="text-[11px] text-[var(--text-muted)] font-normal hidden sm:inline">/{(s?.played ?? 0) * 2}</span>
-                  </td>
-                )}
-                <td className="px-1.5 sm:px-3 py-2"><ProbBar value={o?.pGold ?? 0} baseline={isScenario ? b?.pGold ?? 0 : null} tint="gold" emphasis /></td>
-                <td className={`px-1.5 sm:px-3 py-2 ${HIDE.sm}`}><ProbBar value={o?.pMedal ?? 0} baseline={isScenario ? b?.pMedal ?? 0 : null} tint="green" /></td>
-                <td className={`px-1.5 sm:px-3 py-2 text-right tabular-nums ${isScenario && expRank === null ? 'text-[var(--text-muted)]' : 'text-[var(--text-secondary)]'}`}
-                    title={isScenario && expRank === null ? 'Baseline value — expected finish is recomputed only for picked teams' : undefined}>
-                  {formatRank(expRank ?? b?.expRank ?? null)}
-                  {isScenario && expRank !== null && b?.expRank != null && Math.abs(expRank - b.expRank) >= 0.05 && (
-                    <span className={`block text-[11px] ${expRank < b.expRank ? 'text-emerald-500' : 'text-rose-400'}`}>
-                      {expRank < b.expRank ? '▲' : '▼'} {Math.abs(expRank - b.expRank).toFixed(1)}
-                    </span>
+              <Tr key={t.teamId} selected={selected} label={`${t.name}, seed ${t.teamId}${selected ? ', selected' : ''}`} onSelect={() => onSelect(t.teamId)} onPrefetch={onPrefetch && (() => onPrefetch(t.teamId))}>
+                {anyPlayed && <Td priority={2} muted>{medal ?? s?.rank ?? '–'}</Td>}
+                <Td
+                  header className={medal ? 'font-semibold' : 'font-medium'}
+                  lead={(
+                    <>
+                      {/* On phones the place column is gone and the seed is in the profile. */}
+                      {medal && <span className="mr-2 flex sm:hidden"><Medal rank={s?.rank as 1 | 2 | 3} decorative /></span>}
+                      <Flag code={t.fedCode} size="md" decorative />
+                    </>
                   )}
-                </td>
-                <td className={`${CHEVRON_COL} pr-2 text-right`} aria-hidden>
-                  <svg className={`inline w-4 h-4 transition-transform ${selected ? 'text-gold-ink rotate-90' : 'text-[var(--text-muted)] group-hover:text-gold-ink group-hover:translate-x-0.5'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
-                </td>
-              </tr>
+                  meta={<span className="hidden sm:inline" title={`Seed #${t.teamId}`}>#{t.teamId}</span>}
+                >
+                  <span title={t.name}>{shortTeamName(t.name)}</span>
+                </Td>
+                <Td align="right" priority={4}>{t.avgRating}</Td>
+                {anyPlayed && <Td align="right">{s?.mp ?? 0}<span className="hidden text-ink-3 sm:inline">/{(s?.played ?? 0) * 2}</span></Td>}
+                <Td align="right" className={BAR}><Meter value={o?.pGold ?? 0} baseline={base?.pGold} tone="gold" label="right" bar="sm" delta={base && <Delta value={o?.pGold ?? 0} base={base.pGold} short />} /></Td>
+                <Td align="right" priority={2} className={BAR}><Meter value={o?.pMedal ?? 0} baseline={base?.pMedal} label="right" delta={base && <Delta value={o?.pMedal ?? 0} base={base.pMedal} short />} /></Td>
+                <Td align="right" muted={stale} title={stale ? 'Baseline value: expected finish is recomputed only for picked teams' : undefined}>
+                  {formatRank(exp ?? b?.expRank ?? null)}
+                  {base?.expRank != null && exp !== null && <Delta value={exp} base={base.expRank} unit="places" better="down" digits={1} short className="flex justify-end" />}
+                </Td>
+                <Td priority={2}><Icon name="chevron-right" size={16} className={selected ? 'rotate-90 text-ink' : 'text-ink-3'} /></Td>
+              </Tr>
             );
           })}
-        </tbody>
-      </table>
-
-      <div className="px-4 sm:px-6 py-3 flex items-center justify-between text-xs text-[var(--text-muted)] border-t border-[var(--border)]">
-        <span>
-          {query.trim() ? `${rows.length} match${rows.length === 1 ? '' : 'es'}` : `Showing ${visible.length} of ${rows.length} teams`}
-          {isScenario && ' · ghost bars show the baseline'}
+        </TBody>
+      </Table>
+      {searching && rows.length === 0 && <EmptyState className="border-t-0" level={3} title="No team with that name" />}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 type-small text-ink-2">
+        <span role="status">
+          {searching ? `${rows.length} match${rows.length === 1 ? '' : 'es'}` : `Showing ${visible.length} of ${rows.length} teams`}
+          {isScenario && '. Ticks show the baseline'}
         </span>
-        {!query.trim() && rows.length > PAGE && (
-          <button type="button" onClick={() => setShowAll(v => !v)} className="h-10 px-2 text-gold-ink hover:text-chess-gold-light">
-            {showAll ? 'Show top 25' : `Show all ${rows.length}`}
-          </button>
-        )}
+        {!searching && rows.length > PAGE && <Button size="sm" onClick={() => setShowAll(v => !v)}>{showAll ? `Show top ${PAGE}` : `Show all ${rows.length}`}</Button>}
       </div>
     </div>
   );
-}
-
-function team_label(t: Team, selected: boolean): string {
-  return `${t.name}, seed ${t.teamId}${selected ? ', selected' : ''}`;
 }

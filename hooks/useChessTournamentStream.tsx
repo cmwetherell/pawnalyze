@@ -1,40 +1,23 @@
-// Assuming you're running this in a client-side environment because of 'use client'
 import { useEffect } from 'react';
 
+/** Reads a Lichess broadcast round as it is streamed, until the page is left. */
 const useChessTournamentStream = (broadcastRoundId: string) => {
   useEffect(() => {
-    const url = `https://lichess.org/api/stream/broadcast/round/${broadcastRoundId}.pgn`; // Construct the API endpoint URL
-
-    // Function to handle streaming and processing of data
-    const streamChessData = async (streamUrl: string) => {
-      const response = await fetch(streamUrl);
-      const reader = response.body?.getReader();
-      let decoder = new TextDecoder();
-
-      // Read the stream
-      const processStream = async () => {
-        if (!reader) return;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          // Decode binary data to text
-          const textChunk = decoder.decode(value, { stream: true });
-          console.log(textChunk); // Here you'd process your PGN data
-          // You may need to adjust parsing depending on how your data is formatted
-        }
-      };
-
-      processStream().catch(console.error);
+    const ctl = new AbortController();
+    const read = async () => {
+      const response = await fetch(`https://lichess.org/api/stream/broadcast/round/${broadcastRoundId}.pgn`, { signal: ctl.signal });
+      const reader = response.ok ? response.body?.getReader() : undefined;
+      if (!reader) return;
+      const decoder = new TextDecoder();
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) return;
+        console.log(decoder.decode(value, { stream: true }));
+      }
     };
-
-    // Call the stream handling function
-    streamChessData(url);
-
-    // No explicit clean-up function in this case, as fetch does not provide a native way to cancel a request.
-    // However, if using AbortController is suitable for your case, you can implement request cancellation here.
-  }, [broadcastRoundId]); // Reconnect if the broadcastRoundId changes
+    read().catch((error: unknown) => { if (!ctl.signal.aborted) console.error(error); });
+    return () => ctl.abort();
+  }, [broadcastRoundId]);
 };
 
 export default useChessTournamentStream;

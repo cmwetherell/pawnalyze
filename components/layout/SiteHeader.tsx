@@ -24,7 +24,7 @@ export function SiteHeader() {
           </Link>
           <div className="-mr-3 flex h-full items-center gap-1">
             <nav aria-label="Main" className="mr-2 hidden h-full md:block">
-              <ul className="flex h-full items-center gap-2 xl:gap-4">
+              <ul className="flex h-full items-center lg:gap-2 xl:gap-4">
                 {MAIN_LINKS.map(l => {
                   const current = isCurrent(pathname, l.href);
                   return (
@@ -34,7 +34,7 @@ export function SiteHeader() {
                         aria-current={current ? 'page' : undefined}
                         {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         className={cn(
-                          'relative flex h-full items-center gap-1 px-2 type-ui transition-colors duration-in hover:text-ink focus-visible:-outline-offset-2',
+                          'relative flex h-full items-center gap-1 whitespace-nowrap px-2 type-ui transition-colors duration-in hover:text-ink focus-visible:-outline-offset-2',
                           'after:absolute after:inset-x-2 after:-bottom-px after:h-0.5 after:origin-left after:bg-brand-mark after:transition-transform after:duration-in',
                           current ? 'text-ink after:scale-x-100' : 'text-ink-2 after:scale-x-0 hover:after:scale-x-100',
                         )}

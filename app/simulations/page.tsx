@@ -1,77 +1,14 @@
-import TournamentCard from '@/components/TournamentCard';
-import OlympiadCards from '@/components/olympiad/OlympiadCards';
-import WccHomeFeature from '@/components/wcc/WccHomeFeature';
+import { PastTournaments } from '@/components/home/PastTournaments';
+import { Page } from '@/components/layout/Page';
+import { PageHead } from '@/components/layout/PageHead';
+import { WccFeature } from '@/components/wcc/WccFeature';
 
-export default async function SimPage() {
+export default function SimulationsPage() {
   return (
-    <main className="flex-1 flex flex-col min-h-screen">
-      {/* Page header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4 w-full">
-        <h1 className="font-heading text-3xl sm:text-4xl text-[var(--text-primary)]">Simulations</h1>
-        <p className="mt-2 text-[var(--text-muted)]">
-          Monte Carlo tournament simulations with interactive scenario building.
-        </p>
-      </div>
-
-      {/* Featured */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">World Chess Championship 2026</h2>
-        <div className="max-w-4xl">
-          <WccHomeFeature />
-        </div>
-      </div>
-
-      {/* Past Tournaments */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-16 w-full">
-        <h2 className="font-heading text-xl text-[var(--text-primary)] mb-4">Past Tournaments</h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <OlympiadCards />
-          <TournamentCard
-            name="2026 Candidates Tournament"
-            href="/simulations/candidates-2026"
-            description="Determined the challenger for the World Chess Championship, who will face Gukesh D."
-            format="8-player double round-robin"
-            status="completed"
-            winner="Sindarov, Javokhir"
-          />
-          <TournamentCard
-            name="2026 Women's Candidates Tournament"
-            href="/simulations/womens-candidates-2026"
-            description="Determined the challenger for the Women's World Chess Championship, who will face Ju Wenjun."
-            format="8-player double round-robin"
-            status="completed"
-            winner="Rameshbabu, Vaishali"
-          />
-          <TournamentCard
-            name="FIDE World Championship 2024"
-            href="/simulations/fide-world-championship-singapore-2024"
-            description="Ding Liren defends his title against Gukesh D."
-            format="14 classical games"
-            status="completed"
-          />
-          <TournamentCard
-            name="Chess Olympiad Budapest 2024"
-            href="/simulations/chess-olympiad-budapest-2024"
-            description="Countries battle it out 4v4 to find the best chess nation."
-            format="11 rounds of 4v4"
-            status="completed"
-          />
-          <TournamentCard
-            name="2024 Candidates Tournament"
-            href="/simulations/candidates-2024"
-            description="The Candidates Tournament to determine the challenger for the World Chess Championship."
-            format="8-player double round-robin"
-            status="completed"
-          />
-          <TournamentCard
-            name="2024 Women's Candidates"
-            href="/simulations/womens-candidates-2024"
-            description="The Women's Candidates Tournament to determine the challenger for the Women's World Chess Championship."
-            format="8-player double round-robin"
-            status="completed"
-          />
-        </div>
-      </div>
-    </main>
+    <Page kind="landing">
+      <PageHead title="Simulations" lead="Monte Carlo tournament simulations with interactive scenario building." enter className="pb-6" />
+      <WccFeature as="section" />
+      <PastTournaments />
+    </Page>
   );
 }

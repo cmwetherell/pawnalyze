@@ -13,6 +13,8 @@ export interface ChartTable { columns: string[]; rows: (string | number)[][] }
 interface ChartFrameProps {
   /** What the y axis is. */
   caption?: ReactNode;
+  /** A control that changes the figure (a metric switch), at the right end of the caption line. */
+  tools?: ReactNode;
   /** States the finding; names the plot for assistive tech. LineChart puts it on its own <svg role="img">. */
   ariaLabel: string;
   height: { desktop: number; phone: number };
@@ -25,12 +27,17 @@ interface ChartFrameProps {
 }
 
 /** Caption, plot drawn at real pixels, legend, table. CSS alone sets the height of the box, so measuring it never moves the page. */
-export function ChartFrame({ caption, ariaLabel, height, legend, table, children, empty, className }: ChartFrameProps) {
+export function ChartFrame({ caption, tools, ariaLabel, height, legend, table, children, empty, className }: ChartFrameProps) {
   const [ref, width] = useSize<HTMLDivElement>();
   const phone = width > 0 && width < PHONE_WIDTH;
   return (
     <figure aria-label={empty ? ariaLabel : undefined} className={cn('min-w-0', className)}>
-      {caption && <figcaption className="mb-3 type-small text-ink-2">{caption}</figcaption>}
+      {tools ? (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+          <figcaption className="type-small text-ink-2">{caption}</figcaption>
+          {tools}
+        </div>
+      ) : caption && <figcaption className="mb-3 type-small text-ink-2">{caption}</figcaption>}
       {empty ?? (
         <div className="[container-type:inline-size]" style={{ '--h': `${height.desktop}px`, '--h-phone': `${height.phone}px` } as CSSProperties}>
           <div ref={ref} className="relative h-[var(--h)] w-full [@container_(max-width:559.98px)]:h-[var(--h-phone)]">

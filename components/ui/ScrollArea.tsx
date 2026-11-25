@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -14,11 +14,13 @@ interface ScrollAreaProps {
   followKey?: string | number;
   /** Focus stays on a control outside (the list of a combobox): no region and no tab stop. */
   passive?: boolean;
+  /** In a flex column, from 768: takes the height that is left instead of `maxHeight`. */
+  fill?: boolean;
   className?: string;
   children: ReactNode;
 }
 
-export function ScrollArea({ label, maxHeight, follow, followKey, passive = false, className, children }: ScrollAreaProps) {
+export function ScrollArea({ label, maxHeight, follow, followKey, passive = false, fill = false, className, children }: ScrollAreaProps) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const box = ref.current;
@@ -33,8 +35,8 @@ export function ScrollArea({ label, maxHeight, follow, followKey, passive = fals
     <div
       ref={ref}
       {...(passive ? {} : { role: 'region', 'aria-label': label, tabIndex: 0 })}
-      style={{ maxHeight }}
-      className={cn('relative overflow-y-auto overflow-x-hidden overscroll-contain focus-visible:-outline-offset-2 [&_:focus-visible]:-outline-offset-2', className)}
+      style={fill ? { '--max-h': typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight } as CSSProperties : { maxHeight }}
+      className={cn('relative overflow-y-auto overflow-x-hidden overscroll-contain focus-visible:-outline-offset-2 [&_:focus-visible]:-outline-offset-2', fill && 'max-h-[var(--max-h)] md:max-h-none md:min-h-48 md:shrink md:grow md:basis-0', className)}
     >
       {children}
     </div>

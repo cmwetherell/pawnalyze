@@ -58,7 +58,7 @@ export function StatSpecimens() {
       </Specimen>
       <Specimen name="Meter" from="ui/Meter" note="At zero there is no bar and no track.">
         <div className="grid gap-4 sm:max-w-reading">
-          <Meter value={0.18} label="right" ruled /><Meter value={0.9282} tone="gold" label="right" baseline={0.18} /><Meter value={P1} tone="p1" label="right" /><Meter value={0} label="right" /><Meter value={0.5} />
+          <Meter value={0.18} label="right" ruled /><Meter value={0.9282} tone="gold" label="right" baseline={0.18} /><Meter value={0.651} tone="gold" label="right" baseline={0.475} delta={<Delta value={0.651} base={0.475} short />} /><Meter value={P1} tone="p1" label="right" /><Meter value={0} label="right" /><Meter value={0.5} />
         </div>
       </Specimen>
       <Specimen name="SplitBar" from="ui/SplitBar">
@@ -73,7 +73,7 @@ export function StatSpecimens() {
       <Specimen name="Pips" from="ui/Pips" note="Win filled, draw grey, loss outlined. Letters inside from 20px.">
         <div className="grid gap-4">
           {([12, 20, 32] as const).map(s => <Pips key={s} kind="form" size={s} ariaLabel="Gukesh at the Olympiad" items={FORM.map((f, i) => ({ label: `Round ${i + 1}: ${f}`, letter: f, tone: FORM_TONE[f] }))} />)}
-          <Pips kind="result" size={32} ariaLabel="Simulated match" items={DEAL.map((f, i) => ({ label: `Game ${i + 1}`, letter: f === ' ' ? '–' : f, tone: f === 'S' ? 'p2' : f === ' ' ? 'none' : 'draw' }))} />
+          <Pips kind="result" size={32} fill ariaLabel="Simulated match" items={DEAL.map((f, i) => ({ label: `Game ${i + 1}`, letter: f === ' ' ? '–' : f, tone: f === 'S' ? 'p2' : f === ' ' ? 'none' : 'draw' }))} />
           <Pips kind="games" size={20} ariaLabel="Games of the match, each a link" items={GAMES.map(g => ({ label: `Game ${g.gameNo}${g.result ? ': draw' : ', not played'}`, letter: g.result ? '½' : String(g.gameNo), tone: g.result ? 'draw' : 'none', href: `/world-chess-championship-2026/live?game=${g.gameNo}` }))} />
           <Pips kind="eligibility" size={12} ariaLabel="7 of 8 games" items={Array.from({ length: 8 }, (_, i) => ({ label: `Game ${i + 1}`, tone: i < 7 ? 'ink' : 'none' }))} />
         </div>
@@ -97,6 +97,7 @@ export function ListSpecimens() {
           <Row href="/simulations/chess-olympiad-2026" lead={<Flag code="UZB" size="lg" decorative />} title="Uzbekistan" meta="Chess Olympiad 2026. Samarkand, 206 teams, 11 rounds" value="18.0%" figure={<Meter value={0.18} ruled />} />
           <Row href="/simulations/candidates-2026" lead={<Avatar size={40} name="Sindarov" src="/players/sindarov.webp" decorative />} title="Javokhir Sindarov" meta="2026 Candidates Tournament. 8-player double round-robin" value="8.2%" figure={<Meter value={0.0819} ruled />} />
           <Row onClick={() => setSel(s => (s === 'IND' ? null : 'IND'))} selected={sel === 'IND'} lead={<Flag code="IND" size="lg" decorative />} title="India" meta="A button row, selected" value="23.4%" />
+          <Row href="/simulations/candidates-2026" lead={<Flag code="UZB" size="lg" decorative />} title="2026 Candidates Tournament" meta="8-player double round-robin" aside={<span>Javokhir Sindarov</span>} />
           <Row title="Plain row" meta="Not interactive" value="2710" />
         </Rows>
       </Specimen>

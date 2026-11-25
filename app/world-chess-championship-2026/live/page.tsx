@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
-import LiveGame from '@/components/live/LiveGame';
+import { LiveGame, type GameResults } from '@/components/live/LiveGame';
+import { Page } from '@/components/layout/Page';
+import { PageHead } from '@/components/layout/PageHead';
+import { Button } from '@/components/ui/Button';
 import { WCC_HREF } from '@/lib/wcc/config';
+import { getWccGames } from '@/lib/wcc/queries';
+import { matchState } from '@/lib/wcc/status';
 
 const title = 'Gukesh vs Sindarov Live: Complexity and Stockfish Evaluation | Pawnalyze';
 const description =
@@ -16,19 +20,26 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title, description },
 };
 
-export default function Page() {
+/** Results for the game picker only: the page itself follows Lichess, so it works without the database. */
+async function finishedGames(): Promise<GameResults> {
+  const games = await getWccGames().catch((err: unknown) => {
+    console.error('[live] games failed:', err instanceof Error ? err.message : String(err));
+    return [];
+  });
+  return Object.fromEntries(matchState(games).fixed);
+}
+
+export default async function LivePage() {
+  const results = await finishedGames();
   return (
-    <main className="flex-1 flex flex-col min-h-screen">
-      <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 space-y-5">
-        <header>
-          <nav className="text-xs text-[var(--text-muted)] mb-2">
-            <Link href={WCC_HREF} className="hover:text-[var(--text-secondary)]">World Championship 2026</Link> / Live
-          </nav>
-          <h1 className="font-heading text-2xl sm:text-3xl text-[var(--text-primary)]">Gukesh vs Sindarov, live</h1>
-          <p className="text-sm text-[var(--text-muted)] mt-1">Every move as it is played, with the engine&rsquo;s verdict and how hard the position is to play.</p>
-        </header>
-        <LiveGame />
-      </div>
-    </main>
+    <Page kind="dashboard">
+      <PageHead
+        title="Gukesh vs Sindarov, live"
+        crumbs={[{ label: 'World Championship 2026', href: WCC_HREF }, { label: 'Live' }]}
+        lead={<>Every move as it is played, with the engine&rsquo;s verdict and how hard the position is to play.</>}
+        crumbActions={<Button size="sm" href={WCC_HREF}>See the match odds</Button>}
+      />
+      <LiveGame results={results} />
+    </Page>
   );
 }

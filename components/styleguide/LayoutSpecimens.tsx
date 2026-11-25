@@ -3,6 +3,7 @@ import { Container } from '@/components/layout/Container';
 import { PageHead } from '@/components/layout/PageHead';
 import { Section } from '@/components/layout/Section';
 import { Split } from '@/components/layout/Split';
+import { Part } from '@/components/layout/Part';
 import { Button } from '@/components/ui/Button';
 import { FlagStack } from '@/components/ui/FlagStack';
 import { Legend } from '@/components/ui/Legend';
@@ -48,6 +49,10 @@ export function LayoutSpecimens() {
       </Section>
       <Section title="Split: two figures" layout="split" finding="Equal halves, or 5/7 and 7/5 by the ratio prop.">
         <Figure label="Six columns" /><Figure label="Six columns" />
+      </Section>
+      <Section label="Parts" layout="split">
+        <Part title="Part" finding="One figure of a split section, with its own anchor and heading."><Figure label="Six columns" /></Part>
+        <Part title="Second part" finding="Stacked, it gets a rule of its own."><Figure label="Six columns" /></Part>
       </Section>
       <Section title="Split 5/7" layout="split" ratio="5/7" level={3} rule={false}>
         <Figure label="Five" /><Figure label="Seven" />

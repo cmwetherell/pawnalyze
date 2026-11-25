@@ -3,24 +3,38 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import BottomSheet from '@/components/ui/BottomSheet';
-import HeroPanel from './HeroPanel';
-import OlympiadScenarioBuilder from './OlympiadScenarioBuilder';
-import ScenarioSummary from './ScenarioSummary';
-import TeamSpotlight from './TeamSpotlight';
-import SpotlightHint from './SpotlightHint';
-import TeamTable from './TeamTable';
-import { MAX_PICKS, N_ROUNDS } from '@/lib/olympiad/config';
+import { BottomBar } from '@/components/layout/BottomBar';
+import { Section } from '@/components/layout/Section';
+import { SectionBar } from '@/components/layout/SectionBar';
+import { Split } from '@/components/layout/Split';
+import { Button } from '@/components/ui/Button';
+import { Callout } from '@/components/ui/Callout';
+import { CopyButton } from '@/components/ui/CopyButton';
+import { Flag } from '@/components/ui/Flag';
+import { SearchInput } from '@/components/ui/Input';
+import { Sheet } from '@/components/ui/Sheet';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { formatPct } from '@/lib/format';
+import { MAX_PICKS, N_ROUNDS, OLYMPIAD_EVENTS } from '@/lib/olympiad/config';
 import { cachedJson, StaleRunError } from '@/lib/olympiad/clientCache';
 import { describePick, encodePicks, normalizePick, parseFiltersLenient, pickKey } from '@/lib/olympiad/filters';
 import { baselineOdds, scenarioOdds } from '@/lib/olympiad/odds';
 import { prefetchTeam } from '@/lib/olympiad/prefetch';
 import { latestActiveRound } from '@/lib/olympiad/rounds';
 import { deriveStandings, outcomeFromScores, sortMatchesForPicker } from '@/lib/olympiad/standings';
-import { formatPct } from '@/components/ui/ProbBar';
 import type {
   HistoryPoint, Match, OfficialStandings, OlympiadEvent, Outcome, Pick, Player, RoundOdds, Run, ScenarioResult, ScenarioTeam, Team, TeamOdds, TeamSummary,
 } from '@/lib/olympiad/types';
+import { FinalPodium } from './FinalPodium';
+import { byGold } from './GoldRace';
+import { OlympiadScenarioBuilder, PickNote, simulateState, type ScenarioBuilderProps } from './OlympiadScenarioBuilder';
+import { RaceSection } from './RaceSection';
+import { ScenarioSummary } from './ScenarioSummary';
+import { SpotlightHint } from './SpotlightHint';
+import { TeamSpotlight } from './TeamSpotlight';
+import { TeamTable } from './TeamTable';
+import { podiumRows } from './podium';
+import { shortTeamName } from './teams';
 
 interface OlympiadDashboardProps {
   event: OlympiadEvent;
@@ -41,7 +55,11 @@ interface OlympiadDashboardProps {
 
 const LIVE_REFRESH_MS = 5 * 60 * 1000;
 
-export default function OlympiadDashboard({
+function glideTo(el: HTMLElement | null) {
+  el?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+}
+
+export function OlympiadDashboard({
   event, run, teams, players, matches, summary, history, roundOdds: baseRoundOdds, anyLive, finished, oddsRound, officialStandings,
 }: OlympiadDashboardProps) {
   const router = useRouter();
@@ -67,6 +85,9 @@ export default function OlympiadDashboard({
   const [appliedResults, setAppliedResults] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pickedByUser, setPickedByUser] = useState(false);
+  const [query, setQuery] = useState('');
+  /** No room for the table and the builder side by side: the builder is in the bottom bar and its sheet. */
+  const narrow = useMediaQuery('(max-width: 1279.98px)');
   const spotlightRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
@@ -190,7 +211,7 @@ export default function OlympiadDashboard({
     writeUrl(url => { if (key) url.searchParams.set('s', key); else url.searchParams.delete('s'); });
     void runSimulation(key, selectedTeamId);
     requestAnimationFrame(() => {
-      if (window.innerWidth < 1024) summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.innerWidth < 1280) glideTo(summaryRef.current);
     });
   };
 
@@ -212,7 +233,8 @@ export default function OlympiadDashboard({
   const selectTeam = useCallback((teamId: number | null, scroll = true) => {
     if (teamId !== null) {
       const active = document.activeElement as HTMLElement | null;
-      if (active && active !== document.body) triggerRef.current = active;
+      // Previous and next inside the spotlight keep what opened it.
+      if (active && active !== document.body && !spotlightRef.current?.contains(active)) triggerRef.current = active;
       setPickedByUser(true);
     }
     setSelectedTeamId(teamId);
@@ -220,7 +242,7 @@ export default function OlympiadDashboard({
     if (teamId === null) url.searchParams.delete('team'); else url.searchParams.set('team', String(teamId));
     window.history.replaceState(null, '', url.toString());
     if (teamId !== null && scroll) {
-      requestAnimationFrame(() => spotlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      requestAnimationFrame(() => glideTo(spotlightRef.current));
     }
   }, []);
 
@@ -284,187 +306,152 @@ export default function OlympiadDashboard({
       .filter(x => x.b && Math.abs(x.o.pGold - x.b.pGold) >= 0.005)
       .sort((a, b) => Math.abs(b.o.pGold - b.b!.pGold) - Math.abs(a.o.pGold - a.b!.pGold))
       .slice(0, 2)
-      .map(x => `${name(x.o.teamId)}'s gold odds go ${formatPct(x.b!.pGold)} → ${formatPct(x.o.pGold)}`);
+      .map(x => `${name(x.o.teamId)}’s gold odds go from ${formatPct(x.b!.pGold)} to ${formatPct(x.o.pGold)}`);
     if (changes.length === 0) return `With ${pickList.join(' and ')}${more}, the gold odds barely move.`;
     return `With ${pickList.join(' and ')}${more}, ${changes.join(' and ')}.`;
   }, [isScenario, scenario, picks, matches, teamsById, odds, baseline]);
 
-  return (
-    <div className={`max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6 ${finished ? '' : 'pb-28 lg:pb-6'}`}>
-      <div aria-live="polite" className="space-y-3">
-        {staleRun && (
-          <div className="rounded-lg border border-chess-gold/40 bg-chess-gold/10 px-4 py-3 text-sm text-[var(--text-primary)] flex flex-wrap items-center gap-3">
-            <span>New simulations have been uploaded since this page loaded.</span>
-            <button type="button" onClick={() => window.location.reload()} className="h-8 rounded-md bg-chess-gold text-chess-dark px-3 text-xs font-semibold hover:bg-chess-gold-light">
-              Reload
-            </button>
-          </div>
-        )}
-        {restoreNote && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] px-4 py-2.5 text-xs text-[var(--text-secondary)] flex items-center gap-3">
-            <span className="flex-1">{restoreNote}</span>
-            <button type="button" onClick={() => setRestoreNote(null)} className="h-8 px-2 text-[var(--text-muted)] hover:text-[var(--text-primary)]">Dismiss</button>
-          </div>
-        )}
-      </div>
+  const eventLabel = OLYMPIAD_EVENTS[event].shortTitle;
+  const places = useMemo(() => (finished && officialStandings ? podiumRows(officialStandings) : []), [finished, officialStandings]);
+  const champion = places.length ? teamsById.get(places[0].teamId) : undefined;
+  const podium = champion !== undefined;
+  const leader = [...rows].sort(byGold)[0];
+  const leaderTeam = leader && leader.pGold > 0 ? teamsById.get(leader.teamId) : undefined;
+  const heroId = podium ? 'podium' : 'race-figure';
 
-      <HeroPanel
-        run={run}
-        rows={rows}
-        odds={odds}
-        baseline={baseline}
-        teamsById={teamsById}
-        isScenario={isScenario}
-        history={history}
-        matches={matches}
-        standings={standings}
-        roundOdds={roundOdds}
-        nextRound={nextRound}
-        resultsRound={resultsRound}
-        anyLive={anyLive}
-        finished={finished}
-        oddsRound={oddsRound}
-        selectedTeamId={selectedTeamId}
-        onSelect={id => selectTeam(id)}
-        onPrefetch={prefetch}
-        applyResults={applyResults}
+  // What the section bar shows once the hero is gone: the answer, with the team it belongs to.
+  const chip = champion
+    ? { team: champion, text: 'won gold' }
+    : leaderTeam ? { team: leaderTeam, text: `${formatPct(leader.pGold)} gold` } : null;
+  const simulate = simulateState(picks.size, dirty, loading);
+
+  const builder: ScenarioBuilderProps = {
+    run, teams: participants, teamsById, matches, standings, picks, onSetPick: handleSetPick, onSimulate: handleSimulate, onReset: handleReset,
+    loading, dirty, roundOdds, applyResults,
+  };
+
+  const sectionBar = (
+    <SectionBar
+      eventLabel={eventLabel} heroId={heroId}
+      groups={[{
+        label: eventLabel,
+        items: [
+          ...(podium ? [{ id: 'podium', label: 'Podium' }] : []),
+          { id: 'race', label: finished ? 'Final-round odds' : 'Gold race' },
+          ...(finished ? [] : [{ id: 'results', label: 'Results' }]),
+          { id: 'teams', label: 'Teams' },
+          { id: 'method', label: 'How it works' },
+        ],
+      }]}
+      live={chip && (
+        <span className="flex items-center gap-2">
+          <Flag code={chip.team.fedCode} size="sm" decorative />
+          {shortTeamName(chip.team.name)}
+          <span className="text-ink-2 tnum">{chip.text}</span>
+        </span>
+      )}
+      actions={isScenario && (
+        <>
+          <Button size="sm" variant="quiet" icon="reset" onClick={handleReset}>Reset</Button>
+          <CopyButton kind="link" variant="secondary" label="Share scenario" />
+        </>
+      )}
+    />
+  );
+
+  const teamTable = (
+    <div className={loading ? 'pointer-events-none opacity-50 transition-opacity duration-data' : 'transition-opacity duration-data'} aria-busy={loading}>
+      <TeamTable
+        teams={participants} standings={standings} odds={odds} baseline={baseline} isScenario={isScenario} anyPlayed={anyPlayed} finished={finished} query={query}
+        selectedTeamId={selectedTeamId} onSelect={id => selectTeam(id === selectedTeamId ? null : id)} onPrefetch={prefetch} onOrderChange={setOrder}
       />
-
-      {selectedTeam && (
-        <div ref={spotlightRef} className="scroll-mt-20">
-          <TeamSpotlight
-            key={selectedTeam.teamId}
-            event={event}
-            run={run}
-            team={selectedTeam}
-            players={players.filter(p => p.teamId === selectedTeam.teamId)}
-            matches={matches}
-            teamsById={teamsById}
-            standing={standings.get(selectedTeam.teamId)}
-            participants={participants.length}
-            odds={odds.get(selectedTeam.teamId) ?? null}
-            baseline={baseline.get(selectedTeam.teamId) ?? null}
-            isScenario={isScenario}
-            filtersKey={isScenario ? scenarioKey : ''}
-            history={history}
-            anyPlayed={anyPlayed}
-            finished={finished}
-            onClose={() => selectTeam(null)}
-            onPrev={prevTeam !== null ? () => selectTeam(prevTeam, false) : undefined}
-            onNext={nextTeam !== null ? () => selectTeam(nextTeam, false) : undefined}
-            onStale={markStale}
-          />
-        </div>
-      )}
-
-      <div className={finished ? 'space-y-6' : 'lg:grid lg:grid-cols-5 lg:gap-6 space-y-6 lg:space-y-0'}>
-        <div className={finished ? 'space-y-4' : 'lg:col-span-3 space-y-4'}>
-          <div ref={summaryRef} className="scroll-mt-20 space-y-3" aria-live="polite">
-            {isScenario && scenario && (
-              <ScenarioSummary pickCount={picks.size} matched={scenario.matched} nSims={run.nSims} sentence={sentence} onClear={handleReset} />
-            )}
-            {error && (
-              <div className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-400">{error}</div>
-            )}
-          </div>
-          {!finished && <SpotlightHint hasSelected={pickedByUser} />}
-          <div className={`transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : ''}`} aria-busy={loading}>
-            <TeamTable
-              teams={participants}
-              standings={standings}
-              odds={odds}
-              baseline={baseline}
-              isScenario={isScenario}
-              anyPlayed={anyPlayed}
-              finished={finished}
-              selectedTeamId={selectedTeamId}
-              onSelect={id => selectTeam(id === selectedTeamId ? null : id)}
-              onPrefetch={prefetch}
-              onOrderChange={setOrder}
-            />
-          </div>
-        </div>
-
-        {!finished && (
-        <div className="hidden lg:block lg:col-span-2">
-          <div className="surface-card overflow-hidden lg:sticky lg:top-20">
-            <OlympiadScenarioBuilder
-              run={run}
-              teams={participants}
-              teamsById={teamsById}
-              matches={matches}
-              standings={standings}
-              picks={picks}
-              onSetPick={handleSetPick}
-              onSimulate={handleSimulate}
-              onReset={handleReset}
-              loading={loading}
-              dirty={dirty}
-              roundOdds={roundOdds}
-              applyResults={applyResults}
-            />
-          </div>
-        </div>
-        )}
-      </div>
-
-      {/* Mobile: sticky action bar + builder in a bottom sheet */}
-      {!finished && (
-      <>
-      <div
-        className="lg:hidden fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg-surface-1)]/95 backdrop-blur"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-      >
-        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSheetOpen(true)}
-            className="flex-1 h-11 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-2)] px-3 text-sm font-semibold text-[var(--text-primary)] flex items-center justify-between gap-2"
-            aria-haspopup="dialog"
-            aria-expanded={sheetOpen}
-          >
-            <span className="inline-flex items-center gap-2">
-              <svg className="w-4 h-4 text-gold-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>
-              Scenario Builder
-            </span>
-            <span className="text-xs font-normal text-[var(--text-muted)]">
-              {picks.size === 0 ? 'no picks' : `${picks.size} pick${picks.size === 1 ? '' : 's'}${dirty ? ' · new' : ''}`}
-            </span>
-          </button>
-          <button
-            type="button"
-            onClick={handleSimulate}
-            disabled={!(dirty && picks.size > 0) || loading}
-            className={`h-11 px-4 rounded-lg text-sm font-semibold transition-colors ${
-              dirty && picks.size > 0 && !loading
-                ? 'bg-chess-gold text-chess-dark hover:bg-chess-gold-light'
-                : 'bg-[var(--bg-surface-3)] text-[var(--text-muted)]'
-            }`}
-          >
-            {loading ? 'Simulating…' : 'Simulate'}
-          </button>
-        </div>
-      </div>
-      <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Scenario Builder">
-        <OlympiadScenarioBuilder
-          run={run}
-          teams={participants}
-          teamsById={teamsById}
-          matches={matches}
-          standings={standings}
-          picks={picks}
-          onSetPick={handleSetPick}
-          onSimulate={handleSimulate}
-          onReset={handleReset}
-          loading={loading}
-          dirty={dirty}
-          roundOdds={roundOdds}
-          applyResults={applyResults}
-          inSheet
-        />
-      </BottomSheet>
-      </>
-      )}
     </div>
+  );
+
+  const teamsMain = finished ? teamTable : (
+    <div className="flex flex-col gap-4">
+      <div ref={summaryRef} id="scenario" className="flex flex-col gap-3 empty:hidden" aria-live="polite">
+        {isScenario && scenario && <ScenarioSummary pickCount={picks.size} matched={scenario.matched} nSims={run.nSims} sentence={sentence} onClear={handleReset} />}
+        {error && <Callout tone="negative" icon="error"><p>{error}</p></Callout>}
+      </div>
+      <SpotlightHint hasSelected={pickedByUser} />
+      {teamTable}
+    </div>
+  );
+
+  return (
+    <>
+      {podium && officialStandings && (
+        <FinalPodium standings={officialStandings} teamsById={teamsById} history={history} eventLabel={eventLabel} selectedTeamId={selectedTeamId} onSelect={id => selectTeam(id)} />
+      )}
+      {podium && sectionBar}
+
+      <RaceSection
+        run={run} rows={rows} odds={odds} baseline={baseline} teamsById={teamsById} isScenario={isScenario} history={history} matches={matches}
+        standings={standings} roundOdds={roundOdds} nextRound={nextRound} resultsRound={resultsRound} anyLive={anyLive} finished={finished} oddsRound={oddsRound}
+        selectedTeamId={selectedTeamId} onSelect={id => selectTeam(id)} onPrefetch={prefetch} applyResults={applyResults} opens={!podium} figureId="race-figure"
+        notices={(
+          <div aria-live="polite" className="flex flex-col gap-3 empty:hidden [&:not(:empty)]:mb-6">
+            {staleRun && (
+              <Callout tone="warning" icon="warning" action={<Button size="sm" icon="reset" onClick={() => window.location.reload()}>Reload</Button>}>
+                <p>New simulations have been uploaded since this page loaded.</p>
+              </Callout>
+            )}
+            {restoreNote && <Callout icon="info" onDismiss={() => setRestoreNote(null)}><p>{restoreNote}</p></Callout>}
+          </div>
+        )}
+      >
+        {selectedTeam && (
+          <div ref={spotlightRef} id="team" className="mt-8">
+            <TeamSpotlight
+              key={selectedTeam.teamId}
+              event={event} run={run} team={selectedTeam} players={players.filter(p => p.teamId === selectedTeam.teamId)} matches={matches} teamsById={teamsById}
+              standing={standings.get(selectedTeam.teamId)} participants={participants.length}
+              odds={odds.get(selectedTeam.teamId) ?? null} baseline={baseline.get(selectedTeam.teamId) ?? null}
+              isScenario={isScenario} filtersKey={filtersKey} history={history} anyPlayed={anyPlayed} finished={finished} oddsRound={oddsRound}
+              onClose={() => selectTeam(null)}
+              onPrev={prevTeam !== null ? () => selectTeam(prevTeam, false) : undefined}
+              onNext={nextTeam !== null ? () => selectTeam(nextTeam, false) : undefined}
+              onStale={markStale}
+            />
+          </div>
+        )}
+      </RaceSection>
+      {!podium && sectionBar}
+
+      <Section
+        id="teams" layout="wide" title={`All ${participants.length} teams`}
+        finding={isScenario ? 'Scenario odds with the change from the baseline. Select a team to open its profile.'
+          : !anyPlayed ? 'Select a team for roster, results, finish odds and likely opponents.'
+          : finished ? 'Final standings. Gold odds are as they stood before the last round. Select a team for its full profile.'
+          : 'Sorted by gold odds; sort by Pos or MP for the standings. Select a team for its full profile.'}
+        actions={<SearchInput className="w-full" placeholder="Search teams" aria-label="Search teams" value={query} onChange={e => setQuery(e.target.value)} onClear={() => setQuery('')} />}
+      >
+        {finished || narrow ? teamsMain : <Split stickyAside main={teamsMain} aside={<OlympiadScenarioBuilder {...builder} />} />}
+      </Section>
+
+      {!finished && narrow && (
+        <>
+          <BottomBar label="Scenario" heroId={heroId} until="xl">
+            <Button className="flex-1" icon="sort" onClick={() => setSheetOpen(true)} aria-haspopup="dialog" aria-expanded={sheetOpen}>
+              Scenario{picks.size > 0 && `, ${picks.size} pick${picks.size === 1 ? '' : 's'}`}
+            </Button>
+            <Button variant="primary" onClick={handleSimulate} disabled={simulate.disabled} loading={loading}>{loading ? 'Simulating' : 'Simulate'}</Button>
+          </BottomBar>
+          <Sheet
+            open={sheetOpen} onClose={() => setSheetOpen(false)} title="Scenario builder"
+            footer={(
+              <>
+                <Button variant="primary" onClick={handleSimulate} disabled={simulate.disabled} loading={loading}>{simulate.label}</Button>
+                {picks.size > 0 && <Button variant="quiet" icon="reset" onClick={handleReset} disabled={loading}>Reset</Button>}
+                {picks.size > 0 && <span className="w-full type-label text-ink-2"><PickNote picks={picks.size} dirty={dirty} /></span>}
+              </>
+            )}
+          >
+            <OlympiadScenarioBuilder {...builder} bare />
+          </Sheet>
+        </>
+      )}
+    </>
   );
 }

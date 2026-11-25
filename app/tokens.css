@@ -107,7 +107,7 @@
 
   /* Type sizes: each has a Tailwind text-* style of the same name */
   --t-figure: clamp(50px, 9.2vw, 128px);   /* the headline odds; one pair per page */
-  --t-mega: clamp(38px, 8.2vw, 112px);     /* landing h1, match title */
+  --t-mega: clamp(38px, 7.5vw, 112px);     /* landing h1, match title */
   --t-h1: clamp(34px, 4.8vw, 64px);        /* dashboard title */
   --t-h2: clamp(26px, 2.6vw, 36px);
   --t-h3: 22px;

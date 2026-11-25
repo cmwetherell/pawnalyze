@@ -162,3 +162,7 @@ export function fmtPoints(hp: number): string {
 export function fmtScore(h1: number, h2: number): string {
   return `${fmtPoints(h1)}–${fmtPoints(h2)}`;
 }
+
+/** What the score in the face-off is a score of. Here, not beside the component, so server components can call it. */
+export const scoreLabel = (state: MatchState) =>
+  state.winner !== null ? 'final score' : state.lastFinal > 0 ? `after game ${state.lastFinal}` : state.anyLive ? 'game 1' : 'to game 1';

@@ -32,6 +32,8 @@ How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23
 
 ---
 
+**Language: American English everywhere** (owner's rule): site copy, share images, aria labels, docs, comments and identifiers. Color, center, gray, favorite, analyze, defense, canceled; dates as `Nov 22`, ranges as `Nov 22 to Dec 13`. Proper names keep their own spelling. This overrides any British spelling elsewhere in this file.
+
 ## 2. Tokens
 
 `app/tokens.css` is the only file in the repo with colour literals. Colours are `R G B` channel triplets so Tailwind opacity modifiers work. Light on `:root`, dark on `.dark` (the existing class on `<html>`, default dark). Verified by `scripts/check-theme.mjs`: every pair of `fillClass` and `onClass` included, 0 failures (text 4.5:1 on every ground it may use, `ink`/`ink-2` 7:1, marks and control edges 3:1). Series 1 to 8, p1/p2 and the four complexity steps pass the colour-blind validator in both themes on `canvas` and `surface`. There is no violet and none may be added.
@@ -495,7 +497,7 @@ Additions to the props in 8.1 to 8.5 (nothing was removed):
 | `Table` | `label`, `stickyHead`, `scroll` (TableFallback only); `Td header`; `Tr id` | |
 | `ScrollArea` | `follow` is a CSS selector, `followKey` says when to look again; `passive` is not a region and not a tab stop | scrolls itself, never the page; `passive` for the `Combobox` list, where focus stays in the input |
 | `Callout` | `icon`, `role` | |
-| `LineChart` and the other charts | `format` is `Formatter`: a function or a name from `lib/format` (`pct`, `pct0`, `percent`, `percent0`, `int`, `one`, `signed`) | a server component cannot pass a function to a client chart |
+| `LineChart` and the other charts | `format` is `Formatter`: a function or a name from `lib/format` (`pct`, `pct0`, `percent`, `percent0`, `int`, `plain` (no thousands mark, for ratings), `one`, `signed`) | a server component cannot pass a function to a client chart |
 | `ColumnChart` | `values`, `onSelect`, `selected`, `caption`, `ariaLabel`, `table` | the 83-column Elocator chart prints no values |
 | `ButterflyChart` | `names`, `ariaLabel` | |
 | `MatchRow` | `options`, `legend`, `disabled`; sides are `{lead, name, meta, onSelect?, emphasis?, muted?}` (`muted`: the loser) | `onPick` needs the pick cells |
@@ -533,7 +535,41 @@ Additions to the props in 8.1 to 8.5 (nothing was removed):
 | `ColumnChart` | drawn in `ChartFrame`: gaps, labels and printed values follow its own width, so it works in a narrow column | section 11.7 |
 | `RaceRows` | `muted`; a `value` of "0.0%" is quiet by itself. Under 768 the delta joins the second line | |
 | `MatchRow` | in a narrow box the flag goes over the name; names wrap, they are not cut | 320px |
-| `BarRows` | `max` (value of a full bar), `rows[].key`, `ariaLabel` | |
+| `SplitRows` (`charts/SplitRows`) | `label`, `head`, `names`, `tones`, `rows: {key, title, href?, meta?, left \| null, cells?, own?}[]`, `columns`: the same split from several sources with aligned bars; `own` is our row (gold wash and edge) | the market rows in 11.5.10 |
+| `Part` (`layout/Part`) | `id`, `title`, `finding`, `actions`, `legend`, `level`: one figure of a `Section layout="split"` with its own anchor and heading; stacked, every one gets its own rule | `#scores` + `#how-it-ends`, `#prize` + `#head-to-head` |
+| `Pips` | `fill`: at size 32 the pips share the full width, seven to a line on phones | the simulated match |
+| `FaceOff` | `sides[].country` names the flag; phone portraits are square so the odds start above 440px | 11.5 |
+| `GameSheet` | the phone disclosure closes again; a live game says "Live now" in the place of its date | 11.5.5 |
+| `BarRows` | `max` (value of a full bar), `rows[].key`, `rows[].short` (the name under 640), `ariaLabel` | Candidates names on phones |
+| `Replay` (`chess/Replay`) | `label`, `ply`, `last`, `onGo`, `onFlip`, `board`, `aside?`, `head?`, `size?: 'md' \| 'lg'` | every game that can be stepped through: layout and keys (arrows, Home, End, f). On a narrow screen: head, board, aside. `lg` keeps the board on the first screen |
+| `BoardPane` (`chess/BoardPane`) | `fen`, `from`, `to`, `flipped`, `label`, `top?`, `bottom?`, `evaluation?`, `stale?`, `controls?` | `Board` with its name lines, `EvalBar` and controls |
+| `ComplexityChart` (`chess/ComplexityChart`), `averageComplexity` | `points: {ply, san, toMove, complexity}[]`, `sides`, `selected`, `onSelect`, `atLeast?`, `height?`, `caption?`, `table?` | live page and Elocator. Words and axis of a game: `lib/chess/moves` (`moveLabel`, `moveAxis`) |
+| `LineChart` | `series[].texts` (what to print where the plotted number is not it: a capped evaluation, a mate), `series[].endValue` ("avg 46" after the end label); `table` optional inside a `ChartGroup` whose last chart carries it | live charts |
+| `Segmented` | `items[].note` (a result after the label), `items[].muted`; with `role="nav"`, `onChange` handles a plain click on the page and the links still open in a new tab | game picker on the live page |
+| `MoveList`, `ScrollArea` | `fill`: from 768 takes the height that is left in its flex column | beside the live board |
+| `BoardControls` | no counter for a single position | Elocator FEN |
+| `PageHead` | `crumbActions`: small buttons at the right end of the breadcrumb line | the live board starts high |
+| `Segmented` | `items[].short` (label under 640; give `ariaLabel` too); `items[].icon` may be an element (a flag), which shows from 640 | board switch |
+| `Td header` | `sub`: a quiet second line under the name | board standings |
+| `Pips` | tone `rest` (sat out: a short line, never an empty box like a loss); `asImage`: one image with `ariaLabel` as its text, for tables | form and eligibility columns |
+| `Row` | `toggle` `{text, label, onToggle, disabled?}` with `expanded`: a row that opens something and also has links in `title` or `meta`; the rest of the row is a pointer shortcut | player games |
+| `Section` | `nested`: a column of another Section, with its own 2px rule and no Container; `note`: a sentence under the figure | player page, board medals |
+| `useHeroGone` | also true after a jump past the element, so a bar may watch something below the first screen | board switch |
+| `Row` | `action`: a control at the right end of a row that is not itself one | copy buttons |
+| `FaceOff` | `heading`: a ruled row over the portraits with `next` at its right end. Two short `actions` share a line on phones | the home hero, which has no title of its own for the match |
+| `Row` | `aside`: a fact of its own, at the right of the words from 768 and under them on phones. `figure` and `value` go under the words on phones | winners on the index, the meter on home |
+| `FlagStack` | `more`: how many there are beyond `items` | "+203" |
+| `LogoItem` | `colour`: never turned white | NPR |
+| `ComplexityScale` | `words={false}`: the scale alone | beside a figure that says the score |
+| `ScenarioPanel` | `note` (a line over the buttons), `fit` (from 1024 no taller than the window, so it can be sticky), `bare` (in a Sheet: rounds, tools and games only), state `unpaired`; the round row has arrows and mouse drag | Olympiad builder |
+| `BottomBar` | `until: 'lg' \| 'xl'`: the live Olympiad keeps it up to 1280, because the table and the builder do not fit side by side before | |
+| `LineChart`, `ChartFrame` | `tools`: a control that changes the figure, at the right end of the caption line | metric switch |
+| `Meter` | `delta` (change under the label), `bar: 'always' \| 'sm'` (phones show the number alone) | team table |
+| `Delta` | `digits: 0 \| 1` for `places` and `plain` | expected finish moves by tenths |
+| `BarRows` | `size: 'md' \| 'sm'` (a narrow column) | likely opponents |
+| `Td header` | `grow`: all the space the other columns leave, at every width | roster in a quarter column |
+| `Heading` | `ref` with `tabIndex={-1}`: code moves focus to it | team spotlight |
+| `Podium` | `label` names the list | |
 
 Probabilities are 0 to 1 everywhere (`p1`, `SplitBar` values, `Meter` with its default `max`, `PickOption.pct`, `OddsChip`). `LineChart` takes whatever the caller formats.
 
@@ -543,7 +579,7 @@ CSS classes outside Tailwind are four, in `app/globals.css`: `lift` (button hove
 
 `/styleguide` (`app/styleguide/page.tsx`, `components/styleguide/*`) renders every component in this section inside the site shell; noindex, out of the sitemap, disallowed in robots. A new component or variant goes there in the same commit. Its numbers are a fixed snapshot (`fixtures.ts`).
 
-From 1024 to 1439 `SectionBar` shows the buttons in `actions` as icons (the words stay for assistive tech), so give each an icon. It shows as many links as fit on one line (at most 8); the rest, and every section, are in "More", which names the current section when its link is not on the bar. `Breadcrumb` has `compact` (phones leave out the current page), which `PageHead` sets when there is a `switcher`. The site menu lists the main links and this year's tournaments (`TOURNAMENT_LINKS` in `layout/nav.ts`). `Section` marks `data-pace`; a surface `SectionGroup` pads to match.
+From 1024 to 1439 `SectionBar` shows the buttons in `actions` as icons (the words stay for assistive tech), so give each an icon. It shows as many links as fit on one line (at most 8); the rest, and every section, are in "More", which names the current section when its link is not on the bar. `Breadcrumb` has `compact` (phones show only the parent of the current page), which `PageHead` sets when there is a `switcher` or `crumbActions`. The site menu lists the main links and this year's tournaments (`TOURNAMENT_LINKS` in `layout/nav.ts`). `Section` marks `data-pace`; a surface `SectionGroup` pads to match.
 
 `SiteFooter`, not `Page`, pads for the bottom bar, because it is the last thing on the page. Scroll lock for sheets is on `html`, because `overflow-x: clip` on `html` stops `body`'s overflow from reaching the viewport.
 
@@ -592,9 +628,9 @@ All URLs, query parameters, hashes, metadata, JSON-LD, revalidation, polling, ke
 ### 11.1 Home `/` (landing)
 
 1. **Hero** (`min-h-hero`, alone on the first screen at 1440x900). `PageHead size="mega" enter`: h1 "Forecasts for championship chess"; lead right of it, bottom-aligned: "Exact match odds, tournament simulations you can steer, and a complexity score for any position." Then a 1px `line`, then `FaceOff variant="feature"` fed by the existing `WccHomeFeature` loader (renamed `components/wcc/WccFeature.tsx`): row above the portraits with "World Chess Championship 2026, Geneva" (`type-h3`) left and next game right; score or `Countdown inline`; `PawnBar deal`; note "Exact odds, confirmed by 10,000 simulations" (or the pre-run text). **Actions: `Watch live` (to `/world-chess-championship-2026/live`) and `See the match odds`.** While a game is live, `Watch live` is primary with `live` dot and reads "Watch game 2 live"; otherwise `See the match odds` is primary and `Watch live` secondary. After the match: "See how it ended" and "Replay the games". Credit line under the figure (`PhotoCreditLine` with "Backgrounds removed, black and white"). No dead band above the portraits: 24px.
-2. **Recent results** (`Section rail pace="landing"`). Finding: "The chance our model gave each winner before round 1." `Rows`, four: Uzbekistan (Chess Olympiad 2026), China (Women's Olympiad), Javokhir Sindarov (2026 Candidates), Vaishali Rameshbabu (2026 Women's Candidates). Lead = `Flag` (no avatars: several have no recorded licence). Meta keeps today's description and format text; value = pre-event chance from `getOlympiadSummaryHistory` (roundsCompleted 0) or the `Pre` row of `getBaseSimulationData`, as `type-stat-sm` + `Meter ruled`. If a number is missing, drop the figure, keep the row. While an Olympiad is live, its row shows the live leader, as `OlympiadCards` does today. Action: `See every simulation`.
+2. **Recent results** (`Section rail`). Finding: "The chance our model gave each winner before round 1." `Rows`, four: Uzbekistan (Chess Olympiad 2026), China (Women's Olympiad), Javokhir Sindarov (2026 Candidates), Vaishali Rameshbabu (2026 Women's Candidates). Lead = `Flag` (no avatars: several have no recorded licence). Meta keeps today's description and format text; value = pre-event chance from `getOlympiadSummaryHistory` (roundsCompleted 0) or the `Pre` row of `getBaseSimulationData`, as `type-stat-sm` + `Meter ruled`. If a number is missing, drop the figure, keep the row. While an Olympiad is live, its row shows the live leader, as `OlympiadCards` does today. Action: `See every simulation`.
 3. **2026 Candidates** (`Section rail`). `LineChart` of the Candidates history: winner `strong` in its series tone, the others `context`, labels for any player who peaked above 10%. Finding computed: "Javokhir Sindarov won from a starting chance of 8.2%." plus "He was behind Fabiano Caruana until round 5." built from the first round after which the winner led for good. Link: `Replay the Candidates`. Chance to win, so y 0 to 100%.
-4. **Elocator** (`SectionGroup surface`, `Section split ratio="5/7"`). h2 "Elocator scores how hard a position is"; body "Paste a FEN or PGN. A neural network trained on more than 100,000 grandmaster moves rates the position from 1 to 100 for the player to move."; button `Analyze a position`. Right: `Board` after 17. Kf1 from Byrne vs Fischer, 1956 (`lib/elocator/game-of-the-century.json`, real API scores), beside it "94" in `type-mega` size (as a figure, not a heading), "Extreme, out of 100", `ComplexityScale lg`; under both a `ColumnChart` of all 83 positions in `complexityTone`, move 17 labelled.
+4. **Elocator** (`SectionGroup surface`, `Section split ratio="5/7"`). h2 "Elocator scores how hard a position is"; body "Paste a FEN or PGN. A neural network trained on more than 100,000 grandmaster moves rates the position from 1 to 100 for the player to move."; button `Analyze a position`, all in the section's heading row. Left: `Board` after 17. Kf1 from Byrne vs Fischer, 1956 (`lib/elocator/game-of-the-century.json`, real API scores). Right, as tall as the board: "94" in `type-mega` size (as a figure, not a heading), "Extreme, out of 100", `ComplexityScale lg`; under them a `ColumnChart` of all 83 positions in `complexityTone`, move 17 labelled.
 5. **In the press** (`Section rail`): `Quote` with the NYT text and cite; NPR `Row`; `LogoRow label="Also seen in"` Japan Times, Gulf News, Deccan Herald. Text unchanged.
 
 ### 11.2 Simulations index `/simulations` (landing)
@@ -609,7 +645,7 @@ Split `page.tsx` into a server page (adds metadata title "Elocator: Chess Comple
 
 ### 11.4 About `/about` (landing)
 
-`PageHead` h1 "About Pawnalyze". `Section split ratio="5/7"`: left `Photo` (square, no glow, zoom none), right `Prose`. Owner's text stays in the first person with these edits only: "a haven for chess enthusiasts and data lovers alike" → "a site for people who like chess and data"; "with a penchant for chess, albeit not mastering it just yet" → "who plays chess, not very well yet"; heading "Elocator: Unveiling Chess Complexity" → "Elocator"; "a groundbreaking project named Elocator" → "Elocator"; "Join The Journey" → "Follow along"; drop "I am thrilled to share it with you". Sections: Elocator, Recognition (`Rows`: The New York Times, NPR, text unchanged), Follow along with `Follow on X` and `View on GitHub` (`secondary`). Links unchanged.
+`PageHead` h1 "About Pawnalyze". `Section split ratio="5/7"`: left `Photo` (square, no glow, zoom none), right `Prose` and, under it, the Elocator text as a `nested` section. Owner's text stays in the first person with these edits only: "a haven for chess enthusiasts and data lovers alike" → "a site for people who like chess and data"; "with a penchant for chess, albeit not mastering it just yet" → "who plays chess, not very well yet"; heading "Elocator: Unveiling Chess Complexity" → "Elocator"; "a groundbreaking project named Elocator" → "Elocator"; "Join The Journey" → "Follow along"; drop "I am thrilled to share it with you". Sections: Elocator, Recognition (`Rows`: The New York Times, NPR, text unchanged), Follow along with `Follow on X` and `View on GitHub` (`secondary`). Links unchanged.
 
 ### 11.5 World Championship 2026 `/world-chess-championship-2026` (dashboard)
 
@@ -685,9 +721,11 @@ Loading (`Skeleton`/`EmptyState busy`), no data, error (`Callout negative`), liv
 
 ## 12. OG images
 
-`lib/og/kit.tsx` (Satori; inline styles allowed, colours only from `TOKENS.dark`): `OgFrame` (1200x630, `canvas`, 56px padding, 4px `rule` line at the top, "Pawnalyze" wordmark text left, stage right, footer line), `OgTitle`, `OgRow` (rank, flag, name, bar, value), `OgSplit` (two figures + 20px split bar), `OgPortrait` (field block + cut-out PNG), `OgFlag`, `OgMedal`, `clip()`. Fonts: pass `PawnalyzeDisplay-og.ttf` and `HankenGrotesk-{Regular,SemiBold}-og.ttf` read with `readFileSync` from `assets/fonts` (add them and `public/players/wcc/*-og.png` to `outputFileTracingIncludes`); if a font fails to load, fall back to Satori's default, never fail the image. No gradients, no tracked capitals. `safeOg` fallback card uses `OgFrame`.
+`lib/og/kit.tsx` (Satori; inline styles allowed, colours only from `ogColor`, which is `TOKENS.dark`): `OgFrame` (1200x630, `canvas`, 56px sides, 4px `rule` line at the top, logo left, stage right, footer line with the address), `OgTitle`, `OgRow` (rank, flag, name, bar, value), `OgFigure` (figure with a small unit), `OgSplit` (20px split bar), `OgPortrait` (field block + cut-out PNG), `OgFlag`, `OgMedal`, `OgPips`, `OgLogo`, `OgMark`, `ogPlayerPhoto()`, `ogDisplay()` (the serif at a size), `clip()`. Fonts: `PawnalyzeDisplay-og.ttf` and `HankenGrotesk-{Regular,SemiBold}-og.ttf`, read with `readFileSync` from `assets/fonts`; they, the flags and `public/players/wcc/*-og.png` are in `outputFileTracingIncludes`. `ogImage(title, card)` draws the card and waits for the bytes: if the data fails it draws a title card, if a font is rejected it draws with Satori's own. A letter the subset lacks comes from Satori's fallback face. No gradients, no tracked capitals.
 
-Cards: WCC (portraits either side on their fields, names, two 110px figures, split bar, tiebreak share, stage, simulations line); Olympiad odds x2 (top five rows; finished: podium with medal rules); boards x2 (five columns of three); player x2 (flag, name, TPR, rank medal, score, eligibility). Same data and copy as today. The root metadata's remote image stays.
+Cards: site default (`app/opengraph-image.tsx`, for every page that has none of its own); WCC and live (portraits either side on their fields, names, two 110px figures, split bar, tiebreak share, stage, simulations line, photo credit); Olympiad odds x2 (top five rows; finished: podium with medal rules); boards x2 (five columns of three); player x2 (flag, name, TPR, rank medal, score, eligibility, form). The root metadata names no image: the file convention supplies it to Open Graph and X.
+
+Board medals, on the cards and the pages, go to players who have or can still reach eight games (`lib/olympiad/medals.ts`).
 
 ---
 

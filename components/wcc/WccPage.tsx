@@ -1,4 +1,12 @@
-import { EVENT } from '@/lib/wcc/config';
+import { Container } from '@/components/layout/Container';
+import { Page } from '@/components/layout/Page';
+import { PageHead } from '@/components/layout/PageHead';
+import { Section } from '@/components/layout/Section';
+import { FaceOff } from '@/components/chess/FaceOff';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { PhotoCreditLine } from '@/components/ui/PhotoCredit';
+import { EVENT, WCC_HREF } from '@/lib/wcc/config';
 import { exact } from '@/lib/wcc/match';
 import {
   getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSummary,
@@ -6,13 +14,13 @@ import {
 import { withMatchRatings } from '@/lib/wcc/rebase';
 import { currentOdds, matchState } from '@/lib/wcc/status';
 import type { WccRun, WccSummary } from '@/lib/wcc/types';
-import FaceOffHero from './FaceOffHero';
 import HeadToHead from './HeadToHead';
+import { MatchScore, NextGame, scoreLabel } from './MatchNow';
 import ModelVsMarkets from './ModelVsMarkets';
-import ScheduleCalendar from './ScheduleCalendar';
+import { Schedule } from './Schedule';
 import WccDashboard from './WccDashboard';
 import WccMethodology from './WccMethodology';
-import { resolvePlayers } from './players';
+import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, faceOffSides, resolvePlayers } from './players';
 
 /** Server-side guard: the site's TypeScript DP must reproduce the pipeline's stored summary. */
 function parityCheck(run: WccRun, summary: WccSummary, state: ReturnType<typeof matchState>) {
@@ -79,9 +87,25 @@ export default async function WccPage() {
   const methodology = <WccMethodology run={oddsRun} summary={summary} rawSummary={rawSummary} players={players} />;
   const h2h = <HeadToHead players={players} />;
 
+  const defender = players[players[2].isChampion ? 2 : 1];
+  const challenger = players[defender.id === 1 ? 2 : 1];
+  // The stored price nearest to now; the live quote is in the markets section.
+  const kalshi = market.filter(m => m.source === 'kalshi').sort((a, b) => b.asOf.localeCompare(a.asOf))[0]?.pWin1 ?? null;
+
   return (
-    <main className="flex-1 flex flex-col min-h-screen">
-      <FaceOffHero players={players} />
+    <Page kind="dashboard">
+      <PageHead
+        enter
+        size="mega"
+        title="Gukesh vs Sindarov"
+        crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: 'World Championship 2026' }]}
+        facts={[
+          'FIDE World Championship 2026',
+          `22 Nov to 13 Dec, ${EVENT.venue}, ${EVENT.venueArea}`,
+          '14 classical games, first to 7½, $2.5M prize fund',
+          `${defender.name} (${defender.country}) defends against Candidates winner ${challenger.name} (${challenger.country})`,
+        ]}
+      />
       {run && oddsRun && summary ? (
         <WccDashboard
           players={players}
@@ -90,6 +114,7 @@ export default async function WccPage() {
           summary={summary}
           history={history}
           markets={market}
+          kalshi={kalshi}
           finished={finished}
           slots={{
             markets: <ModelVsMarkets modelPWin1={currentOdds(summary, oddsRun, state).pWin1} players={players} stored={market} ratingGap={ratingGap} drawRate={drawRate} />,
@@ -98,18 +123,31 @@ export default async function WccPage() {
           }}
         />
       ) : (
-        <div className="max-w-6xl w-full mx-auto px-4 sm:px-6 pb-12 space-y-6">
-          <section className="surface-card p-6 sm:p-8 text-center -mt-16 relative z-10">
-            <h2 className="font-heading text-xl text-[var(--text-primary)]">Match odds are on their way</h2>
-            <p className="text-sm text-[var(--text-muted)] mt-1 max-w-md mx-auto">
-              Exact match probabilities, confirmed by 10,000 simulations, will appear here shortly. The match starts in {EVENT.city} on 22 November.
-            </p>
+        <>
+          <section id="odds" aria-label="Match odds" className="pb-section">
+            <Container>
+              <FaceOff
+                variant="hero"
+                sides={faceOffSides(players)}
+                p1={null}
+                score={<MatchScore state={state} players={players} />}
+                scoreLabel={scoreLabel(state)}
+                next={<NextGame state={state} />}
+                actions={<Button variant="primary" href={`${WCC_HREF}/live`}>Watch live</Button>}
+                credit={<PhotoCreditLine photos={FACE_OFF_PHOTOS} changes={FACE_OFF_CHANGES} />}
+              />
+              <EmptyState
+                className="mt-8"
+                title="Match odds are on their way"
+                body={`Exact match probabilities, confirmed by 10,000 simulations, will appear here shortly. The match starts in ${EVENT.city} on 22 November.`}
+              />
+            </Container>
           </section>
-          {h2h}
-          <ScheduleCalendar games={state.classical} players={players} />
+          <Section layout="plain" label="Form">{h2h}</Section>
+          <Schedule games={state.classical} players={players} />
           {methodology}
-        </div>
+        </>
       )}
-    </main>
+    </Page>
   );
 }

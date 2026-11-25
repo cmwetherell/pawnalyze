@@ -20,7 +20,9 @@ export function useActiveSection(ids: string): string | null {
       let hit: string | null = null;
       let best = -Infinity;
       for (const id of list) {
-        const { top } = document.getElementById(id)?.getBoundingClientRect() ?? { top: Infinity };
+        const el = document.getElementById(id);
+        // A section inside a closed tab has no box.
+        const top = el?.getClientRects().length ? el.getBoundingClientRect().top : Infinity;
         if (top <= innerHeight * BAND_END && top >= best) { best = top; hit = id; }
       }
       return hit;

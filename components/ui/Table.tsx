@@ -114,15 +114,19 @@ interface TdProps extends Omit<ComponentPropsWithoutRef<'td'>, 'align'> {
   muted?: boolean;
   /** Row header: use on the name column. It takes the space that is left and truncates; a link in it is as tall as the row. */
   header?: boolean;
+  /** With `header`: all the space the other columns leave, at every width (a narrow table). */
+  grow?: boolean;
   /** With `header`: flag, avatar or medal before the name. */
   lead?: ReactNode;
   /** With `header`: seed or code after the name, never truncated. */
   meta?: ReactNode;
+  /** With `header`: a quiet second line under the name. */
+  sub?: ReactNode;
 }
 
 const ROW_H = 'h-[52px] group-data-[density=compact]/table:h-11 md:group-data-[density=compact]/table:h-10';
 
-export function Td({ align = 'left', priority = 1, muted = false, header = false, lead, meta, className, children, ...rest }: TdProps) {
+export function Td({ align = 'left', priority = 1, muted = false, header = false, grow = false, lead, meta, sub, className, children, ...rest }: TdProps) {
   const cls = cn('border-b border-line py-1 align-middle font-normal', ROW_H, CELL, ALIGN[align], PRIORITY[priority], align === 'right' && 'whitespace-nowrap', muted && 'text-ink-3');
   const data = priority > 1 ? priority : undefined;
   if (!header) return <td data-p={data} className={cn(cls, className)} {...rest}>{children}</td>;
@@ -130,7 +134,7 @@ export function Td({ align = 'left', priority = 1, muted = false, header = false
     <th
       scope="row"
       data-p={data}
-      className={cn(cls, 'py-0', 'w-full max-w-0 md:w-1/3 md:group-data-[density=compact]/table:w-1/2', 'group-data-[scroll]/table:!w-auto group-data-[scroll]/table:max-w-none', className)}
+      className={cn(cls, 'py-0', 'w-full max-w-0', !grow && 'md:w-1/3 md:group-data-[density=compact]/table:w-1/2', 'group-data-[scroll]/table:!w-auto group-data-[scroll]/table:max-w-none', className)}
       {...rest}
     >
       <div className="flex min-w-0 items-center gap-3">
@@ -139,11 +143,13 @@ export function Td({ align = 'left', priority = 1, muted = false, header = false
           className={cn(
             'min-w-0 truncate [&_:focus-visible]:-outline-offset-2',
             '[&>a]:block [&>a]:truncate [&>a]:py-3',
+            sub && '[&>a]:pb-0 [&>a]:pt-2',
             cellLink,
             'md:group-data-[density=compact]/table:[&>a]:py-2 [&>button]:block [&>button]:w-full [&>button]:truncate [&>button]:py-3 [&>button]:text-left md:group-data-[density=compact]/table:[&>button]:py-2',
           )}
         >
           {children}
+          {sub && <span className="block truncate pb-2 type-label text-ink-3">{sub}</span>}
         </div>
         {meta && <span className="shrink-0 type-label text-ink-3">{meta}</span>}
       </div>

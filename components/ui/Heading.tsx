@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -15,12 +15,15 @@ interface HeadingProps {
   style: HeadingStyle;
   fit?: boolean;
   id?: string;
+  /** -1 and a ref: code moves focus here when something opens. */
+  tabIndex?: -1;
+  ref?: Ref<HTMLHeadingElement>;
   className?: string;
   children: ReactNode;
 }
 
-export function Heading({ level, style, fit = false, id, className, children }: HeadingProps) {
+export function Heading({ level, style, fit = false, id, tabIndex, ref, className, children }: HeadingProps) {
   const As = `h${level}` as const;
   const s = fit && typeof children === 'string' ? fitTitle(children, style) : style;
-  return <As id={id} className={cn(STYLE[s], 'text-ink', className)}>{children}</As>;
+  return <As id={id} ref={ref} tabIndex={tabIndex} className={cn(STYLE[s], 'text-ink', tabIndex === -1 && 'outline-none', className)}>{children}</As>;
 }

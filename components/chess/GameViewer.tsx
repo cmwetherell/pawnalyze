@@ -1,13 +1,15 @@
 'use client';
 
 import { Chess } from 'chess.js';
-import { useMemo, useState, type KeyboardEvent } from 'react';
+import { useMemo, useState } from 'react';
 
 import { TextLink } from '@/components/ui/TextLink';
-import { Board } from './Board';
+import { START_FEN } from '@/lib/live/pgn';
 import { BoardControls } from './BoardControls';
+import { BoardPane } from './BoardPane';
 import { MoveList } from './MoveList';
 import { PlayerClock } from './PlayerClock';
+import { Replay } from './Replay';
 
 interface Side {
   name: string;
@@ -27,8 +29,6 @@ interface GameViewerProps {
 }
 
 interface Ply { san: string; fen: string; from: string; to: string }
-
-const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
 function parsePlies(moves: string): { plies: Ply[]; error: boolean } {
   try {
@@ -52,36 +52,38 @@ export function GameViewer({ moves, white, black, result, orientation = 'w', sta
 
   const last = ply === 0 ? null : plies[ply - 1];
   const go = (n: number) => setPly(Math.min(Math.max(n, 0), plies.length));
-  const onKey = (e: KeyboardEvent) => {
-    const to = e.key === 'ArrowLeft' ? ply - 1 : e.key === 'ArrowRight' ? ply + 1 : e.key === 'Home' ? 0 : e.key === 'End' ? plies.length : null;
-    if (to !== null) { e.preventDefault(); go(to); }
-    else if (e.key === 'f') setFlipped(v => !v);
-  };
+  const flip = () => setFlipped(v => !v);
 
   if (error || plies.length === 0) {
     return <p className="py-3 type-small text-ink-3">Moves for this game are not available{error ? ' (the broadcast record could not be parsed)' : ''}.</p>;
   }
 
-  const sideRow = (c: 'white' | 'black') => {
+  const name = (c: 'white' | 'black') => {
     const s = c === 'white' ? white : black;
     return <PlayerClock name={s.name} rating={s.rating} tone="ink" side={c} />;
   };
   return (
-    <div tabIndex={0} onKeyDown={onKey} aria-label="Game replay; use the arrow keys to step through the moves" className="grid gap-x-6 gap-y-4 rounded-sm md:grid-cols-[minmax(0,440px)_minmax(11rem,1fr)]">
-      <div className="min-w-0">
-        {sideRow(flipped ? 'white' : 'black')}
-        <Board fen={last?.fen ?? START_FEN} from={last?.from} to={last?.to} flipped={flipped} label={`Position after ${ply} ${ply === 1 ? 'ply' : 'plies'}`} />
-        {sideRow(flipped ? 'black' : 'white')}
-        <BoardControls ply={ply} last={plies.length} onGo={go} onFlip={() => setFlipped(v => !v)} />
-      </div>
-      <div className="min-w-0">
-        <MoveList moves={plies} ply={ply} onGo={go} maxHeight="clamp(280px, 60vh, 440px)" />
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 type-small">
-          <span className="whitespace-nowrap font-medium text-ink tnum">{result.replace('1/2-1/2', '½–½')}</span>
-          <TextLink standalone href={lichessAnalysisHref(moves)}>Analyze on Lichess</TextLink>
+    <Replay
+      label="Game replay; use the arrow keys to step through the moves"
+      ply={ply} last={plies.length} onGo={go} onFlip={flip}
+      board={(
+        <BoardPane
+          fen={last?.fen ?? START_FEN} from={last?.from} to={last?.to} flipped={flipped}
+          label={`Position after ${ply} ${ply === 1 ? 'ply' : 'plies'}`}
+          top={name(flipped ? 'white' : 'black')} bottom={name(flipped ? 'black' : 'white')}
+          controls={<BoardControls ply={ply} last={plies.length} onGo={go} onFlip={flip} />}
+        />
+      )}
+      aside={(
+        <div>
+          <MoveList moves={plies} ply={ply} onGo={go} maxHeight="clamp(280px, 60vh, 440px)" />
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 type-small">
+            <span className="whitespace-nowrap font-medium text-ink tnum">{result.replace('1/2-1/2', '½–½')}</span>
+            <TextLink standalone href={lichessAnalysisHref(moves)}>Analyze on Lichess</TextLink>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+    />
   );
 }
 

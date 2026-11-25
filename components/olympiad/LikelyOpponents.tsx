@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from 'react';
 
-import Flag from '@/components/ui/Flag';
-import { SkeletonBars } from '@/components/ui/Skeleton';
-import { formatPct } from '@/components/ui/ProbBar';
+import { BarRows } from '@/components/charts/BarRows';
+import { Flag } from '@/components/ui/Flag';
+import { Segmented } from '@/components/ui/Segmented';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { formatPct } from '@/lib/format';
 import { StaleRunError, cachedJson } from '@/lib/olympiad/clientCache';
 import type { OlympiadEvent, OpponentShare, Outcome, Run, Team, TeamOpponents } from '@/lib/olympiad/types';
+import { shortTeamName } from './teams';
 
 interface LikelyOpponentsProps {
   event: OlympiadEvent;
@@ -14,9 +17,8 @@ interface LikelyOpponentsProps {
   team: Team;
   teamsById: Map<number, Team>;
   filtersKey: string;
-  isScenario: boolean;
   onStale?: () => void;
-  /** The team's actual result in the next simulated round, when that round has already been played */
+  /** The team's actual result in the next simulated round, when that round has already been played. */
   playedNextResult?: Outcome | null;
 }
 
@@ -25,39 +27,25 @@ type Split = 'all' | 'w' | 'd' | 'l';
 const SPLIT_LABEL: Record<Split, string> = { all: 'Any', w: 'Win', d: 'Draw', l: 'Loss' };
 const TOP_N = 6;
 
-function ShareList({ shares, total, teamsById }: { shares: OpponentShare[]; total: number; teamsById: Map<number, Team> }) {
-  if (total === 0) return <p className="text-xs text-[var(--text-muted)] italic">No matching simulations.</p>;
-  const top = shares.slice(0, TOP_N);
+function ShareList({ shares, total, teamsById, label }: { shares: OpponentShare[]; total: number; teamsById: Map<number, Team>; label: string }) {
+  if (total === 0) return <p className="type-small text-ink-3">No matching simulations.</p>;
   const rest = shares.slice(TOP_N).reduce((a, s) => a + s.n, 0);
-  const max = Math.max(top[0]?.n ?? 1, 1);
   return (
-    <ul className="space-y-1">
-      {top.map(s => {
-        const opp = teamsById.get(s.teamId);
-        const p = s.n / total;
-        return (
-          <li key={s.teamId} className="flex items-center gap-2 text-xs">
-            {opp ? <Flag code={opp.fedCode} size="xs" title={opp.name} aria-hidden /> : <span className="w-[18px]" />}
-            <span className="truncate text-[var(--text-secondary)] w-28 shrink-0">
-              {opp ? opp.name : s.teamId === 0 ? 'Bye' : `Team ${s.teamId}`}
-            </span>
-            <div className="flex-1 h-1.5 rounded-full bg-[var(--bg-surface-3)] overflow-hidden">
-              <div className="h-full bg-chess-gold rounded-full" style={{ width: `${(s.n / max) * 100}%` }} />
-            </div>
-            <span className="tabular-nums w-12 text-right text-[var(--text-primary)]">{formatPct(p)}</span>
-          </li>
-        );
-      })}
-      {rest > 0 && (
-        <li className="text-[11px] text-[var(--text-muted)] pl-6">
-          {shares.length - TOP_N} other teams · {formatPct(rest / total)}
-        </li>
-      )}
-    </ul>
+    <>
+      <BarRows
+        size="sm" format="pct" ariaLabel={label}
+        rows={shares.slice(0, TOP_N).map(s => {
+          const opp = teamsById.get(s.teamId);
+          return { key: String(s.teamId), label: opp ? shortTeamName(opp.name) : s.teamId === 0 ? 'Bye' : `Team ${s.teamId}`, value: s.n / total, tone: 'ink' as const, lead: opp && <Flag code={opp.fedCode} size="xs" decorative /> };
+        })}
+      />
+      {rest > 0 && <p className="mt-2 type-label text-ink-3">{shares.length - TOP_N} other teams, {formatPct(rest / total)}</p>}
+    </>
   );
 }
 
-export default function LikelyOpponents({ event, run, team, teamsById, filtersKey, isScenario, onStale, playedNextResult = null }: LikelyOpponentsProps) {
+/** Who the team is likely to meet next, and after that for each result. */
+export function LikelyOpponents({ event, run, team, teamsById, filtersKey, onStale, playedNextResult = null }: LikelyOpponentsProps) {
   const requestKey = `opp|${event}|${run.runId}|${team.teamId}|${filtersKey}`;
   const [result, setResult] = useState<{ key: string; data?: TeamOpponents; error?: string } | null>(null);
   const [split, setSplit] = useState<Split>(playedNextResult ?? 'all');
@@ -72,96 +60,53 @@ export default function LikelyOpponents({ event, run, team, teamsById, filtersKe
       .then(d => { if (!cancelled) setResult({ key: requestKey, data: d }); })
       .catch(e => {
         if (cancelled) return;
-        if (e instanceof StaleRunError) { onStale?.(); setResult({ key: requestKey, error: 'New simulations are available — reload the page.' }); return; }
+        if (e instanceof StaleRunError) { onStale?.(); setResult({ key: requestKey, error: 'New simulations are available: reload the page.' }); return; }
         setResult({ key: requestKey, error: e.message });
       });
     return () => { cancelled = true; };
   }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale]);
 
-  const heading = (
-    <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-2">
-      Likely opponents{isScenario ? ' · scenario' : ''}
-    </div>
-  );
+  if (error) return <p role="alert" className="type-small text-negative">{error}</p>;
+  if (!data) return <Skeleton kind="bars" rows={6} label="Loading likely opponents" />;
+  if (!data.available || data.nextRound === null) return <p className="type-small text-ink-3">Pairing odds arrive with the next simulation upload.</p>;
 
-  if (error) return <div>{heading}<p className="text-xs text-rose-400">{error}</p></div>;
-  if (!data) {
-    return (
-      <div>
-        {heading}
-        <div className="h-3 w-24 rounded bg-[var(--bg-surface-3)] animate-pulse mb-2" aria-hidden />
-        <SkeletonBars rows={6} />
-      </div>
-    );
-  }
-  if (!data.available || data.nextRound === null) {
-    return <div>{heading}<p className="text-xs text-[var(--text-muted)] italic">Pairing odds arrive with the next simulation upload.</p></div>;
-  }
-
-  const nextIsFixed = data.next.length === 1 && data.next[0].n === data.total;
+  const next = data.nextRound;
+  const fixed = data.next.length === 1 && data.next[0].n === data.total;
+  const fixedOpp = fixed ? teamsById.get(data.next[0].teamId) : undefined;
   const splitTotal = split === 'all' ? data.total : data.outcomeCounts[split];
 
   return (
-    <div>
-      {heading}
-
+    <div className="flex flex-col gap-6">
       {playedNextResult === null && (
-      <div className="mb-3">
-        <div className="text-[11px] text-[var(--text-muted)] mb-1">
-          Round {data.nextRound}{nextIsFixed ? ' · pairing set' : ''}
+        <div className="flex flex-col gap-2">
+          <p className="type-label text-ink-2">Round {next}{fixed ? ', pairing set' : ''}</p>
+          {!fixed ? <ShareList shares={data.next} total={data.total} teamsById={teamsById} label={`Likely opponents in round ${next}`} />
+            : fixedOpp ? (
+              <p className="flex min-w-0 items-center gap-2 type-ui text-ink">
+                <Flag code={fixedOpp.fedCode} size="sm" decorative />
+                <span className="truncate">{fixedOpp.name}</span>
+                <span className="shrink-0 type-label text-ink-3">#{fixedOpp.teamId}, {fixedOpp.avgRating}</span>
+              </p>
+            ) : <p className="type-small text-ink-3">Bye</p>}
         </div>
-        {nextIsFixed ? (() => {
-          const opp = teamsById.get(data.next[0].teamId);
-          return opp ? (
-            <div className="flex items-center gap-2 text-xs">
-              <Flag code={opp.fedCode} size="sm" aria-hidden />
-              <span className="font-medium text-[var(--text-primary)] truncate">{opp.name}</span>
-              <span className="text-[var(--text-muted)]">#{opp.teamId} · {opp.avgRating}</span>
-            </div>
-          ) : <p className="text-xs text-[var(--text-muted)] italic">Bye</p>;
-        })() : (
-          <ShareList shares={data.next} total={data.total} teamsById={teamsById} />
-        )}
-      </div>
       )}
-
       {data.followingRound !== null && (
-        <div>
-          <div className="flex items-center justify-between gap-2 mb-1.5">
-            <div className="text-[11px] text-[var(--text-muted)]">
-              Round {data.followingRound}
-              {split !== 'all' && (
-                <span> · {playedNextResult === split ? 'after the actual' : 'if'} {SPLIT_LABEL[split].toLowerCase()} in R{data.nextRound}</span>
-              )}
-            </div>
-            <div role="tablist" aria-label={`Condition on round ${data.nextRound} result`} className="inline-flex rounded-md bg-[var(--bg-surface-1)] border border-[var(--border)] p-0.5">
-              {(['all', 'w', 'd', 'l'] as Split[]).map(k => {
-                const count = k === 'all' ? data.total : data.outcomeCounts[k];
-                const active = split === k;
-                const tone = k === 'w' ? 'text-emerald-500' : k === 'd' ? 'text-gold-ink' : k === 'l' ? 'text-rose-400' : 'text-[var(--text-primary)]';
-                return (
-                  <button
-                    key={k}
-                    role="tab"
-                    aria-selected={active}
-                    type="button"
-                    onClick={() => setSplit(k)}
-                    disabled={count === 0}
-                    title={`${SPLIT_LABEL[k]} in round ${data.nextRound} · ${formatPct(data.total ? count / data.total : 0)} of sims`}
-                    className={`h-10 min-w-[2.5rem] px-2 rounded text-[11px] font-semibold transition-colors ${
-                      active ? `bg-[var(--bg-surface-3)] ${tone}` : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
-                    } disabled:opacity-40`}
-                  >
-                    {k === 'all' ? 'Any' : k.toUpperCase()}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <ShareList shares={data.following[split]} total={splitTotal} teamsById={teamsById} />
+        <div className="flex flex-col gap-2">
+          <p className="type-label text-ink-2">
+            Round {data.followingRound}
+            {split !== 'all' && `, ${playedNextResult === split ? 'after the actual' : 'if a'} ${SPLIT_LABEL[split].toLowerCase()} in round ${next}`}
+          </p>
+          <Segmented
+            role="tablist" size="sm" ariaLabel={`Condition on round ${next} result`} value={split} onChange={setSplit}
+            items={(['all', 'w', 'd', 'l'] as Split[]).map(k => {
+              const count = k === 'all' ? data.total : data.outcomeCounts[k];
+              return { value: k, label: SPLIT_LABEL[k], disabled: count === 0, hint: `${SPLIT_LABEL[k]} in round ${next}, ${formatPct(data.total ? count / data.total : 0)} of simulations` };
+            })}
+          />
+          <ShareList shares={data.following[split]} total={splitTotal} teamsById={teamsById} label={`Likely opponents in round ${data.followingRound}`} />
           {split !== 'all' && data.total > 0 && (
-            <p className="mt-1.5 text-[11px] text-[var(--text-muted)]">
-              {formatPct(splitTotal / data.total)} of simulations have {team.name} {split === 'w' ? 'winning' : split === 'd' ? 'drawing' : 'losing'} round {data.nextRound}.
+            <p className="type-label text-ink-3">
+              {formatPct(splitTotal / data.total)} of simulations have {team.name} {split === 'w' ? 'winning' : split === 'd' ? 'drawing' : 'losing'} round {next}.
             </p>
           )}
         </div>

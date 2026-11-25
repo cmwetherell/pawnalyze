@@ -22,14 +22,16 @@ interface PodiumProps {
   places: PodiumPlace[];
   /** stack: first place across, second and third under it side by side. row: three columns. */
   layout?: 'stack' | 'row';
+  /** Names the list for assistive tech. */
+  label?: string;
   className?: string;
 }
 
 /** A 3px medal-coloured rule over each place; first place is larger. */
-export function Podium({ places, layout = 'stack', className }: PodiumProps) {
+export function Podium({ places, layout = 'stack', label, className }: PodiumProps) {
   const stack = layout === 'stack';
   return (
-    <ol className={cn('grid grid-cols-1 gap-x-6 gap-y-8', stack ? 'sm:grid-cols-2' : 'md:grid-cols-3', className)}>
+    <ol aria-label={label} className={cn('grid grid-cols-1 gap-x-6 gap-y-8', stack ? 'sm:grid-cols-2' : 'md:grid-cols-3', className)}>
       {places.map(p => {
         const first = p.rank === 1 && stack;
         return (

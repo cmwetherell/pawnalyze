@@ -1,99 +1,135 @@
 'use client';
 
-import Link from 'next/link';
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 
-import BoardSvg from '@/components/chess/BoardSvg';
-import ComplexityBar from '@/components/elocator/ComplexityBar';
-import { CompactCountdown, localDay, localTime, useNow } from '@/components/wcc/MatchStatus';
-import { P_COLOR } from '@/components/wcc/ui';
+import { BoardControls } from '@/components/chess/BoardControls';
+import { BoardPane } from '@/components/chess/BoardPane';
+import { averageComplexity } from '@/components/chess/ComplexityChart';
+import { ComplexityScale } from '@/components/chess/ComplexityScale';
+import { MoveList } from '@/components/chess/MoveList';
+import { PlayerClock } from '@/components/chess/PlayerClock';
+import { Replay } from '@/components/chess/Replay';
+import { Container } from '@/components/layout/Container';
+import { Section } from '@/components/layout/Section';
+import { Countdown } from '@/components/ui/Countdown';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Heading } from '@/components/ui/Heading';
+import { LocalTime } from '@/components/ui/LocalTime';
+import { ScrollRow } from '@/components/ui/ScrollRow';
+import { Segmented, type SegmentedItem } from '@/components/ui/Segmented';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { StatStrip } from '@/components/ui/StatStrip';
+import type { StatProps } from '@/components/ui/Stat';
+import { Tag, type TagTone } from '@/components/ui/Tag';
+import { TextLink } from '@/components/ui/TextLink';
+import { useNow } from '@/hooks/useNow';
 import { setUrlParam, useUrlParam } from '@/hooks/useUrlParam';
+import { moveLabel } from '@/lib/chess/moves';
 import { BroadcastFeed, RoundsStore, defaultRound, type FeedSnapshot, type RoundInfo } from '@/lib/live/feed';
-import { START_FEN, fenKey, fmtEval, parseLiveGame, type Colour, type Evaluation, type LivePosition } from '@/lib/live/pgn';
+import { fenKey, fmtEval, parseLiveGame, type Colour, type Evaluation, type LivePosition } from '@/lib/live/pgn';
 import { complexityInputs, createComplexityStore, createEvalStore, evalInputs } from '@/lib/live/scores';
-import { PLAYER_DEFAULTS, WCC_HREF } from '@/lib/wcc/config';
+import { playerTone, type Tone } from '@/lib/theme/tones';
+import { CLASSICAL_SCHEDULE, G1_WHITE, PLAYER_DEFAULTS, WCC_HREF } from '@/lib/wcc/config';
 import { LICHESS_BROADCAST_ID } from '@/lib/wcc/lichess';
-import type { PlayerId } from '@/lib/wcc/types';
-import EvalBar from './EvalBar';
-import LiveCharts, { moveLabel, type ChartPoint } from './LiveCharts';
+import { other, whiteInGame } from '@/lib/wcc/match';
+import type { HalfPoints, PlayerId } from '@/lib/wcc/types';
+import { LiveCharts, type ChartPoint } from './LiveCharts';
 
 const EMPTY_GAME = parseLiveGame('');
+/** Before Lichess answers: the published schedule, so the picker is there from the start. */
+const SCHEDULED: RoundInfo[] = CLASSICAL_SCHEDULE.map(s => ({ id: '', gameNo: s.gameNo, startsAt: Date.parse(s.startsAt), ongoing: false, finished: false }));
 
 function useStore<S>(store: { subscribe: (cb: () => void) => () => void; getSnapshot: () => S }): S {
   return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
 }
 
+/** Gukesh's half-points in each finished game. */
+export type GameResults = Partial<Record<number, HalfPoints>>;
+
 /** Live page for the match: picks the game, then follows it. */
-export default function LiveGame() {
+export function LiveGame({ results }: { results: GameResults }) {
   const [store] = useState(() => new RoundsStore(LICHESS_BROADCAST_ID));
   useEffect(() => { store.start(); return () => store.stop(); }, [store]);
   const { rounds, failed } = useStore(store);
-  const now = useNow();
+  const now = useNow(1000);
   const wanted = Number(useUrlParam('game'));
   // Any other broadcast round, for checking the page when the match is not being played.
-  const other = useUrlParam('round');
+  const otherRound = useUrlParam('round');
 
-  if (other && /^\w{8}$/.test(other)) {
-    return <GameView key={other} round={{ id: other, gameNo: 0, startsAt: null, ongoing: true, finished: false }} />;
+  if (otherRound && /^\w{8}$/.test(otherRound)) {
+    return <GameView key={otherRound} round={{ id: otherRound, gameNo: 0, startsAt: null, ongoing: true, finished: false }} />;
   }
-  if (!rounds || now === null) {
-    return (
-      <div className="surface-card p-8 text-center text-sm text-[var(--text-muted)]">
-        {failed ? 'Lichess cannot be reached right now. Trying again…' : 'Loading the broadcast…'}
-      </div>
-    );
-  }
-  const auto = defaultRound(rounds, now);
-  const round = rounds.find(r => r.gameNo === wanted) ?? auto;
-  if (!round) return <div className="surface-card p-8 text-center text-sm text-[var(--text-muted)]">No games in the broadcast yet.</div>;
+  const auto = rounds && now !== null ? defaultRound(rounds, now) : null;
+  const round = rounds?.find(r => r.gameNo === wanted) ?? auto;
+  const shown = rounds?.length ? rounds : SCHEDULED;
 
   return (
-    <div className="space-y-4">
-      <nav aria-label="Games" className="flex flex-wrap gap-1.5">
-        {rounds.map(r => {
-          const on = r.id === round.id;
-          return (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setUrlParam('game', r.id === auto?.id ? null : String(r.gameNo))}
-              aria-current={on ? 'page' : undefined}
-              title={r.startsAt ? `${localDay(new Date(r.startsAt).toISOString())}, ${localTime(new Date(r.startsAt).toISOString())}` : undefined}
-              className={`h-9 min-w-9 px-2.5 rounded-md text-sm font-medium tabular-nums border transition-colors ${on
-                ? 'bg-chess-gold/15 border-chess-gold/50 text-[var(--text-primary)]'
-                : r.finished || r.ongoing
-                  ? 'border-[var(--border)] text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)]'
-                  : 'border-transparent text-[var(--text-muted)] hover:bg-[var(--bg-surface-2)]'}`}
-            >
-              {r.ongoing && <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-live mr-1.5 align-middle" aria-label="live" />}
-              G{r.gameNo}
-            </button>
-          );
-        })}
-      </nav>
-      {/* A round that finishes while being watched keeps its feed (the key does not change). */}
-      <GameView key={round.id} round={round} />
-    </div>
+    <>
+      <Container className="pb-6 pt-2 md:pb-8 md:pt-0">
+        <GamePicker
+          rounds={shown} results={results} current={round?.gameNo ?? (shown.some(r => r.gameNo === wanted) ? wanted : null)} clock={now !== null}
+          onPick={no => setUrlParam('game', no === auto?.gameNo ? null : String(no))}
+        />
+      </Container>
+      {round
+        // A round that finishes while being watched keeps its feed (the key does not change).
+        ? <GameView key={round.id} round={round} />
+        : (
+          <Section label="Game" layout="plain" rule={false}>
+            {rounds && now !== null
+              ? <EmptyState title="No games in the broadcast yet" />
+              : <EmptyState busy title={failed ? 'Lichess cannot be reached right now' : 'Loading the broadcast'} body={failed ? 'Trying again.' : undefined} />}
+          </Section>
+        )}
+    </>
   );
 }
 
-function StatusPill({ feed, round, now }: { feed: FeedSnapshot; round: RoundInfo; now: number | null }) {
-  const started = (feed.game?.positions.length ?? 0) > 1;
-  const pill = (cls: string, dot: string, text: React.ReactNode) => (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 h-7 rounded-full text-xs font-semibold ${cls}`} role="status">
-      <span className={`w-2 h-2 rounded-full ${dot}`} aria-hidden /> {text}
-    </span>
+// ------------------------------------------------------------------ picker
+
+const WORD: Record<HalfPoints, string> = { 2: `${PLAYER_DEFAULTS[1].shortName} won`, 1: 'draw', 0: `${PLAYER_DEFAULTS[2].shortName} won` };
+const GLYPH: Record<HalfPoints, string> = { 2: PLAYER_DEFAULTS[1].shortName[0], 1: '½', 0: PLAYER_DEFAULTS[2].shortName[0] };
+
+interface GamePickerProps { rounds: RoundInfo[]; results: GameResults; current: number | null; /** Local times are known. */ clock: boolean; onPick: (gameNo: number) => void }
+
+function GamePicker({ rounds, results, current, clock, onPick }: GamePickerProps) {
+  const items = rounds.map((r): SegmentedItem => {
+    const result = r.ongoing ? undefined : results[r.gameNo];
+    const started = clock && r.startsAt ? new Date(r.startsAt) : null;
+    const when = started && `${started.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}, ${started.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+    const state = r.ongoing ? 'live' : result !== undefined ? WORD[result] : r.finished ? 'finished' : null;
+    return {
+      value: String(r.gameNo),
+      label: r.gameNo,
+      note: result !== undefined ? GLYPH[result] : undefined,
+      dot: r.ongoing,
+      muted: !r.ongoing && !r.finished && result === undefined,
+      href: `${WCC_HREF}/live?game=${r.gameNo}`,
+      hint: when ?? undefined,
+      ariaLabel: [`Game ${r.gameNo}`, state, when].filter(Boolean).join(', '),
+    };
+  });
+  return (
+    <ScrollRow label="Games" bleed follow='[aria-current="page"]' followKey={`${current}-${rounds.length}`}>
+      <Segmented role="nav" ariaLabel="Games" size="sm" full items={items} value={current === null ? '' : String(current)} onChange={v => onPick(Number(v))} />
+    </ScrollRow>
   );
-  const quiet = 'bg-[var(--bg-surface-3)] text-[var(--text-secondary)]';
-  if (feed.game?.result) return pill(quiet, 'bg-[var(--text-muted)]', `Final · ${feed.game.result.replace('1/2-1/2', '½–½')}`);
-  if (feed.unreachable && !feed.game) return pill(quiet, 'bg-amber-500', 'Lichess unreachable, retrying');
-  if (feed.status === 'reconnecting') return pill(quiet, 'bg-amber-500', 'Reconnecting');
-  if (feed.status === 'connecting') return pill(quiet, 'bg-amber-500', 'Connecting');
-  if (started) return pill('bg-red-500/10 text-red-500', 'bg-red-500 animate-pulse-live', 'Live');
-  if (round.startsAt && now !== null && round.startsAt > now) {
-    return pill(quiet, 'bg-[var(--text-muted)]', <CompactCountdown to={new Date(round.startsAt).toISOString()} label="Starts in" />);
-  }
-  return pill(quiet, 'bg-amber-500', 'Waiting for the first move');
+}
+
+// ------------------------------------------------------------------ one game
+
+function StatusTag({ feed, round, now }: { feed: FeedSnapshot; round: RoundInfo; now: number | null }) {
+  const started = (feed.game?.positions.length ?? 0) > 1;
+  let tone: TagTone = 'neutral';
+  let text: ReactNode;
+  if (feed.game?.result) text = `Final, ${feed.game.result.replace('1/2-1/2', '½–½').replace('-', '–')}`;
+  else if (feed.unreachable && !feed.game) { tone = 'warning'; text = 'Lichess unreachable, retrying'; }
+  else if (feed.status === 'reconnecting') { tone = 'warning'; text = 'Reconnecting'; }
+  else if (feed.status === 'connecting') text = 'Connecting';
+  else if (started) { tone = 'live'; text = 'Live'; }
+  else if (round.startsAt && now !== null && round.startsAt > now) text = <>Starts in <Countdown iso={new Date(round.startsAt).toISOString()} /></>;
+  else text = 'Waiting for the first move';
+  return <span role="status"><Tag tone={tone}>{text}</Tag></span>;
 }
 
 function fmtClock(s: number): string {
@@ -104,31 +140,19 @@ function fmtClock(s: number): string {
   return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
 }
 
-interface SideInfo { name: string; rating: string | null; playerId: PlayerId | null }
+interface SideInfo { name: string; rating: string | null; tone: Tone }
 
-function PlayerRow({ side, clock, running, colour }: { side: SideInfo; clock: number | null; running: boolean; colour: string }) {
-  return (
-    <div className="flex items-center gap-2 py-1.5 text-sm">
-      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: colour }} aria-hidden />
-      <span className="font-semibold text-[var(--text-primary)] truncate">{side.name}</span>
-      {side.rating && <span className="text-xs text-[var(--text-muted)] tabular-nums">{side.rating}</span>}
-      {clock !== null && (
-        <span className={`ml-auto px-2 py-0.5 rounded font-mono text-sm tabular-nums ${running ? 'bg-chess-gold/20 text-[var(--text-primary)] font-semibold' : 'bg-[var(--bg-surface-2)] text-[var(--text-muted)]'}`}>
-          {fmtClock(clock)}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function sideInfo(headers: Record<string, string>, c: Colour): SideInfo {
+/** From the broadcast; before it arrives, from the colour draw. */
+function sideInfo(headers: Record<string, string>, c: Colour, gameNo: number): SideInfo {
   const k = c === 'w' ? 'White' : 'Black';
   const fide = Number(headers[`${k}FideId`]);
-  const playerId = ([1, 2] as PlayerId[]).find(id => PLAYER_DEFAULTS[id].fideId === fide) ?? null;
+  const white = gameNo > 0 ? whiteInGame(gameNo, G1_WHITE) : null;
+  const drawn = white === null || headers[k] ? null : c === 'w' ? white : other(white);
+  const id = ([1, 2] as PlayerId[]).find(p => PLAYER_DEFAULTS[p].fideId === fide) ?? drawn;
   return {
-    name: playerId ? PLAYER_DEFAULTS[playerId].shortName : headers[k] ?? (c === 'w' ? 'White' : 'Black'),
+    name: id ? PLAYER_DEFAULTS[id].shortName : headers[k] ?? k,
     rating: headers[`${k}Elo`] ?? null,
-    playerId,
+    tone: playerTone(id ?? (c === 'w' ? 1 : 2)),
   };
 }
 
@@ -162,10 +186,10 @@ function GameView({ round }: { round: RoundInfo }) {
   const f = useStore(feed);
   const evals = useStore(evalStore);
   const complexities = useStore(complexityStore);
-  const now = useNow();
+  const now = useNow(1000);
 
   const game = f.game ?? EMPTY_GAME;
-  const { positions } = game;
+  const positions = game.positions.length ? game.positions : EMPTY_GAME.positions;
   const inPlay = game.result === null && positions.length > 1;
   useEffect(() => {
     evalStore.want(evalInputs(positions), inPlay);
@@ -178,16 +202,7 @@ function GameView({ round }: { round: RoundInfo }) {
   const last = positions.length - 1;
   const ply = pinned === null ? last : Math.min(pinned, last);
   const go = (n: number) => setPinned(n >= last ? null : Math.max(0, n));
-
-  const listRef = useRef<HTMLOListElement>(null);
-  useEffect(() => {
-    // Scroll only the list, never the page, as new moves arrive.
-    const list = listRef.current;
-    const el = list?.querySelector<HTMLElement>('[aria-current="step"]');
-    if (!list || !el) return;
-    const top = el.offsetTop - list.offsetTop;
-    if (top < list.scrollTop || top + el.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = top - list.clientHeight / 2;
-  }, [ply, last]);
+  const flip = () => setFlipped(v => !v);
 
   const points: ChartPoint[] = useMemo(() => positions.map(pos => ({
     pos,
@@ -195,15 +210,13 @@ function GameView({ round }: { round: RoundInfo }) {
     evaluation: pos.evaluation ?? evals.values.get(fenKey(pos.fen)) ?? null,
   })), [positions, complexities.values, evals.values]);
 
+  const loadingMoves = round.finished && f.game === null;
   const cur = points[ply];
   // While the newest position has no evaluation yet, show the one before it, marked as such.
-  const prevEval = cur.evaluation ?? (ply > 0 ? points[ply - 1].evaluation : null);
+  const prevEval = loadingMoves ? null : cur.evaluation ?? (ply > 0 ? points[ply - 1].evaluation : null);
   const stale = !cur.evaluation && prevEval !== null;
-  const white = sideInfo(game.headers, 'w');
-  const black = sideInfo(game.headers, 'b');
-  const sides: Record<Colour, SideInfo> = { w: white, b: black };
-  const names = { w: white.name, b: black.name };
-  const colours: Record<Colour, string> = { w: P_COLOR[white.playerId ?? 1], b: P_COLOR[black.playerId ?? 2] };
+  const sides: Record<Colour, SideInfo> = { w: sideInfo(game.headers, 'w', round.gameNo), b: sideInfo(game.headers, 'b', round.gameNo) };
+  const names = { w: sides.w.name, b: sides.b.name };
   const clockOf = (c: Colour): { value: number | null; running: boolean } => {
     const own = [...positions.slice(0, ply + 1)].reverse().find(p => p.clock !== null && p.ply > 0 && p.toMove !== c);
     const value = own?.clock ?? null;
@@ -211,111 +224,96 @@ function GameView({ round }: { round: RoundInfo }) {
     if (value === null || !running || f.lastMoveAt === null || now === null) return { value, running };
     return { value: value - (now - f.lastMoveAt) / 1000, running };
   };
-
-  const top: Colour = flipped ? 'w' : 'b';
-  const bottom: Colour = flipped ? 'b' : 'w';
-  const ctrl = 'h-10 w-10 inline-flex items-center justify-center rounded-md text-[var(--text-secondary)] hover:bg-[var(--bg-surface-3)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:hover:bg-transparent';
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); go(ply - 1); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); go(ply + 1); }
-    else if (e.key === 'Home') { e.preventDefault(); go(0); }
-    else if (e.key === 'End') { e.preventDefault(); go(last); }
-    else if (e.key === 'f') setFlipped(v => !v);
-  };
-  const row = (c: Colour) => {
+  const nameLine = (c: Colour) => {
     const k = clockOf(c);
-    return <PlayerRow side={sides[c]} clock={k.value} running={k.running} colour={colours[c]} />;
+    return <PlayerClock name={sides[c].name} rating={sides[c].rating} tone={sides[c].tone} clock={k.value === null ? null : fmtClock(k.value)} running={k.running} />;
   };
+
+  const opening = game.headers.Opening && game.headers.Opening !== '?' ? game.headers.Opening : null;
+  const source = game.headers.GameURL ?? `https://lichess.org/broadcast/-/-/${round.id}`;
 
   return (
-    <div className="space-y-4">
-      <section className="surface-card p-4 sm:p-6" aria-label="Game">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 mb-3">
-          <h2 className="font-heading text-xl text-[var(--text-primary)]">
-            {isMatch ? `Game ${round.gameNo}: ` : ''}{names.w} – {names.b}
-          </h2>
-          <StatusPill feed={f} round={round} now={now} />
-          {game.headers.Opening && game.headers.Opening !== '?' && <span className="text-xs text-[var(--text-muted)]">{game.headers.Opening}</span>}
-        </div>
-
-        <div
-          tabIndex={0}
-          onKeyDown={onKey}
-          aria-label="Game; use the arrow keys to step through the moves"
-          className="grid gap-5 lg:grid-cols-[minmax(0,460px)_minmax(0,1fr)] outline-none focus-visible:ring-2 focus-visible:ring-chess-gold rounded-lg"
-        >
-          <div className="min-w-0">
-            {row(top)}
-            <div className="flex gap-2 items-stretch">
-              <EvalBar evaluation={prevEval} stale={stale} flipped={flipped} />
-              <div className="flex-1 min-w-0">
-                <BoardSvg fen={cur.pos.fen || START_FEN} from={cur.pos.from} to={cur.pos.to} flipped={flipped} label={`Position after ${moveLabel(cur.pos)}`} />
+    <>
+      <Section label="Game" layout="plain">
+        <Replay
+          size="lg"
+          label="Game; use the arrow keys to step through the moves"
+          ply={ply} last={last} onGo={go} onFlip={flip}
+          head={(
+            <div className="flex flex-col gap-3">
+              <Heading level={2} style="h2">{isMatch ? `Game ${round.gameNo}: ` : ''}{names.w} – {names.b}</Heading>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                <StatusTag feed={f} round={round} now={now} />
+                {opening && <span className="type-small text-ink-2">{opening}</span>}
               </div>
             </div>
-            {row(bottom)}
-            <div className="mt-1 flex items-center gap-1">
-              <button type="button" onClick={() => go(0)} disabled={ply === 0} className={ctrl} aria-label="First move">⏮</button>
-              <button type="button" onClick={() => go(ply - 1)} disabled={ply === 0} className={ctrl} aria-label="Previous move">◀</button>
-              <button type="button" onClick={() => go(ply + 1)} disabled={ply === last} className={ctrl} aria-label="Next move">▶</button>
-              <button type="button" onClick={() => go(last)} disabled={ply === last} className={ctrl} aria-label="Last move">⏭</button>
-              <button type="button" onClick={() => setFlipped(v => !v)} className={ctrl} aria-label="Flip board" title="Flip board (f)">⇅</button>
-              {pinned !== null && inPlay && (
-                <button type="button" onClick={() => setPinned(null)} className="ml-auto h-9 px-3 rounded-md text-xs font-semibold bg-red-500/10 text-red-500 hover:bg-red-500/20">
-                  Back to live
-                </button>
+          )}
+          board={(
+            <BoardPane
+              fen={cur.pos.fen} from={cur.pos.from} to={cur.pos.to} flipped={flipped} label={`Position after ${moveLabel(cur.pos)}`}
+              evaluation={prevEval} stale={stale}
+              top={nameLine(flipped ? 'w' : 'b')} bottom={nameLine(flipped ? 'b' : 'w')}
+              controls={<BoardControls ply={ply} last={last} onGo={go} onFlip={flip} live={{ behind: pinned !== null && inPlay, onLive: () => setPinned(null) }} />}
+            />
+          )}
+          aside={(
+            <>
+              <StatStrip
+                columns={2}
+                items={[
+                  evalStat({ evaluation: prevEval, stale, names, failing: evals.failures >= 3, over: cur.pos.over }),
+                  complexityStat({ value: loadingMoves ? null : cur.complexity, pos: cur.pos, mover: names[cur.pos.toMove], result: ply === last ? game.result : null, failing: complexities.failures > 0 }),
+                ]}
+              />
+              {last > 0 ? (
+                <MoveList moves={points.slice(1).map(p => ({ san: p.pos.san ?? '', meta: p.evaluation ? fmtEval(p.evaluation) : undefined }))} ply={ply} onGo={go} maxHeight={220} fill />
+              ) : loadingMoves ? (
+                <Skeleton kind="lines" rows={8} label="Loading the moves" />
+              ) : (
+                <p className="type-body text-ink-2">
+                  {round.startsAt && now !== null && round.startsAt > now && <>The game starts on <LocalTime iso={new Date(round.startsAt).toISOString()} />. </>}
+                  The moves appear here as they are played; keep this page open.
+                </p>
               )}
-            </div>
-          </div>
+              {game.truncated && <p className="type-small text-ink-2">Part of the broadcast could not be read; later moves appear once Lichess corrects it.</p>}
+            </>
+          )}
+        />
+      </Section>
 
-          <div className="min-w-0 flex flex-col gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <EvalTile evaluation={prevEval} stale={stale} names={names} failing={evals.failures >= 3} over={cur.pos.over} />
-              <ComplexityTile value={cur.complexity} pos={cur.pos} mover={names[cur.pos.toMove]} result={ply === last ? game.result : null} failing={complexities.failures > 0} />
-            </div>
-            {last > 0 ? (
-              <ol ref={listRef} className="relative grid grid-cols-[2.5rem_1fr_1fr] gap-y-0.5 content-start text-sm max-h-[220px] lg:max-h-[330px] overflow-y-auto pr-1" aria-label="Moves">
-                {Array.from({ length: Math.ceil(last / 2) }, (_, i) => (
-                  <li key={i} className="contents">
-                    <span className="text-[var(--text-muted)] tabular-nums h-7 inline-flex items-center px-1">{i + 1}.</span>
-                    {[i * 2 + 1, i * 2 + 2].map(n => positions[n] ? (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => go(n)}
-                        aria-current={ply === n ? 'step' : undefined}
-                        className={`flex items-center justify-between gap-2 text-left px-1.5 h-7 rounded font-mono ${ply === n ? 'bg-chess-gold/20 text-[var(--text-primary)] font-semibold' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-surface-2)]'}`}
-                      >
-                        <span>{positions[n].san}</span>
-                        <span className="text-[11px] font-normal text-[var(--text-muted)] tabular-nums">{points[n].evaluation ? fmtEval(points[n].evaluation as Evaluation) : ''}</span>
-                      </button>
-                    ) : <span key={n} />)}
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="text-sm text-[var(--text-muted)]">
-                The moves appear here as they are played; keep this page open.
-              </p>
-            )}
-            {game.truncated && <p className="text-xs text-[var(--text-muted)]">Part of the broadcast could not be read; later moves appear once Lichess corrects it.</p>}
-          </div>
-        </div>
-      </section>
-
-      <section className="surface-card p-4 sm:p-6" aria-labelledby="live-charts">
-        <h2 id="live-charts" className="font-heading text-lg text-[var(--text-primary)] mb-1">Complexity and evaluation</h2>
-        <p className="text-sm text-[var(--text-muted)] mb-4 max-w-2xl">
-          Complexity is <Link href="/elocator" className="underline decoration-chess-gold/40 hover:text-[var(--text-secondary)]">Elocator</Link>&rsquo;s 1–100 rating of how hard the position is for the player to move: 70 means harder than 70% of positions from tournament games between players rated 2000+. Click the chart to see a position.
+      <Section
+        id="live-charts" title="Complexity and evaluation" layout="wide"
+        finding={(
+          <>
+            <Finding points={points} names={names} />
+            Complexity is <TextLink href="/elocator">Elocator</TextLink>&rsquo;s 1 to 100 rating of how hard the position is for the player to move: 70 means harder than 70% of positions from tournament games between players rated 2000+.{last > 0 && ' Tap or click the chart to see a position.'}
+          </>
+        )}
+      >
+        {last > 0
+          ? <LiveCharts points={points} selected={ply} onSelect={go} sides={sides} inPlay={inPlay} />
+          : <EmptyState level={3} busy={loadingMoves} title={loadingMoves ? 'Loading the moves' : 'No moves yet'} body={loadingMoves ? undefined : 'Both charts begin with the first move.'} />}
+        <p className="mt-8 type-small text-ink-2">
+          Moves and clocks: <TextLink href={source}>Lichess broadcast</TextLink>. Evaluation: Stockfish, from Lichess&rsquo;s analysis and cloud evaluations.
+          {isMatch && <> <TextLink href={WCC_HREF}>Match odds and predictions</TextLink>.</>}
         </p>
-        <LiveCharts points={points} selected={ply} onSelect={go} names={names} colours={colours} />
-      </section>
+      </Section>
+    </>
+  );
+}
 
-      <p className="text-xs text-[var(--text-muted)]">
-        Moves and clocks: <a className="underline" href={game.headers.GameURL ?? `https://lichess.org/broadcast/-/-/${round.id}`} target="_blank" rel="noopener noreferrer">Lichess broadcast ↗</a>.
-        {' '}Evaluation: Stockfish, from Lichess&rsquo;s analysis and cloud evaluations.
-        {isMatch && <> <Link href={WCC_HREF} className="underline">Match odds and predictions</Link>.</>}
-      </p>
-    </div>
+/** The averages and the hardest position, once nearly every position has its score. */
+function Finding({ points, names }: { points: ChartPoint[]; names: Record<Colour, string> }) {
+  const scored = points.filter(p => p.complexity !== null);
+  if (points.length < 11 || scored.length < points.length * 0.9) return null;
+  const at = points.map(p => ({ ply: p.pos.ply, san: p.pos.san, toMove: p.pos.toMove, complexity: p.complexity }));
+  const [w, b] = [averageComplexity(at, 'w'), averageComplexity(at, 'b')];
+  const top = scored.reduce((m, p) => ((p.complexity as number) > (m.complexity as number) ? p : m));
+  if (w === null || b === null) return null;
+  return (
+    <span className="font-medium text-ink">
+      {names.w}&rsquo;s positions average {Math.round(w)}, {names.b}&rsquo;s {Math.round(b)}. The hardest scores {top.complexity}: {names[top.pos.toMove]} to move {top.pos.ply === 0 ? 'at the start' : `after ${moveLabel(top.pos)}`}.{' '}
+    </span>
   );
 }
 
@@ -328,44 +326,26 @@ function firstGamePicker() {
   };
 }
 
-function Tile({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-lg bg-[var(--bg-surface-2)] p-3.5 min-w-0">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--text-muted)]">{label}</p>
-      {children}
-    </div>
-  );
-}
+interface EvalStatInput { evaluation: Evaluation | null; stale: boolean; names: Record<Colour, string>; failing: boolean; over: boolean }
 
-function EvalTile({ evaluation, stale, names, failing, over }: { evaluation: Evaluation | null; stale: boolean; names: Record<Colour, string>; failing: boolean; over: boolean }) {
+function evalStat({ evaluation, stale, names, failing, over }: EvalStatInput): StatProps {
   let note: string;
   if (over) note = 'Game over on the board';
   else if (!evaluation) note = failing ? 'Evaluation source unreachable, retrying' : 'Waiting for an evaluation';
-  else if (stale) note = 'Previous move; evaluating this one…';
+  else if (stale) note = 'Previous move; evaluating this one';
   else {
     const ahead = evaluation.mate !== undefined ? (evaluation.mate > 0 ? 'w' : 'b') : Math.abs(evaluation.cp ?? 0) < 30 ? null : (evaluation.cp ?? 0) > 0 ? 'w' : 'b';
     note = ahead ? `${names[ahead]} is better` : 'About equal';
-    if (evaluation.depth) note += ` · depth ${Math.min(evaluation.depth, 99)}`;
+    if (evaluation.depth) note += `, depth ${Math.min(evaluation.depth, 99)}`;
   }
-  return (
-    <Tile label="Stockfish">
-      <p className={`font-heading text-3xl text-[var(--text-primary)] tabular-nums mt-1 ${stale ? 'opacity-50' : ''}`}>{evaluation ? fmtEval(evaluation) : '–'}</p>
-      <p className="text-xs text-[var(--text-muted)] mt-1">{note}</p>
-    </Tile>
-  );
+  return { label: 'Stockfish', size: 'lg', value: <span className={stale ? 'text-ink-3' : undefined}>{evaluation ? fmtEval(evaluation) : '–'}</span>, sub: note };
 }
 
-function ComplexityTile({ value, pos, mover, result, failing }: { value: number | null; pos: LivePosition; mover: string; result: string | null; failing: boolean }) {
+interface ComplexityStatInput { value: number | null; pos: LivePosition; mover: string; result: string | null; failing: boolean }
+
+function complexityStat({ value, pos, mover, result, failing }: ComplexityStatInput): StatProps {
   const note = pos.over ? 'No move to find'
-    : value === null ? (failing ? 'Elocator is waking up, retrying' : 'Scoring this position…')
+    : value === null ? (failing ? 'Elocator is waking up, retrying' : 'Scoring this position')
       : result ? 'Final position' : `${mover} to move`;
-  return (
-    <Tile label="Complexity">
-      <p className="font-heading text-3xl text-[var(--text-primary)] tabular-nums mt-1">
-        {value ?? '–'}
-      </p>
-      {value !== null && <div className="mt-1.5"><ComplexityBar score={value} /></div>}
-      <p className="text-xs text-[var(--text-muted)] mt-1">{note}</p>
-    </Tile>
-  );
+  return { label: 'Complexity', size: 'lg', value: value ?? '–', visual: value !== null ? <ComplexityScale score={value} /> : undefined, sub: note };
 }

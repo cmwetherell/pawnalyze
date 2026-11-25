@@ -50,7 +50,8 @@ export function GameSheet({ games, players, locked, onPick, onPreview, className
   const listId = useId();
   const [more, setMore] = useState(false);
   const rest = games.slice(FIRST);
-  const open = more || rest.some(g => g.pick !== undefined || g.live || g.next || g.result !== null);
+  const needed = rest.some(g => g.pick !== undefined || g.live || g.next || g.result !== null);
+  const open = more || needed;
   return (
     <div className={className}>
       <ol id={listId} aria-label="Classical games" className="grid grid-cols-1 border-t border-control lg:grid-cols-7">
@@ -61,9 +62,9 @@ export function GameSheet({ games, players, locked, onPick, onPreview, className
           />
         ))}
       </ol>
-      {rest.length > 0 && !open && (
-        <Button full aria-expanded={false} aria-controls={listId} onClick={() => setMore(true)} iconEnd="chevron-down" className="mt-4 lg:hidden">
-          Show games {rest[0].gameNo} to {rest[rest.length - 1].gameNo}
+      {rest.length > 0 && !needed && (
+        <Button full aria-expanded={more} aria-controls={listId} onClick={() => setMore(m => !m)} iconEnd={more ? 'chevron-up' : 'chevron-down'} className="mt-4 lg:hidden">
+          {more ? 'Hide' : 'Show'} games {rest[0].gameNo} to {rest[rest.length - 1].gameNo}
         </Button>
       )}
     </div>
@@ -93,6 +94,8 @@ export function GameCell({ game: g, players, locked, onPick, onPreview, classNam
   const black = g.whiteName === null ? null : g.whiteName === players[1].shortName ? players[2].shortName : players[1].shortName;
   const note = g.unreachable ? 'Not played: match already decided' : g.gameNo >= 8 && !done ? `Played in ${formatPct(g.pPlayed, 0)}` : null;
 
+  const when = g.live ? <Link href={g.href} className="rounded-sm underline-offset-4 hover:underline"><LiveDot label="Live now" /></Link> : g.dateLabel;
+
   return (
     <li
       className={cn(
@@ -110,19 +113,19 @@ export function GameCell({ game: g, players, locked, onPick, onPreview, classNam
         <span aria-hidden className={cn('pointer-events-none absolute -inset-x-3 -bottom-px -top-px border-2 border-ink lg:inset-x-0', g.gameNo % 7 === 1 && 'lg:-left-3', g.gameNo % 7 === 0 && 'lg:-right-3')} />
       )}
 
-      <div className="flex min-w-0 flex-col lg:gap-y-1">
+      <div className="flex min-w-0 flex-col justify-center lg:gap-y-1">
         <div className="flex flex-wrap items-center justify-between gap-x-2">
           <Link
             href={g.href}
             aria-label={`Game ${g.gameNo}, watch or replay`}
-            className={cn('inline-flex min-h-tap items-center gap-2 whitespace-nowrap rounded-sm type-h3 underline-offset-4 transition-colors duration-in hover:underline hover:decoration-brand-mark', g.unreachable ? 'text-ink-3' : 'text-ink')}
+            className={cn('-my-2 inline-flex min-h-tap items-center gap-2 whitespace-nowrap rounded-sm type-h3 lg:my-0 underline-offset-4 transition-colors duration-in hover:underline hover:decoration-brand-mark', g.unreachable ? 'text-ink-3' : 'text-ink')}
           >
             <span><span className="lg:hidden">Game </span>{g.gameNo}</span>
             <Icon name="play" size={14} className="text-ink-3" />
           </Link>
-          <span className={cn('hidden whitespace-nowrap type-label lg:block', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{g.dateLabel}</span>
+          <span className={cn('hidden whitespace-nowrap type-label lg:block', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{when}</span>
         </div>
-        <p className={cn('type-label lg:hidden', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{g.dateLabel}</p>
+        <p className={cn('type-label lg:hidden', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{when}</p>
         <p className={cn('mt-1 flex items-center gap-1.5 type-label lg:mt-0 xl:gap-2 xl:type-small', g.unreachable ? 'text-ink-3' : 'text-ink-2')} title={g.whiteAssumed ? 'Colours are assumed until the draw' : undefined}>
           <PieceDot side="white" />
           <span className="min-w-0 truncate">White: {g.whiteName ?? 'to be drawn'}</span>
@@ -138,7 +141,6 @@ export function GameCell({ game: g, players, locked, onPick, onPreview, classNam
           </div>
         ) : (
           <>
-            {g.live && <Link href={g.href} className="inline-flex min-h-tap w-fit items-center rounded-sm underline-offset-4 hover:underline"><LiveDot label="Live now" /></Link>}
             <PickToggle
               legend={`Game ${g.gameNo}`} options={OUTCOMES.map(option)} value={g.pick ?? null} disabled={locked || g.unreachable}
               onChange={v => onPick(g.gameNo, v)} onPreview={onPreview ? v => onPreview(v && g.swing ? g.swing[v] : null) : undefined}

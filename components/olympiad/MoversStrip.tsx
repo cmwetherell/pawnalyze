@@ -1,48 +1,40 @@
 'use client';
 
-import Flag from '@/components/ui/Flag';
-import { formatPct } from '@/components/ui/ProbBar';
+import { Chip } from '@/components/ui/Chip';
+import { Delta } from '@/components/ui/Delta';
+import { Flag } from '@/components/ui/Flag';
+import { ScrollRow } from '@/components/ui/ScrollRow';
+import { formatPct } from '@/lib/format';
 import { movers } from '@/lib/olympiad/odds';
 import type { HistoryPoint, Team } from '@/lib/olympiad/types';
+import { shortTeamName } from './teams';
 
 interface MoversStripProps {
   history: HistoryPoint[];
   teamsById: Map<number, Team>;
-  onSelect?: (teamId: number) => void;
-  roundLabel: string;
+  onSelect: (teamId: number) => void;
+  /** "round 4": what the changes are counted from. */
+  since: string;
 }
 
-export default function MoversStrip({ history, teamsById, onSelect, roundLabel }: MoversStripProps) {
+export function MoversStrip({ history, teamsById, onSelect, since }: MoversStripProps) {
   const { up, down } = movers(history, 4);
-  if (up.length === 0 && down.length === 0) return null;
-  const chips = [...up, ...down];
+  const all = [...up, ...down];
+  if (all.length === 0) return null;
+  const label = `Gold-odds movers since ${since}`;
   return (
-    <div className="mb-4">
-      <div className="text-[11px] uppercase tracking-wider text-[var(--text-muted)] mb-1.5">Gold-odds movers since {roundLabel}</div>
-      <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
-        {chips.map(m => {
+    <div>
+      <p className="mb-2 type-label text-ink-2">{label}</p>
+      <ScrollRow label={label} bleed>
+        {all.map(m => {
           const team = teamsById.get(m.teamId);
-          if (!team) return null;
-          const upward = m.delta > 0;
-          return (
-            <button
-              key={m.teamId}
-              type="button"
-              onClick={() => onSelect?.(m.teamId)}
-              title={`${team.name}: ${formatPct(m.from)} → ${formatPct(m.to)}`}
-              className={`shrink-0 inline-flex items-center gap-1.5 h-10 pl-2 pr-3 rounded-full text-xs border transition-colors ${
-                upward
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
-                  : 'border-rose-500/30 bg-rose-500/10 text-rose-500 dark:text-rose-400 hover:bg-rose-500/20'
-              }`}
-            >
-              <Flag code={team.fedCode} size="xs" className="!ring-0" aria-hidden />
-              <span className="font-medium text-[var(--text-primary)] max-w-[9rem] truncate">{team.name}</span>
-              <span className="tabular-nums font-semibold">{upward ? '▲' : '▼'} {(Math.abs(m.delta) * 100).toFixed(1)}</span>
-            </button>
+          return team && (
+            <Chip key={m.teamId} icon={<Flag code={team.fedCode} size="xs" decorative />} title={`${team.name}: ${formatPct(m.from)} to ${formatPct(m.to)}`} onClick={() => onSelect(m.teamId)}>
+              {shortTeamName(team.name)} <Delta value={m.to} base={m.from} short className="ml-1" />
+            </Chip>
           );
         })}
-      </div>
+      </ScrollRow>
     </div>
   );
 }

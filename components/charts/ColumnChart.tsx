@@ -104,7 +104,9 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
   const numbers = [...printed].sort((a, b) => Number(big(b)) - Number(big(a)) || Number(marked(b)) - Number(marked(a))).reduce<number[]>((kept, i) => {
     const a = valueBox(i);
     const hit = kept.some(k => { const b = valueBox(k); return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && a.bottom - a.h < b.bottom && b.bottom - b.h < a.bottom; });
-    return hit && !big(i) ? kept : [...kept, i];
+    // Nor may a number wider than its column stand on a taller neighbour.
+    const covered = columns.some((_, k) => k !== i && crown(k) < a.bottom - 2 && left(k) < a.x + a.w / 2 - 2 && left(k) + wide(k) > a.x - a.w / 2 + 2);
+    return (hit || covered) && !big(i) ? kept : [...kept, i];
   }, []);
 
   const labelWidth = (i: number) => textWidth(columns[i].label, 13, marked(i)) + 8;

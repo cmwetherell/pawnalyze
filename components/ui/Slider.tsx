@@ -32,7 +32,7 @@ export function Slider({ label, value, min, max, step, onChange, format, tone = 
     <div className={cn(disabled && 'opacity-50', className)}>
       <div className="flex items-baseline justify-between gap-3">
         <label htmlFor={id} className="type-ui text-ink">{label}</label>
-        <output htmlFor={id} className="type-data font-medium text-ink">{format(value)}</output>
+        <output htmlFor={id} className="shrink-0 type-data font-medium text-ink">{format(value)}</output>
       </div>
       <div className="relative flex h-tap items-center">
         <input

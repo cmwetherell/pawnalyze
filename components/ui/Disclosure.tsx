@@ -26,12 +26,13 @@ export function Disclosure({ summary, meta, open, variant = 'plain', id, classNa
           row ? 'min-h-12 justify-between gap-4 py-3 type-ui text-ink' : 'w-fit max-w-full type-small text-ink-2 hover:text-ink',
         )}
       >
-        {!row && <Icon name="chevron-right" size={14} className="transition-transform duration-slide group-open/details:rotate-90" />}
+        {!row && <Icon name="chevron-right" size={14} className="transition-transform duration-slide [[open]>summary>&]:rotate-90" />}
         <span className={cn('min-w-0', row && cn(goldLine, '[summary:hover>&]:underline'))}>{summary}</span>
         {meta && <span className={cn('type-small text-ink-3', row && 'ml-auto shrink-0')}>{meta}</span>}
-        {row && <Icon name="chevron-down" size={16} className="text-ink-3 transition-transform duration-slide group-open/details:rotate-180" />}
+        {row && <Icon name="chevron-down" size={16} className="text-ink-3 transition-transform duration-slide [[open]>summary>&]:rotate-180" />}
       </summary>
-      <div className={row ? 'pb-6' : 'pt-2'}>{children}</div>
+      {/* The row's own rule closes it, so the last row inside drops its line. */}
+      <div className={row ? 'pb-6 [&>:last-child]:border-b-0' : 'pt-2'}>{children}</div>
     </details>
   );
 }

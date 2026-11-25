@@ -25,9 +25,10 @@ export function OddsChip({ sides, preview, variant = 'inline', className }: Odds
     return (
       <span className={cn('grid h-12 min-w-0 flex-1 grid-cols-2 gap-0.5 overflow-hidden rounded-sm', className)}>
         {sides.map((s, i) => (
-          <span key={s.name} className={cn('flex min-w-0 items-center justify-between gap-2 px-3 type-ui', fillClass[s.tone], onClass[s.tone])}>
-            <span className="truncate">{s.name}{would && <span className="sr-only"> would be</span>}</span>
-            <span className="tnum font-semibold">{formatPct(p[i])}</span>
+          // Name over number, each half read from its own side: both fit at 320.
+          <span key={s.name} className={cn('flex min-w-0 flex-col justify-center px-3 leading-tight', i === 1 && 'text-right', fillClass[s.tone], onClass[s.tone])}>
+            <span className="truncate type-label leading-tight">{s.name}{would && <span className="sr-only"> would be</span>}</span>
+            <span className="tnum type-ui font-semibold leading-tight">{formatPct(p[i])}</span>
           </span>
         ))}
       </span>

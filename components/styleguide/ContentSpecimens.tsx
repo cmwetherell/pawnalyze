@@ -128,6 +128,7 @@ export function PictureSpecimens() {
           {(['xs', 'sm', 'md', 'lg', 'xl', 'hero'] as const).map(s => <Flag key={s} code="UZB" size={s} title="Uzbekistan" />)}
           <Flag code="IBC" size="lg" title="IBCA" />
           <FlagStack items={RACE.map(([name, code]) => ({ name, code }))} max={5} />
+          <FlagStack items={RACE.slice(0, 3).map(([name, code]) => ({ name, code }))} more={203} />
         </Variants>
       </Specimen>
       <Specimen name="Medal" from="ui/Medal"><Variants>{([1, 2, 3] as const).map(r => <Medal key={r} rank={r} />)}{([1, 2, 3] as const).map(r => <Medal key={r} rank={r} size={28} />)}</Variants></Specimen>

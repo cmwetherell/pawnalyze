@@ -44,14 +44,6 @@ export const metadata: Metadata = {
     description:
       "Advanced chess analytics with tournament predictions, interactive scenario explorer, and in-depth analysis. Discover, analyze, and predict with Pawnalyze.",
     siteName: siteConfig.name,
-    images: [
-      {
-        url: "https://opengraph.b-cdn.net/production/documents/6250d357-0195-42a7-b47f-744756ea9b37.png?token=O1TzXLBYnJ3ucc_mviBU6ttPMd9uW-c2iKFJJ2b4VsU&height=1200&width=1200&expires=33247948154",
-        width: 1200,
-        height: 1200,
-        alt: "Pawnalyze | Chess Analytics",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -60,9 +52,6 @@ export const metadata: Metadata = {
     description:
       "Advanced chess analytics with tournament predictions, interactive scenario explorer, and in-depth analysis. Discover, analyze, and predict with Pawnalyze.",
     creator: "@pawnalyze",
-    images: [
-      "https://opengraph.b-cdn.net/production/documents/6250d357-0195-42a7-b47f-744756ea9b37.png?token=O1TzXLBYnJ3ucc_mviBU6ttPMd9uW-c2iKFJJ2b4VsU&height=1200&width=1200&expires=33247948154",
-    ],
   },
   metadataBase: new URL(siteConfig.metadataBase),
 };

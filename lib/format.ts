@@ -33,8 +33,9 @@ export function inHundred(p: number): string {
 /**
  * Named formats, so a server component can hand one to a client chart (a function cannot cross that boundary).
  * `pct`: 0..1 to "34.3%". `pct0`: 0..1 to "34%". `percent`: 0..100 to "34.3%". `percent0`: 0..100 to "34%".
+ * `plain`: a whole number with no thousands mark, for ratings.
  */
-export type ValueFormat = 'pct' | 'pct0' | 'percent' | 'percent0' | 'int' | 'one' | 'signed';
+export type ValueFormat = 'pct' | 'pct0' | 'percent' | 'percent0' | 'int' | 'plain' | 'one' | 'signed';
 export type Formatter = ValueFormat | ((v: number) => string);
 
 const FORMATS: Record<ValueFormat, (v: number) => string> = {
@@ -43,6 +44,7 @@ const FORMATS: Record<ValueFormat, (v: number) => string> = {
   percent: v => formatPct(v / 100),
   percent0: v => formatPct(v / 100, 0),
   int: v => Math.round(v).toLocaleString('en-US'),
+  plain: v => String(Math.round(v)),
   one: v => v.toFixed(1),
   signed: v => (v > 0 ? `+${v}` : v < 0 ? `−${Math.abs(v)}` : '0'),
 };

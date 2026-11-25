@@ -12,6 +12,8 @@ export interface DeltaProps {
   better?: 'up' | 'down';
   /** No colour: for dense tables where direction is enough. */
   quiet?: boolean;
+  /** Decimals for places and plain (default 0): an average finish moves by tenths. */
+  digits?: 0 | 1;
   /** Leaves the unit word to assistive tech. */
   short?: boolean;
   /** Size of the change as text, for `unit="plain"` ("$40k"). */
@@ -25,9 +27,9 @@ export interface DeltaProps {
  * Change against a base: arrow, sign, size. Never colour alone. Renders nothing when it rounds to zero.
  * For places the arrow and sign say which way the entry moved, so rank 5 to 3 reads "up 2 places".
  */
-export function Delta({ value, base, unit = 'pts', better = 'up', quiet = false, short = false, format, label, className }: DeltaProps) {
+export function Delta({ value, base, unit = 'pts', better = 'up', quiet = false, digits = 0, short = false, format, label, className }: DeltaProps) {
   const d = unit === 'pts' ? (value - base) * 100 : value - base;
-  const whole = unit === 'places' || unit === 'plain';
+  const whole = (unit === 'places' || unit === 'plain') && digits === 0;
   if (Math.abs(d) < (whole ? 0.5 : 0.05)) return null;
   const good = d > 0 === (better === 'up');
   const up = unit === 'places' && better === 'down' ? good : d > 0;
