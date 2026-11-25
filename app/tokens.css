@@ -1,0 +1,267 @@
+/* Pawnalyze theme tokens. THE ONLY FILE in the repo that may hold a colour literal.
+   Colours are "R G B" channel triplets so Tailwind opacity modifiers work: rgb(var(--ink) / <alpha>).
+   Light values on :root, dark on .dark (the default class on <html>).
+   After any edit: npm run theme (regenerates lib/theme/tokens.generated.ts, checks contrast and colour-blind separation). */
+:root {
+  color-scheme: light;
+
+  /* Surfaces: canvas < surface < sunken; raised floats above */
+  --canvas: 251 252 250;          /* #fbfcfa  page ground */
+  --surface: 240 243 241;         /* #f0f3f1  tinted band, panel, table hover */
+  --sunken: 228 233 230;          /* #e4e9e6  bar tracks, hover fills, wells */
+  --raised: 255 255 255;          /* #ffffff  sheets, menus, tooltips, inputs */
+  --overlay: 9 20 26;             /* #09141a  scrim; always used with an opacity */
+
+  /* Ink */
+  --ink: 12 31 43;                /* #0c1f2b  headings, figures, primary text */
+  --ink-2: 56 74 84;              /* #384a54  body text, labels that carry data */
+  --ink-3: 85 102 111;            /* #55666f  meta, axis ticks, credits */
+  --ink-inverse: 251 252 250;     /* #fbfcfa  text on ink */
+
+  /* Lines */
+  --line: 214 221 218;            /* #d6ddda  hairlines between rows; default border colour */
+  --control: 111 126 134;         /* #6f7e86  3:1 edge of inputs, toggles, chips, axes */
+  --rule: 12 31 43;               /* #0c1f2b  the 2px section rule */
+
+  /* Action and focus */
+  --action: 2 48 72;              /* #023048  primary button, active segment (logo petrol in light) */
+  --action-hover: 11 74 107;      /* #0b4a6b */
+  --on-action: 255 255 255;       /* #ffffff */
+  --focus: 2 48 72;               /* #023048  2px focus ring */
+
+  /* Brand: heritage gold. Link underline, current page, crown, our model marker. Nothing else */
+  --brand: 122 90 8;              /* #7a5a08  gold as text */
+  --brand-mark: 166 124 18;       /* #a67c12  gold as a line or glyph */
+  --brand-wash: 245 238 218;      /* #f5eeda */
+
+  /* Status */
+  --positive: 15 112 69;          /* #0f7045 */
+  --positive-wash: 225 240 232;   /* #e1f0e8 */
+  --negative: 179 38 58;          /* #b3263a */
+  --negative-wash: 249 228 230;   /* #f9e4e6 */
+  --warning: 138 90 0;            /* #8a5a00 */
+  --warning-wash: 247 236 212;    /* #f7ecd4 */
+  --live: 200 16 46;              /* #c8102e */
+  --live-wash: 251 227 230;       /* #fbe3e6 */
+  --on-live: 255 255 255;         /* #ffffff */
+
+  /* Match sides. One data shade everywhere; field only behind portraits; ink only for text */
+  --p1: 204 74 20;                /* #cc4a14  Gukesh: data marks */
+  --p1-ink: 168 56 10;            /* #a8380a  Gukesh: text */
+  --p1-field: 195 60 11;          /* #c33c0b  Gukesh: portrait block */
+  --p1-wash: 251 233 225;         /* #fbe9e1  Gukesh: picked cell, row tint */
+  --on-p1: 255 255 255;           /* #ffffff  text on p1 */
+  --p2: 28 105 201;               /* #1c69c9  Sindarov: data marks */
+  --p2-ink: 26 95 181;            /* #1a5fb5  Sindarov: text */
+  --p2-field: 26 91 201;          /* #1a5bc9  Sindarov: portrait block */
+  --p2-wash: 227 237 249;         /* #e3edf9  Sindarov: picked cell, row tint */
+  --on-p2: 255 255 255;           /* #ffffff  text on p2 */
+  --draw: 122 136 145;            /* #7a8891  draw / still level */
+  --on-draw: 12 31 43;            /* #0c1f2b */
+  --on-field: 255 255 255;        /* #ffffff  text on p1-field or p2-field */
+
+  /* Medals */
+  --gold: 169 126 10;             /* #a97e0a */
+  --silver: 116 138 153;          /* #748a99 */
+  --bronze: 149 80 31;            /* #95501f */
+  --on-gold: 12 31 43;            /* #0c1f2b */
+  --on-silver: 12 31 43;          /* #0c1f2b */
+  --on-bronze: 255 255 255;       /* #ffffff */
+
+  /* Categorical series, fixed order, never violet */
+  --series-1: 28 105 201;         /* #1c69c9 */
+  --series-2: 204 74 20;          /* #cc4a14 */
+  --series-3: 10 125 99;          /* #0a7d63 */
+  --series-4: 176 125 0;          /* #b07d00 */
+  --series-5: 207 74 134;         /* #cf4a86 */
+  --series-6: 63 125 30;          /* #3f7d1e */
+  --series-7: 10 140 166;         /* #0a8ca6 */
+  --series-8: 192 47 61;          /* #c02f3d */
+  --on-mid: 5 11 14;              /* #050b0e  text on the mid tones: context, cx-1, series 4, 5, 7, brand-mark */
+
+  /* Chart furniture */
+  --context: 124 139 147;         /* #7c8b93  de-emphasised series */
+  --grid: 226 232 229;            /* #e2e8e5  gridlines */
+  --axis: 111 126 134;            /* #6f7e86  baseline */
+
+  /* Board, pieces and evaluation */
+  --board-light: 232 236 228;     /* #e8ece4 */
+  --board-dark: 143 166 160;      /* #8fa6a0 */
+  --board-mark: 217 179 71;       /* #d9b347  last move, at 55% */
+  --board-ink: 12 31 43;          /* #0c1f2b  coordinates */
+  --piece-white: 255 255 255;     /* #ffffff  side marker */
+  --piece-black: 12 31 43;        /* #0c1f2b  side marker */
+  --eval-white: 251 252 250;      /* #fbfcfa */
+  --eval-black: 12 31 43;         /* #0c1f2b */
+
+  /* Elocator complexity: one teal ramp, Simple to Extreme */
+  --cx-1: 72 149 143;             /* #48958f  1-25 Simple */
+  --cx-2: 31 119 115;             /* #1f7773  26-50 Moderate */
+  --cx-3: 11 87 87;               /* #0b5757  51-75 Complex */
+  --cx-4: 5 56 56;                /* #053838  76-100 Extreme */
+
+  /* Shadows: only floating surfaces (menu, sheet, tooltip) */
+  --shadow-pop: 0 1px 2px rgb(12 31 43 / .08), 0 12px 32px -8px rgb(12 31 43 / .22);
+  --logo-filter: none;
+  --press-filter: none;              /* publication logos */
+
+  /* Type sizes: each has a Tailwind text-* style of the same name */
+  --t-figure: clamp(50px, 9.2vw, 128px);   /* the headline odds; one pair per page */
+  --t-mega: clamp(38px, 8.2vw, 112px);     /* landing h1, match title */
+  --t-h1: clamp(34px, 4.8vw, 64px);        /* dashboard title */
+  --t-h2: clamp(26px, 2.6vw, 36px);
+  --t-h3: 22px;
+  --t-stat: clamp(30px, 3vw, 44px);        /* standalone figure */
+  --t-stat-sm: 26px;
+  --t-quote: clamp(24px, 2.8vw, 38px);
+  --t-standfirst: clamp(19px, 1.8vw, 25px);
+  --t-lead: 18px;
+  --t-body: 16px;
+  --t-data: 15px;
+  --t-small: 14px;
+  --t-label: 13px;
+  --t-micro: 12px;                         /* chart ticks and photo credits only */
+
+  /* Space and frame */
+  --page: 1280px;
+  --reading: 680px;
+  --gutter: 20px;
+  --section: 56px;                         /* padding above and below a section */
+  --section-landing: 72px;
+  --header: 60px;
+  --bar: 52px;                             /* sticky SectionBar */
+  --bottom-bar: 0px;                       /* set to 64px + inset by BottomBar */
+  --tap: 44px;
+
+  /* Shape: near-square, like a printed page */
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-full: 999px;
+
+  /* Motion */
+  --m-press: 90ms;
+  --m-out: 120ms;
+  --m-in: 150ms;
+  --m-slide: 240ms;
+  --m-data: 450ms;
+  --m-image: 600ms;
+  --m-enter: 700ms;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --ease-enter: cubic-bezier(.22, 1, .36, 1);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces: canvas < surface < sunken; raised floats above */
+  --canvas: 10 20 24;             /* #0a1418 */
+  --surface: 16 30 36;            /* #101e24 */
+  --sunken: 26 43 50;             /* #1a2b32 */
+  --raised: 20 36 43;             /* #14242b */
+  --overlay: 3 8 10;              /* #03080a */
+
+  /* Ink */
+  --ink: 241 244 240;             /* #f1f4f0 */
+  --ink-2: 188 200 201;           /* #bcc8c9 */
+  --ink-3: 147 162 166;           /* #93a2a6 */
+  --ink-inverse: 10 20 24;        /* #0a1418 */
+
+  /* Lines */
+  --line: 35 52 59;               /* #23343b */
+  --control: 107 127 134;         /* #6b7f86 */
+  --rule: 205 214 211;            /* #cdd6d3 */
+
+  /* Action and focus */
+  --action: 241 244 240;          /* #f1f4f0 */
+  --action-hover: 207 216 213;    /* #cfd8d5 */
+  --on-action: 10 20 24;          /* #0a1418 */
+  --focus: 241 244 240;           /* #f1f4f0 */
+
+  /* Brand: heritage gold. Link underline, current page, crown, our model marker. Nothing else */
+  --brand: 224 189 104;           /* #e0bd68 */
+  --brand-mark: 207 168 74;       /* #cfa84a */
+  --brand-wash: 36 30 15;         /* #241e0f */
+
+  /* Status */
+  --positive: 78 196 140;         /* #4ec48c */
+  --positive-wash: 15 43 33;      /* #0f2b21 */
+  --negative: 242 120 138;        /* #f2788a */
+  --negative-wash: 51 24 29;      /* #33181d */
+  --warning: 230 174 74;          /* #e6ae4a */
+  --warning-wash: 43 33 15;       /* #2b210f */
+  --live: 240 86 106;             /* #f0566a */
+  --live-wash: 53 22 27;          /* #35161b */
+  --on-live: 10 20 24;            /* #0a1418 */
+
+  /* Match sides. One data shade everywhere; field only behind portraits; ink only for text */
+  --p1: 232 102 47;               /* #e8662f */
+  --p1-ink: 255 138 88;           /* #ff8a58 */
+  --p1-field: 195 60 11;          /* #c33c0b */
+  --p1-wash: 44 24 15;            /* #2c180f */
+  --on-p1: 10 20 24;              /* #0a1418 */
+  --p2: 63 139 234;               /* #3f8bea */
+  --p2-ink: 111 176 255;          /* #6fb0ff */
+  --p2-field: 26 91 201;          /* #1a5bc9 */
+  --p2-wash: 16 34 58;            /* #10223a */
+  --on-p2: 10 20 24;              /* #0a1418 */
+  --draw: 120 131 130;            /* #788382 */
+  --on-draw: 10 20 24;            /* #0a1418 */
+  --on-field: 255 255 255;        /* #ffffff */
+
+  /* Medals */
+  --gold: 227 187 82;             /* #e3bb52 */
+  --silver: 179 196 208;          /* #b3c4d0 */
+  --bronze: 200 127 72;           /* #c87f48 */
+  --on-gold: 10 20 24;            /* #0a1418 */
+  --on-silver: 10 20 24;          /* #0a1418 */
+  --on-bronze: 10 20 24;          /* #0a1418 */
+
+  /* Categorical series, fixed order, never violet */
+  --series-1: 63 139 234;         /* #3f8bea */
+  --series-2: 232 102 47;         /* #e8662f */
+  --series-3: 33 166 115;         /* #21a673 */
+  --series-4: 192 138 18;         /* #c08a12 */
+  --series-5: 224 98 143;         /* #e0628f */
+  --series-6: 111 159 42;         /* #6f9f2a */
+  --series-7: 26 160 189;         /* #1aa0bd */
+  --series-8: 224 85 99;          /* #e05563 */
+  --on-mid: 0 0 0;                /* #000000 */
+
+  /* Chart furniture */
+  --context: 102 122 130;         /* #667a82 */
+  --grid: 27 42 48;               /* #1b2a30 */
+  --axis: 107 127 134;            /* #6b7f86 */
+
+  /* Board, pieces and evaluation */
+  --board-light: 203 214 208;     /* #cbd6d0 */
+  --board-dark: 122 150 145;      /* #7a9691 */
+  --board-mark: 217 179 71;       /* #d9b347 */
+  --board-ink: 10 20 24;          /* #0a1418 */
+  --piece-white: 241 244 240;     /* #f1f4f0 */
+  --piece-black: 5 11 14;         /* #050b0e */
+  --eval-white: 241 244 240;      /* #f1f4f0 */
+  --eval-black: 5 11 14;          /* #050b0e */
+
+  /* Elocator complexity: one teal ramp, Simple to Extreme */
+  --cx-1: 51 129 124;             /* #33817c */
+  --cx-2: 70 169 161;             /* #46a9a1 */
+  --cx-3: 125 211 201;            /* #7dd3c9 */
+  --cx-4: 203 246 238;            /* #cbf6ee */
+
+
+  --shadow-pop: 0 1px 2px rgb(0 0 0 / .4), 0 16px 40px -8px rgb(0 0 0 / .6);
+  --logo-filter: brightness(0) invert(1);
+  --press-filter: brightness(0) invert(1);
+}
+
+
+@media (min-width: 768px) {
+  :root { --gutter: 48px; --section: 72px; --section-landing: 104px; --header: 72px; --bar: 56px; }
+}
+@media (min-width: 1280px) {
+  :root { --gutter: 80px; --section: 80px; --section-landing: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --m-press: 0ms; --m-out: 0ms; --m-in: 0ms; --m-slide: 0ms; --m-data: 0ms; --m-image: 0ms; --m-enter: 0ms; }
+}

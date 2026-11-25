@@ -1,35 +1,53 @@
+import { Fragment } from 'react';
+
 import type { PhotoCredit as Credit } from '@/lib/wcc/photos';
+import { cn } from '@/lib/utils';
 
-const linkCls = 'underline decoration-current/30 underline-offset-2 hover:decoration-current';
+const linkCls = 'text-ink-2 underline decoration-control decoration-1 underline-offset-2 transition-colors duration-in hover:text-ink';
 
-/** "Photo: Frans Peeters · CC BY-SA 2.0", linking to the Commons page and the licence. */
-export function PhotoCaption({ photo, className = '' }: { photo: Credit; className?: string }) {
-  const licence = photo.license.replace(/\s*\(.*\)$/, '');
+/** Author and licence, each a link. */
+function Source({ photo }: { photo: Credit }) {
   return (
-    <span className={`inline-flex flex-wrap items-center gap-x-1 ${className}`}>
-      <span aria-hidden>Photo:</span>
+    <>
       <a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer" className={linkCls} aria-label={`Photo by ${photo.author} on Wikimedia Commons`}>
         {photo.author.replace(/\s*\(.*\)$/, '')}
       </a>
-      <span aria-hidden>·</span>
-      <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer license" className={linkCls}>{licence}</a>
+      <span aria-hidden>, </span>
+      <a href={photo.licenseUrl} target="_blank" rel="noopener noreferrer license" className={linkCls}>{photo.license.replace(/\s*\(.*\)$/, '')}</a>
+    </>
+  );
+}
+
+/** "Photo: Frans Peeters, CC BY-SA 2.0", linking to the Commons page and the licence. */
+export function PhotoCaption({ photo, className }: { photo: Credit; className?: string }) {
+  return (
+    <span className={cn('type-micro text-ink-3', className)}>
+      <span aria-hidden>Photo: </span>
+      <Source photo={photo} />
+    </span>
+  );
+}
+
+/** Several photos in one line: "Photos: A, licence; B, licence. Backgrounds removed, black and white." `changes` says what was altered. */
+export function PhotoCreditLine({ photos, changes, className }: { photos: Credit[]; changes?: string; className?: string }) {
+  return (
+    <span className={cn('type-micro text-ink-3', className)}>
+      {photos.length > 1 ? 'Photos: ' : 'Photo: '}
+      {photos.map((p, i) => <Fragment key={p.src}>{i > 0 && '; '}<Source photo={p} /></Fragment>)}
+      .{changes && ` ${changes}.`}
     </span>
   );
 }
 
 /** Full TASL attribution list (title, author, source, licence, changes). */
-export function PhotoCreditList({ credits, className = '' }: { credits: Credit[]; className?: string }) {
+export function PhotoCreditList({ credits, className }: { credits: Credit[]; className?: string }) {
   return (
-    <ul className={`space-y-3 ${className}`}>
+    <ul className={cn('space-y-3', className)}>
       {credits.map(c => (
-        <li key={c.sourceUrl} className="text-xs leading-relaxed text-[var(--text-muted)]">
-          <a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" className={`text-[var(--text-secondary)] font-medium ${linkCls}`}>
-            {c.title}
-          </a>
+        <li key={`${c.sourceUrl}-${c.src}`} className="max-w-reading type-small text-ink-2">
+          <a href={c.sourceUrl} target="_blank" rel="noopener noreferrer" className={cn(linkCls, 'text-ink')}>{c.title}</a>
           {' '}by{' '}
-          {c.authorUrl ? (
-            <a href={c.authorUrl} target="_blank" rel="noopener noreferrer" className={linkCls}>{c.author}</a>
-          ) : c.author}
+          {c.authorUrl ? <a href={c.authorUrl} target="_blank" rel="noopener noreferrer" className={linkCls}>{c.author}</a> : c.author}
           {', '}
           <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer license" className={linkCls}>{c.license}</a>
           , via Wikimedia Commons. {c.modified}.

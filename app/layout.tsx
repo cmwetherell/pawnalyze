@@ -1,31 +1,26 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import "flag-icons/css/flag-icons.min.css";
-import Navbar from "@/components/navbar";
-import { Inter as FontSans } from "next/font/google";
-import localFont from "next/font/local";
-import { siteConfig } from "@/config/site";
-import { Viewport } from "next";
-import { cn } from "@/lib/utils";
-import { Analytics } from "@vercel/analytics/react";
+import type { Metadata, Viewport } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/components/ThemeProvider";
-
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const fontHeading = localFont({
-  src: "../assets/fonts/CalSans-SemiBold.woff2",
-  variable: "--font-heading",
-});
+import { Analytics } from "@vercel/analytics/react";
+import "./tokens.css";
+import "flag-icons/css/flag-icons.min.css";
+import "./globals.css";
+import "./legacy.css"; // pages not yet migrated; see the note in the file
+import { SiteFooter } from "@/components/layout/SiteFooter";
+import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SkipLink } from "@/components/layout/SkipLink";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { siteConfig } from "@/config/site";
+import { TOKENS } from "@/lib/theme/tokens.generated";
+import { cn } from "@/lib/utils";
+import { fontVariables } from "./fonts";
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "#0F1116" },
+    { media: "(prefers-color-scheme: light)", color: TOKENS.light.canvas },
+    { media: "(prefers-color-scheme: dark)", color: TOKENS.dark.canvas },
   ],
 };
 
@@ -69,16 +64,12 @@ export const metadata: Metadata = {
       "https://opengraph.b-cdn.net/production/documents/6250d357-0195-42a7-b47f-744756ea9b37.png?token=O1TzXLBYnJ3ucc_mviBU6ttPMd9uW-c2iKFJJ2b4VsU&height=1200&width=1200&expires=33247948154",
     ],
   },
-  icons: {
-    icon: "/favicon.ico",
-  },
-  manifest: `${siteConfig.url}/site.webmanifest`,
   metadataBase: new URL(siteConfig.metadataBase),
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={cn("dark", fontVariables)} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -86,19 +77,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           }}
         />
       </head>
-      <body
-        className={cn(
-          "min-h-screen bg-[var(--bg-base)] font-sans antialiased text-[var(--text-secondary)] overflow-x-hidden",
-          fontSans.variable,
-          fontHeading.variable
-        )}
-      >
+      <body className="group/body flex flex-col">
         <ThemeProvider>
           <Analytics />
           <GoogleAnalytics gaId="G-59WSL645R4" />
-          <Navbar />
-          <div className="flex flex-col min-h-screen">{children}</div>
-          <Footer />
+          <SkipLink />
+          <SiteHeader />
+          {children}
+          <SiteFooter />
         </ThemeProvider>
       </body>
     </html>

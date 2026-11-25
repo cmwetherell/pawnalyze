@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run lint && next build",
     "postbuild": "next-sitemap",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint . && node scripts/check-drift.mjs && node scripts/check-theme.mjs app/tokens.css",
+    "theme": "node scripts/gen-tokens.mjs && node scripts/check-theme.mjs app/tokens.css"
   },
   "dependencies": {
     "@next/third-parties": "16.1.6",

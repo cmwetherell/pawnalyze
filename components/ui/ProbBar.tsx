@@ -1,3 +1,8 @@
+import { formatDelta, formatPct } from '@/lib/format';
+
+// The formatters live in lib/format; this re-export stays until ProbBar is deleted.
+export { formatDelta, formatPct };
+
 export type ProbTint = 'gold' | 'silver' | 'bronze' | 'neutral' | 'green';
 
 const TINT: Record<ProbTint, string> = {
@@ -20,19 +25,6 @@ interface ProbBarProps {
   /** Larger, gold label for the headline column */
   emphasis?: boolean;
   className?: string;
-}
-
-export function formatPct(value: number, digits = 1): string {
-  const pct = value * 100;
-  if (pct > 0 && pct < 0.05) return '<0.1%';
-  if (pct >= 99.95 && pct < 100) return '>99.9%';
-  return `${pct.toFixed(digits)}%`;
-}
-
-export function formatDelta(value: number, baseline: number): string | null {
-  const d = (value - baseline) * 100;
-  if (Math.abs(d) < 0.05) return null;
-  return `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(1)}`;
 }
 
 export default function ProbBar({
