@@ -90,7 +90,7 @@ const T = 12;
 const B = 32;
 const REACH = 14;
 /** Most a phone gives up to end labels (and as much again as a swatch takes): an eight-letter name. Longer ones use `short`, and the value goes under the name. */
-const PHONE_GUTTER = 80;
+const PHONE_GUTTER = 104;
 /** From a name to the value under it. */
 const SECOND_LINE = 17;
 /** Inside a ChartGroup the plots share their edges. */
@@ -121,7 +121,7 @@ const pointsOf = (s: LineSeries): Point[] => s.values.flatMap((v, i) => (v === n
 const rank = (s: LineSeries, promoted: string | null) => (s.id === promoted ? 3 : s.emphasis === 'strong' ? 2 : s.emphasis === 'context' ? 0 : 1);
 
 function Plot({
-  series, x, y, markers = [], refs = [], now, area, points = 'none', values = true, selected, onSelect, onSeries, seriesAction, extraRows, ariaLabel, ground = 'auto', size,
+  series, x, y, markers: allMarkers = [], refs = [], now, area, points = 'none', values = true, selected, onSelect, onSeries, seriesAction, extraRows, ariaLabel, ground = 'auto', size,
 }: LineChartProps & { size: ChartSize }) {
   const group = useChartGroup();
   const [ownHover, setOwnHover] = useState<number | null>(null);
@@ -139,7 +139,7 @@ function Plot({
 
   const all = series.map(s => ({ s, pts: pointsOf(s) }));
   const own = all.flatMap(a => a.pts.map(p => p.v));
-  const round = domain(y, [...own, ...markers.map(m => m.y), ...refs.map(r => r.y)]);
+  const round = domain(y, [...own, ...allMarkers.map(m => m.y), ...refs.map(r => r.y)]);
   // Values printed under the lowest point need ground there.
   const under = (Math.min(...own) - round.min) / (round.max - round.min) * (H - B - T);
   const dom = points === 'all' && y.min === undefined && round.ticks.length > 1 && under < 40 ? { ...round, min: round.min - (round.ticks[1] - round.ticks[0]) / 2 } : round;
@@ -162,6 +162,8 @@ function Plot({
   const color = (s: LineSeries) => (isContext(s) ? token('context') : strokeVar(s.tone));
 
 
+  // Under 560px only the latest marker of each group is drawn; the tooltip and the table have them all.
+  const markers = phone ? allMarkers.filter(m => !allMarkers.some(k => k.group === m.group && k.x > m.x)) : allMarkers;
   // Margins. Lines that stop before the last x (a match in progress) are labeled inside the plot.
   const labeled = all.filter(a => a.pts.length > 0 && a.s.labelAt !== 'none');
   const ended = labeled.filter(a => (a.s.labelAt ?? 'end') === 'end');
@@ -198,7 +200,7 @@ function Plot({
   const markX = (m: LineMarker) => X(m.x) + (pushed[markers.indexOf(m)] ?? 0);
 
   // What can be pointed at: every x that has a value or a marker.
-  const live = [...new Set([...all.flatMap(a => a.pts.map(p => p.i)), ...markers.map(m => m.x)])].sort((a, b) => a - b);
+  const live = [...new Set([...all.flatMap(a => a.pts.map(p => p.i)), ...allMarkers.map(m => m.x)])].sort((a, b) => a - b);
   const nearestX = (px: number) => live.reduce((best, i) => (Math.abs(X(i) - px) < Math.abs(X(best) - px) ? i : best), live[0] ?? 0);
   const canPromote = onSeries !== undefined || series.some(s => s.emphasis === 'context');
   const nearestSeries = (px: number, py: number): string | null => {
@@ -232,7 +234,7 @@ function Plot({
       const note = s.notes?.[i];
       return { key: s.id, label: word(s), value: note ? `${printed(s, i, v)}, ${note}` : printed(s, i, v), tone: isContext(s) ? undefined : s.tone, strong: isStrong(s) || s.id === promoted };
     });
-    rows.push(...markers.filter(m => m.x === i).sort((a, b) => b.y - a.y).map((m): TooltipRow => ({ key: `m-${m.group}`, label: plain(m), value: fmt(m.y), marker: m.shape })));
+    rows.push(...allMarkers.filter(m => m.x === i).sort((a, b) => b.y - a.y).map((m): TooltipRow => ({ key: `m-${m.group}`, label: plain(m), value: fmt(m.y), marker: m.shape })));
     return [...rows, ...(extraRows?.(i) ?? []).map((r, k): TooltipRow => ({ key: `x-${r.label}`, ...r, rule: k === 0 && rows.length > 0 }))];
   };
   const titleAt = (i: number) => x.titles?.[i] ?? x.labels[i];
@@ -245,7 +247,7 @@ function Plot({
     setTouched(e.pointerType !== 'mouse');
   };
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') { clear(); setSaid(''); return; }
+    if (e.key === 'Escape') { if (hover !== null || promoted !== null) e.preventDefault(); clear(); setSaid(''); return; }
     if (e.key === 'Enter' || e.key === ' ') {
       if (promoted !== null && onSeries) { e.preventDefault(); onSeries(promoted); } else if (hover !== null && onSelect) { e.preventDefault(); onSelect(hover); }
       return;

@@ -7,6 +7,9 @@ import { Photo } from '@/components/ui/Photo';
 import { Prose } from '@/components/ui/Prose';
 import { Row, Rows } from '@/components/ui/Rows';
 import { TextLink } from '@/components/ui/TextLink';
+import { pageMeta } from '@/lib/meta';
+
+export const metadata = pageMeta('About', 'What Pawnalyze is, who makes it, and how the chess forecasts work.', { path: '/about', image: 'site' });
 
 export default function AboutPage() {
   return (

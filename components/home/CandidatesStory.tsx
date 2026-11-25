@@ -32,7 +32,7 @@ export async function CandidatesStory() {
   return (
     <Section
       title={EVENT.name}
-      finding={<>{EVENT.winner.name} won from a starting chance of {start}.{lead && ` He was behind ${getPlayerName(lead.from)} until round ${lead.round}.`}</>}
+      finding={<>{EVENT.winner.name} won from a starting chance of {start}.{lead && ` ${EVENT.winner.name.split(' ').at(-1)} took the lead for good after round ${lead.round}.`}</>}
       actions={<TextLink standalone href={EVENT.href}>Replay the Candidates</TextLink>}
     >
       <LineChart

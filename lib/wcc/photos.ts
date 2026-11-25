@@ -212,6 +212,8 @@ export const WCC_PHOTOS: {
   },
 };
 
+const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+
 /** One credit per source work (deduped by Commons page), with every change made to it, for the page's photo credits section. */
 export const ALL_WCC_PHOTO_CREDITS: PhotoCredit[] = (() => {
   const all: PhotoCredit[] = [WCC_PHOTOS.gukesh, WCC_PHOTOS.sindarov]
@@ -222,8 +224,9 @@ export const ALL_WCC_PHOTO_CREDITS: PhotoCredit[] = (() => {
   const bySource = new Map<string, PhotoCredit>();
   for (const p of all) {
     const seen = bySource.get(p.sourceUrl);
-    if (!seen) bySource.set(p.sourceUrl, p);
-    else if (!seen.modified.includes(change(p))) bySource.set(p.sourceUrl, { ...seen, modified: `${seen.modified}. ${p.modified}` });
+    if (!seen) bySource.set(p.sourceUrl, { ...p, modified: change(p) });
+    else if (!seen.modified.includes(change(p))) bySource.set(p.sourceUrl, { ...seen, modified: `${seen.modified}; ${lowerFirst(change(p))}` });
   }
-  return [...bySource.values()];
+  // One sentence per photo: "Changes: cropped ..., resized; background removed ...".
+  return [...bySource.values()].map(p => ({ ...p, modified: `Versions used: ${lowerFirst(p.modified)}` }));
 })();

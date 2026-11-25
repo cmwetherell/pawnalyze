@@ -37,6 +37,8 @@ const GRID = 'grid grid-cols-[4.5rem_minmax(0,1fr)_4.5rem] items-center gap-x-3 
 /** The same split from several sources, bars aligned so they can be compared. Three lines on a phone, one from 1024. */
 export function SplitRows({ label, head, names, tones, rows, columns = [], format = 'pct', className }: SplitRowsProps) {
   const fmt = formatter(format);
+  /** The second share as printed: what the rounded first one leaves, so a row always adds up to 100%. */
+  const rest = (left: number) => fmt(1 - Math.round(left * 1000) / 1000);
   const cols = { '--n': Math.max(1, columns.length - 1), '--cols': `minmax(8.5rem,1fr) 5.5rem minmax(5rem,2fr) 5.5rem${columns.length ? ` repeat(${columns.length},7.5rem)` : ''}` } as CSSProperties;
   return (
     <div className={cn('min-w-0', className)} style={cols}>
@@ -53,17 +55,17 @@ export function SplitRows({ label, head, names, tones, rows, columns = [], forma
             {r.own && <span aria-hidden className="absolute inset-y-0 left-0 w-[3px] bg-brand-mark" />}
             <div className={cn(GRID, 'gap-y-2 py-4')}>
               <div className="col-span-3 min-w-0 lg:col-span-1">
-                <p className="type-data font-medium text-ink">{r.href ? <TextLink href={r.href}>{r.title}</TextLink> : r.title}</p>
+                <p className="type-data font-medium text-ink">{r.href ? <TextLink tap href={r.href}>{r.title}</TextLink> : r.title}</p>
                 {r.meta && <div className="type-label text-ink-2">{r.meta}</div>}
               </div>
               {r.left !== null && (
                 <>
                   <p className="type-stat-sm text-ink lg:text-right"><span className="sr-only">{names[0]} </span>{fmt(r.left)}</p>
                   <SplitBar
-                    height={20} ariaLabel={`${r.title}: ${names[0]} ${fmt(r.left)}, ${names[1]} ${fmt(1 - r.left)}`}
+                    height={20} ariaLabel={`${r.title}: ${names[0]} ${fmt(r.left)}, ${names[1]} ${rest(r.left)}`}
                     segments={[{ key: 'l', value: r.left, tone: tones[0], label: names[0] }, { key: 'r', value: 1 - r.left, tone: tones[1], label: names[1] }]}
                   />
-                  <p className="text-right type-stat-sm text-ink lg:text-left"><span className="sr-only">{names[1]} </span>{fmt(1 - r.left)}</p>
+                  <p className="text-right type-stat-sm text-ink lg:text-left"><span className="sr-only">{names[1]} </span>{rest(r.left)}</p>
                 </>
               )}
               {r.left !== null && columns.length > 0 && (

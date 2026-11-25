@@ -256,6 +256,10 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     });
   }, []);
   const resetAll = useCallback(() => {
+    // The button that was pressed goes away, so the keyboard stays with the scenario.
+    const heading = document.querySelector<HTMLElement>('#scenario h2');
+    heading?.setAttribute('tabindex', '-1');
+    heading?.focus({ preventScroll: true });
     setPicks(new Map());
     setColor(null);
     setOffsets(ZERO_OFFSETS);

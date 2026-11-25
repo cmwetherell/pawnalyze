@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 
 import { Board } from '@/components/chess/Board';
 import { ComplexityScale } from '@/components/chess/ComplexityScale';
@@ -12,8 +11,13 @@ import { Explainer } from '@/components/ui/Explainer';
 import { Row, Rows } from '@/components/ui/Rows';
 import { ScrollArea } from '@/components/ui/ScrollArea';
 import { EXAMPLE_GAME, EXAMPLE_POSITIONS } from '@/lib/elocator/examples';
+import { pageMeta } from '@/lib/meta';
 
-export const metadata: Metadata = { title: 'Elocator: Chess Complexity Calculator | Pawnalyze' };
+export const metadata = pageMeta(
+  'Elocator: Chess Complexity Calculator',
+  'How hard is a chess position to play? Score any position, or every move of a game, from 1 to 100.',
+  { path: '/elocator', image: 'site' },
+);
 
 const STEPS = [
   { title: 'Position analysis', body: 'The neural network analyzes board state features to predict position difficulty.' },

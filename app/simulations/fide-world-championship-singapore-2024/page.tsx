@@ -3,6 +3,9 @@ import { PageHead } from '@/components/layout/PageHead';
 import { Wcc2024Results } from '@/components/simulation/Wcc2024Results';
 import { Callout } from '@/components/ui/Callout';
 import { TextLink } from '@/components/ui/TextLink';
+import { pageMeta } from '@/lib/meta';
+
+export const metadata = pageMeta('World Chess Championship 2024 Odds', 'How our simulations of the 2024 World Chess Championship in Singapore moved game by game.', { path: '/simulations/fide-world-championship-singapore-2024', image: 'site' });
 
 const NAME = 'FIDE Chess World Championship Singapore 2024';
 
@@ -12,9 +15,9 @@ export default function Sims() {
       <PageHead
         title={NAME}
         crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: 'World Championship 2024' }]}
-        lead="Reigning champion Ding Liren defended his title against Gukesh D."
+        lead="Gukesh D challenged reigning champion Ding Liren and took the title."
         foldLead
-        facts={['14 classical games. Tiebreaks if necessary.', <TextLink key="fide" href="https://worldchampionship.fide.com/" external>FIDE</TextLink>]}
+        facts={['14 classical games. Tiebreaks if necessary.', <TextLink key="fide" tap href="https://worldchampionship.fide.com/" external>FIDE</TextLink>]}
       />
       <Wcc2024Results
         notice={(

@@ -62,7 +62,7 @@ export function CandidatesPage({ eventTable, name, description, format, website,
         switcher={switcher(eventTable)}
         lead={description}
         foldLead
-        facts={[format, <TextLink key="fide" href={website} external>FIDE</TextLink>]}
+        facts={[format, <TextLink key="fide" tap href={website} external>FIDE</TextLink>]}
         media={players && <AvatarStack label="Players" size={40} people={players.map(p => ({ name: getPlayerName(p), src: getPlayerPhoto(p) }))} />}
       />
       <CandidatesResults eventTable={eventTable} rounds={GAMES[eventTable]} initialData={initialData} winner={winner} intro={intro} />
@@ -72,8 +72,8 @@ export function CandidatesPage({ eventTable, name, description, format, website,
             columns={3}
             items={[
               { title: 'Monte Carlo sims', body: <p>Over 1M simulations using Elo, color advantage, and draw rates.</p> },
-              { title: 'Scenario explorer', body: <p>Lock in results and explore “what if” scenarios.</p> },
-              { title: 'Round-by-round tracking', body: <p>Actual results were baked in round by round as games completed. The final simulated round reflects the tournament as played.</p> },
+              { title: 'Scenario explorer', body: <p>During the event, results could be locked in to explore “what if” scenarios.</p> },
+              { title: 'Round-by-round tracking', body: <p>Actual results were baked in round by round as games completed.</p> },
             ]}
             note={<>For a deeper dive, check out <TextLink href="https://blog.pawnalyze.com/chess-simulations/2022/06/20/How-Our-Chess-Tournament-Predictions-Work.html">How Our Chess Tournament Predictions Work</TextLink> on the blog.</>}
           />

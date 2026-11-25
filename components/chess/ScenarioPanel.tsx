@@ -27,8 +27,8 @@ interface ScenarioPanelProps {
   /** Search, sort, view switch. */
   tools?: ReactNode;
   summary?: ReactNode;
-  /** The Simulate button, or its label and handler. */
-  primary: ReactNode | { label: string; onClick: () => void; disabled?: boolean; loading?: boolean };
+  /** The Simulate button, or its label and handler. Without one, when nothing is left to pick, the panel has no footer. */
+  primary?: ReactNode | { label: string; onClick: () => void; disabled?: boolean; loading?: boolean };
   onReset?: () => void;
   /** Under 1024 the panel can be folded to its title; it starts open. */
   collapsible?: boolean;
@@ -137,11 +137,11 @@ export function ScenarioPanel({ title, rounds, round, onRound, tools, summary, p
             {children}
           </ScrollArea>
         )}
-        <Panel.Foot>
+        {Boolean(primary || note || onReset) && <Panel.Foot>
           {note && <div className="w-full type-label text-ink-2">{note}</div>}
           {isAction(primary) ? <Button variant="primary" onClick={primary.onClick} disabled={primary.disabled} loading={primary.loading} className="flex-1">{primary.label}</Button> : primary}
           {onReset && <Button variant="quiet" icon="reset" onClick={onReset}>Reset</Button>}
-        </Panel.Foot>
+        </Panel.Foot>}
       </div>
     </Panel>
   );

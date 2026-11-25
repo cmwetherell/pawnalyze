@@ -186,7 +186,7 @@ const tableOf = (positions: Position[]) => ({
 /** The position on the board and its score; the room is there before the score is. */
 function Readout({ position, count, busy }: { position: Position; count: number; busy: boolean }) {
   const { complexity } = position;
-  const where = count === 1 ? null : `Position ${position.ply + 1} of ${count}, ${position.ply === 0 ? 'the start' : `after ${moveLabel(position)}`}. `;
+  const where = count === 1 ? null : `${position.ply === 0 ? 'The start' : `After ${moveLabel(position)}`}. `;
   const end = useMemo(() => endOf(position.fen), [position.fen]);
   return (
     <div className="flex flex-col gap-4">

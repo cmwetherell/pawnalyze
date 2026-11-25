@@ -74,6 +74,7 @@ export function SectionBar({ groups, heroId, live, eventLabel, actions }: Sectio
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      e.preventDefault();
       setOpen(false);
       opener.current?.focus({ preventScroll: true });
     };

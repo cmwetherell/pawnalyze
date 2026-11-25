@@ -19,7 +19,7 @@ export interface TournamentYear { year: number; olympiads: OlympiadEvent[]; even
 export const CANDIDATES_2026: Tournament = {
   name: '2026 Candidates Tournament',
   href: '/simulations/candidates-2026',
-  description: 'Determined the challenger for the World Chess Championship, who will face Gukesh D.',
+  description: 'Determined Gukesh D’s challenger for the 2026 World Chess Championship.',
   format: '8-player double round-robin',
   winner: { name: 'Javokhir Sindarov', key: 'Sindarov, Javokhir', flag: 'UZB' },
   table: 'candidates_2026',
@@ -28,7 +28,7 @@ export const CANDIDATES_2026: Tournament = {
 export const WOMENS_CANDIDATES_2026: Tournament = {
   name: '2026 Women’s Candidates Tournament',
   href: '/simulations/womens-candidates-2026',
-  description: 'Determined the challenger for the Women’s World Chess Championship, who will face Ju Wenjun.',
+  description: 'Determined Ju Wenjun’s challenger for the Women’s World Chess Championship.',
   format: '8-player double round-robin',
   winner: { name: 'Vaishali Rameshbabu', key: 'Rameshbabu, Vaishali', flag: 'IND' },
   table: 'womens_candidates_2026',
@@ -43,7 +43,7 @@ export const TOURNAMENT_YEARS: TournamentYear[] = [
       {
         name: 'FIDE World Championship 2024',
         href: '/simulations/fide-world-championship-singapore-2024',
-        description: 'Ding Liren defends his title against Gukesh D.',
+        description: 'Gukesh D challenged reigning champion Ding Liren and took the title.',
         format: '14 classical games',
         winner: { name: 'Gukesh D', flag: 'IND' },
       },

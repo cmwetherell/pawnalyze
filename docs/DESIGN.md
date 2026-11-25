@@ -769,3 +769,9 @@ A change to a shared prop is a change to this file first. Nobody edits a file ou
 5. All old anchors, query parameters, keyboard shortcuts, aria labels, tables and credits still present (compare with `main` route by route).
 6. `grep -rE "chart\.js|recharts"` finds nothing; gold appears only in its listed jobs; one `type-figure` pair per page.
 7. Reduced motion: nothing animates, nothing is hidden. Keyboard: skip link, visible ring everywhere, focus never under the bar.
+
+## 16. Additions after the build
+
+- `lib/meta.ts` `pageMeta(name, description, { path, image })`: every page's title, description and share metadata.
+- `TextLink tap`: inline link with a 44px touch area. `ScenarioPanel primary` is optional (no footer when nothing is left to pick).
+- `LineChart markers`: under 560px only the latest marker of each group is drawn. `SplitRows`: the second share is 100% minus the first as printed.

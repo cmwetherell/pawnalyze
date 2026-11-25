@@ -1,4 +1,7 @@
 import { CandidatesPage } from '@/components/simulation/CandidatesPage';
+import { pageMeta } from '@/lib/meta';
+
+export const metadata = pageMeta('2024 Women’s Candidates Tournament Odds', 'How our simulations of the 2024 Women’s Candidates Tournament moved round by round.', { path: '/simulations/womens-candidates-2024', image: 'site' });
 
 export default function Sims() {
   return (

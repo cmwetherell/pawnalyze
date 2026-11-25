@@ -107,11 +107,10 @@ export function Wcc2024Results({ notice }: { notice?: ReactNode }) {
   const clear = (a: OddsEntry | undefined, b: OddsEntry | undefined, i: number) => Boolean(a && b && clearlyAbove(a.values[i], b.values[i], rounds[i].nSims));
   const other = entries.find(e => e !== leader);
   const steps = leader && end > 0 ? [
-    ...(clear(leader, other, 0) ? ['started as the favorite'] : []),
-    ...(clear(other, leader, end - 1) ? [`trailed after round ${rounds[end - 1].round}`] : []),
-    ...(over && leader.values[end] === 1 ? [`won round ${rounds[end].round}`] : []),
+    ...(clear(leader, other, 0) ? [`The simulations made ${leader.short ?? leader.name} the favorite at the start`] : []),
+    ...(other && clear(other, leader, end - 1) ? [`${other.short ?? other.name} the favorite after game ${rounds[end - 1].round}`] : []),
   ] : [];
-  const finding = leader && steps.length > 0 ? `${leader.short ?? leader.name} ${new Intl.ListFormat('en-US').format(steps)}.` : undefined;
+  const finding = leader && steps.length === 2 ? `${steps.join(' and ')}.${over && leader.values[end] === 1 ? ` ${leader.short ?? leader.name} won game ${rounds[end].round}.` : ''}` : undefined;
   const inScenario = rounds.some(r => r.round === SCENARIO);
   const sample = rounds.reduce((sum, r) => sum + (r.round === SCENARIO ? 0 : r.nSims), 0);
 
@@ -140,7 +139,7 @@ export function Wcc2024Results({ notice }: { notice?: ReactNode }) {
                   ariaLabel={`Share of simulations won after each round. ${leader ? `${leader.name}: ${pct(0)} before round 1, ${pct(end)} after round ${played}.` : ''}`}
                   note={inScenario
                     ? `Based on ${sims.nSimsForHighestRound.toLocaleString('en-US')} simulations after round ${played} that match your scenario.`
-                    : `Based on a random sample of ${sample.toLocaleString('en-US')} stored simulations, drawn anew on each load. ${sims.nSimsForHighestRound.toLocaleString('en-US')} of them are from after round ${played}.`}
+                    : `Based on a random sample of ${sample.toLocaleString('en-US')} stored simulations, drawn anew on each load. Only a few are from after game ${played}.`}
                   height={{ desktop: 560, phone: 300 }}
                   start={over && end === rounds.length - 1 ? 'first' : 'last'}
                   busy={loading}
@@ -151,15 +150,15 @@ export function Wcc2024Results({ notice }: { notice?: ReactNode }) {
           }
           aside={
             <ScenarioPanel
-              title="Pick game outcomes"
+              title={over ? 'Results' : 'Pick game outcomes'}
               collapsible
               scroll={over ? 'none' : 'lg'}
-              summary={over ? 'Every game has been played, so there are none left to pick.' : undefined}
+              summary={over ? 'Every game of the match.' : undefined}
               rounds={[]}
               round=""
               onRound={() => {}}
               note={pickedWords(picks)}
-              primary={{ label: 'Update simulations', onClick: () => update(picks), loading }}
+              primary={over ? undefined : { label: 'Update simulations', onClick: () => update(picks), loading }}
               onReset={picks.length > 0 && !loading ? () => { setPicks([]); update([]); } : undefined}
             >
               {games.map(g => (

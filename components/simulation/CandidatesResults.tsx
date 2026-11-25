@@ -107,7 +107,7 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
   const end = marks.length - 1;
   const inScenario = scenario.length > 0 ? entries[0] : undefined;
   // The strip over the results says who won, from where and since when, so the finding says who came closest.
-  const closest = told?.rest ? `No one else rose above ${getPlayerName(told.rest.name)}’s ${about(told.rest.chance)}${told.rest.round === null ? '' : ` ${after(told.rest.round)}`}.` : '';
+  const closest = told?.rest ? `The closest rival was ${getPlayerName(told.rest.name)}, at ${about(told.rest.chance)}${told.rest.round === null ? '' : ` ${after(told.rest.round)}`}.` : '';
   const left = history && lastRound !== undefined ? rounds.length - Number(lastRound === 'Pre' ? 0 : lastRound) : 0;
   const stopped = told && left > 0 && told.now < 1 ? ` The simulations stop after round ${lastRound}, ${left === 1 ? 'one round' : `${left} rounds`} before the end.` : '';
   const finding = told && (inScenario

@@ -99,7 +99,7 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
         media={<FlagStack className="hidden md:flex" items={flags} size={medalists.length ? 'lg' : 'md'} label={medalists.length ? 'Medalists' : 'Top seeds'} />}
         status={<EventStatus status={status} startDate={cfg.startDate} />}
         title={cfg.shortTitle}
-        facts={[cfg.format, ...meta, <TextLink key="cr" href={cfg.chessResultsUrl}>chess-results</TextLink>]}
+        facts={[cfg.format, ...meta, <TextLink key="cr" tap href={cfg.chessResultsUrl}>chess-results</TextLink>]}
         tabs={olympiadSubnav(event, 'odds')}
       />
 

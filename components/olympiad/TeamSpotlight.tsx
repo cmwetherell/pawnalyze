@@ -236,7 +236,7 @@ export function TeamSpotlight({
         />
 
         {finished ? (
-          <div className="grid gap-x-12 md:grid-cols-2">
+          <div className="grid gap-x-12 lg:grid-cols-2">
             <div className="flex min-w-0 flex-col md:gap-8">
               {roster}
               <FinalBlock team={team} standing={standing} participants={participants} points={points} charted={charted} wide={wide} />

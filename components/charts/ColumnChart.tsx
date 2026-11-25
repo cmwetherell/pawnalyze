@@ -140,7 +140,7 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
   ];
   const title = (c: Column) => c.title ?? ([c.label, c.sub].filter(Boolean).join(', ') || c.key);
   const onKey = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') { go(null); setSaid(''); return; }
+    if (e.key === 'Escape') { if (at !== null) e.preventDefault(); go(null); setSaid(''); return; }
     if ((e.key === 'Enter' || e.key === ' ') && at !== null && onSelect) { e.preventDefault(); onSelect(columns[at].key); return; }
     const from = at ?? columns.findIndex(c => c.key === selected);
     const to = e.key === 'ArrowRight' ? from + 1 : e.key === 'ArrowLeft' ? (from < 0 ? n - 1 : from - 1) : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : null;

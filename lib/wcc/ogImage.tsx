@@ -30,7 +30,7 @@ async function renderWccOg(live: boolean) {
   return (
     <OgFrame
       // A shared card stays in caches for days, so the live one names the page and not the game of the moment.
-      stage={live ? <span style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 12, color: ogColor.ink }}><Dot />Live board and evaluation</span> : score}
+      stage={live ? <span style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 12, color: ogColor.ink }}>Live board and evaluation</span> : score}
       stageNote={live ? score : state.winner || state.lastFinal > 0 ? undefined : 'Before the match'}
       footer={<span style={{ fontSize: 16 }}>{`Photos: ${credit(gukesh)}; ${credit(sindarov)}. Backgrounds removed, black and white.`}</span>}
     >
@@ -65,7 +65,6 @@ async function renderWccOg(live: boolean) {
   );
 }
 
-const Dot = () => <div style={{ display: 'flex', width: 14, height: 14, borderRadius: 14, background: ogColor.live }} />;
 
 function Side({ name, code, p, right = false }: { name: string; code: string; p: number; right?: boolean }) {
   return (

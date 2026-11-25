@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import PlayerPage, { findPlayer, playerSummary } from '@/components/olympiad/players/PlayerPage';
+import { pageMeta } from '@/lib/meta';
 import { OLYMPIAD_EVENTS, boardLabel } from '@/lib/olympiad/config';
 import { getOlympiadBoardRace } from '@/lib/olympiad/queries';
 import { displayName } from '@/lib/olympiad/tpr';
@@ -21,10 +22,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const cfg = OLYMPIAD_EVENTS[event];
   if (!p) return { title: `Player not found | ${cfg.shortTitle} | Pawnalyze` };
   const name = `${p.title ? p.title + ' ' : ''}${displayName(p.name)}`;
-  return {
-    title: `${name} · ${boardLabel(p.board)} · ${cfg.shortTitle} | Pawnalyze`,
-    description: `${name} (${p.teamName}) at the ${cfg.shortTitle} board prize race: ${playerSummary(p, race)} Every game with replay.`,
-  };
+  return pageMeta(`${name} · ${boardLabel(p.board)} · ${cfg.shortTitle}`, `${name} (${p.teamName}) at the ${cfg.shortTitle} board prize race: ${playerSummary(p, race)} Every game with replay.`, { path: `/simulations/chess-olympiad-2026/players/${fideId}` });
 }
 
 export default async function Page({ params }: { params: Params }) {
