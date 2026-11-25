@@ -44,7 +44,7 @@ export const ZERO_OFFSETS: RatingOffsets = { g: 0, s: 0 };
 const TC_KEY: Record<TimeControl, 'c' | 'r' | 'b'> = { classical: 'c', rapid: 'r', blitz: 'b' };
 
 export function add(a: Triplet, b: Triplet, c: Triplet): Triplet {
-  // a + (b - c), clipped and renormalised
+  // a + (b - c), clipped and renormalized
   const raw = [0, 1, 2].map(k => Math.max(1e-9, a[k] + b[k] - c[k])) as Triplet;
   const s = raw[0] + raw[1] + raw[2];
   return [raw[0] / s, raw[1] / s, raw[2] / s];
@@ -88,7 +88,7 @@ export function isIdentity(offsets: RatingOffsets, theta: number, runTheta: numb
   return offsets.g === 0 && offsets.s === 0 && Math.abs(theta - runTheta) < 1e-9;
 }
 
-/** Expected share of draws in a classical game for a W/D/L set (colour-averaged). */
+/** Expected share of draws in a classical game for a W/D/L set (color-averaged). */
 export function drawRate(wdl: WdlSet): number {
   return (wdl.classical['1'][1] + wdl.classical['2'][1]) / 2;
 }

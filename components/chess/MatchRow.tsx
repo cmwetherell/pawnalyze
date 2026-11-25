@@ -66,7 +66,7 @@ export function MatchRow<V extends string>({ home, away, result, pick = null, op
       ? <button type="button" onClick={s.onSelect} className={cn(cls, 'group/side min-h-tap rounded-sm')}>{order}</button>
       : <span className={cls}>{order}</span>;
   };
-  const centre = result !== undefined || !picks
+  const center = result !== undefined || !picks
     ? <span className={cn('shrink-0 whitespace-nowrap text-center type-data font-medium text-ink', result === undefined ? 'min-w-6' : 'min-w-14')}>{result ?? <span className="font-normal text-ink-3">v</span>}</span>
     : null;
 
@@ -74,7 +74,7 @@ export function MatchRow<V extends string>({ home, away, result, pick = null, op
     <div className={cn('border-b border-line py-2 [container-type:inline-size]', className)}>
       {onSelect ? (
         <button type="button" onClick={onSelect} className={cn(GRID, 'group/row -mx-3 min-h-tap w-[calc(100%+24px)] rounded-sm px-3 text-left transition-colors duration-in', hoverGround)}>
-          {side(home, false)}{centre}{side(away, true)}
+          {side(home, false)}{center}{side(away, true)}
         </button>
       ) : (
         <div className={GRID}>
@@ -84,7 +84,7 @@ export function MatchRow<V extends string>({ home, away, result, pick = null, op
               <PickToggle size="sm" legend={legend ?? `${home.name} against ${away.name}`} options={options} value={pick} onChange={onPick} disabled={disabled} />
               {result !== undefined && <p className="mt-1 hidden text-center type-label text-ink-2 [@container_(min-width:26rem)]:block">{result}</p>}
             </div>
-          ) : centre}
+          ) : center}
           {picks && <span aria-hidden className="type-data text-ink-3 [@container_(min-width:26rem)]:hidden">{result ?? 'v'}</span>}
           {side(away, true)}
         </div>

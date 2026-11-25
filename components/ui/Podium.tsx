@@ -27,7 +27,7 @@ interface PodiumProps {
   className?: string;
 }
 
-/** A 3px medal-coloured rule over each place; first place is larger. */
+/** A 3px medal-colored rule over each place; first place is larger. */
 export function Podium({ places, layout = 'stack', label, className }: PodiumProps) {
   const stack = layout === 'stack';
   return (

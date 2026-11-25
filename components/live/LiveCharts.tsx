@@ -4,7 +4,7 @@ import { ChartGroup } from '@/components/charts/ChartGroup';
 import { LineChart } from '@/components/charts/LineChart';
 import { ComplexityChart } from '@/components/chess/ComplexityChart';
 import { moveAxis, moveLabel } from '@/lib/chess/moves';
-import { evalPawns, fmtEval, type Colour, type Evaluation, type LivePosition } from '@/lib/live/pgn';
+import { evalPawns, fmtEval, type Color, type Evaluation, type LivePosition } from '@/lib/live/pgn';
 import type { Tone } from '@/lib/theme/tones';
 
 export interface ChartPoint {
@@ -17,7 +17,7 @@ interface LiveChartsProps {
   points: ChartPoint[];
   selected: number;
   onSelect: (ply: number) => void;
-  sides: Record<Colour, { name: string; tone: Tone }>;
+  sides: Record<Color, { name: string; tone: Tone }>;
   /** Leaves room on the axis for the moves to come. */
   inPlay: boolean;
 }

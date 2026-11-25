@@ -14,7 +14,7 @@ for(const k of ['brand','positive','negative','warning','live','p1-ink','p2-ink'
 for(const k of ['positive','negative','warning','live','brand']) T.push([k,k+'-wash'],['ink',k+'-wash'],['ink-2',k+'-wash']);
 for(const k of ['p1','p2']) T.push([k+'-ink',k+'-wash'],['ink',k+'-wash'],['ink-2',k+'-wash'],['on-field',k+'-field'],['on-'+k,k]);
 T.push(['on-action','action'],['on-action','action-hover'],['on-live','live'],['ink-inverse','ink'],['on-gold','gold'],['on-silver','silver'],['on-bronze','bronze'],['board-ink','board-light'],['board-ink','board-dark'],['piece-black','eval-white'],['eval-white','eval-black']);
-// large/bold glyphs on mid grey: draw pick label is 15px/600, so 4.5 would be ideal; we require it
+// large/bold glyphs on mid gray: draw pick label is 15px/600, so 4.5 would be ideal; we require it
 T.push(['on-draw','draw']);
 // Every fillClass/onClass pair of lib/theme/tones.ts (initials, pips, bar labels, picks). A transparent or hatched fill shows the ground.
 const tones=fs.readFileSync(new URL('../lib/theme/tones.ts',import.meta.url),'utf8');

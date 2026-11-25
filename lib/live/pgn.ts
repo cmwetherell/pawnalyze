@@ -9,7 +9,7 @@ import { Chess } from 'chess.js';
 
 export const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-export type Colour = 'w' | 'b';
+export type Color = 'w' | 'b';
 
 /** Engine evaluation from White's point of view. Exactly one of cp / mate is set. */
 export interface Evaluation {
@@ -17,7 +17,7 @@ export interface Evaluation {
   /** Moves to mate; positive when White mates, negative when Black does. 0 = already checkmate. */
   mate?: number;
   /** Who delivered it, when mate is 0. */
-  mateBy?: Colour;
+  mateBy?: Color;
   depth?: number;
   source: 'broadcast' | 'cloud' | 'rules';
 }
@@ -29,7 +29,7 @@ export interface LivePosition {
   from: string | null;
   to: string | null;
   fen: string;
-  toMove: Colour;
+  toMove: Color;
   /** Mover's remaining time in seconds after the move that reached this position. */
   clock: number | null;
   /** Evaluation given in the PGN (Lichess adds these once its post-game analysis is done). */

@@ -34,7 +34,7 @@ export interface RowProps {
   /** With `onClick`: the row opens what is in `children`, and the chevron turns. */
   expanded?: boolean;
   /**
-   * For a row that opens something and has links of its own in `title` or `meta`: a labelled button at the right end, with
+   * For a row that opens something and has links of its own in `title` or `meta`: a labeled button at the right end, with
    * the rest of the row as a pointer shortcut to it. Use with `expanded`, instead of `onClick`.
    */
   toggle?: { text: string; label: string; onToggle: () => void; disabled?: boolean };

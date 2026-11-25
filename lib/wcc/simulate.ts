@@ -2,7 +2,7 @@
  * Browser-side match simulation from the exact model's per-game odds, conditioned on the results
  * already played. Replaces the pipeline's stored sims for the replay and its fun facts, so they
  * always match the real match so far. Same rules as match.ts: first to 7½ in classical, then the
- * tiebreak ladder (each stage played in full, colours by lot, alternating), then sudden death.
+ * tiebreak ladder (each stage played in full, colors by lot, alternating), then sudden death.
  * Seeded per simulation index, so "Simulation #k" is reproducible and server/client renders agree.
  */
 import { CLINCH_HP, N_CLASSICAL, TB_STAGE_GAMES } from './config';

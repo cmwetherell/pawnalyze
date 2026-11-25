@@ -1,7 +1,7 @@
-/* Pawnalyze theme tokens. THE ONLY FILE in the repo that may hold a colour literal.
-   Colours are "R G B" channel triplets so Tailwind opacity modifiers work: rgb(var(--ink) / <alpha>).
+/* Pawnalyze theme tokens. THE ONLY FILE in the repo that may hold a color literal.
+   Colors are "R G B" channel triplets so Tailwind opacity modifiers work: rgb(var(--ink) / <alpha>).
    Light values on :root, dark on .dark (the default class on <html>).
-   After any edit: npm run theme (regenerates lib/theme/tokens.generated.ts, checks contrast and colour-blind separation). */
+   After any edit: npm run theme (regenerates lib/theme/tokens.generated.ts, checks contrast and color-blind separation). */
 :root {
   color-scheme: light;
 
@@ -19,7 +19,7 @@
   --ink-inverse: 251 252 250;     /* #fbfcfa  text on ink */
 
   /* Lines */
-  --line: 214 221 218;            /* #d6ddda  hairlines between rows; default border colour */
+  --line: 214 221 218;            /* #d6ddda  hairlines between rows; default border color */
   --control: 111 126 134;         /* #6f7e86  3:1 edge of inputs, toggles, chips, axes */
   --rule: 12 31 43;               /* #0c1f2b  the 2px section rule */
 
@@ -80,7 +80,7 @@
   --on-mid: 5 11 14;              /* #050b0e  text on the mid tones: context, cx-1, series 4, 5, 7, brand-mark */
 
   /* Chart furniture */
-  --context: 124 139 147;         /* #7c8b93  de-emphasised series */
+  --context: 124 139 147;         /* #7c8b93  de-emphasized series */
   --grid: 226 232 229;            /* #e2e8e5  gridlines */
   --axis: 111 126 134;            /* #6f7e86  baseline */
 

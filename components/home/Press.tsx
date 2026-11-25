@@ -4,7 +4,7 @@ import { Quote } from '@/components/ui/Quote';
 import { Row, Rows } from '@/components/ui/Rows';
 
 const NYT: LogoItem = { src: '/img/nyt-logo.svg', alt: 'The New York Times', width: 114, height: 18 };
-const NPR: LogoItem = { src: '/img/npr-logo.svg', alt: 'NPR', width: 64, height: 32, colour: true };
+const NPR: LogoItem = { src: '/img/npr-logo.svg', alt: 'NPR', width: 64, height: 32, color: true };
 const ALSO: LogoItem[] = [
   { src: '/img/japantimes-logo.svg', alt: 'The Japan Times', width: 138, height: 20 },
   { src: '/img/gulfnews-logo.svg', alt: 'Gulf News', width: 152, height: 18 },

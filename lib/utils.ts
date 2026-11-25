@@ -4,7 +4,7 @@ const space = ['gutter', 'section', 'section-landing', 'header', 'bar', 'bottom-
 
 /**
  * Teaches tailwind-merge the names in tailwind.config.ts. The type styles get their own group, so `type-data text-ink`
- * keeps both and `type-data type-small` keeps the last; colour names need no entry (its colour groups accept any name).
+ * keeps both and `type-data type-small` keeps the last; color names need no entry (its color groups accept any name).
  */
 const merge = extendTailwindMerge<'type'>({
   extend: {

@@ -1,13 +1,13 @@
 /**
  * Photos used on the World Chess Championship 2026 page (Gukesh D vs Javokhir Sindarov).
  *
- * Every image comes from Wikimedia Commons under a free licence (CC BY / CC BY-SA).
- * Licences, authors and source pages were verified against the Commons API
+ * Every image comes from Wikimedia Commons under a free license (CC BY / CC BY-SA).
+ * Licenses, authors and source pages were verified against the Commons API
  * (imageinfo + extmetadata) on 2026-09-27. The files in /public were cropped
  * and resized from the Commons originals; adaptations of CC BY-SA works are
- * shared under the same CC BY-SA licence as the original.
+ * shared under the same CC BY-SA license as the original.
  *
- * Attribution (TASL: Title, Author, Source, Licence + modifications) must be
+ * Attribution (TASL: Title, Author, Source, License + modifications) must be
  * shown for every image — render ALL_WCC_PHOTO_CREDITS in the page's credits section.
  */
 
@@ -18,7 +18,7 @@ export interface PhotoCredit {
   /** Plain-text author, as given on Commons */
   author: string;
   authorUrl?: string;
-  /** Licence short name (CC BY-SA adaptations note the ShareAlike terms) */
+  /** License short name (CC BY-SA adaptations note the ShareAlike terms) */
   license: string;
   licenseUrl: string;
   /** Commons File: description page */
@@ -87,7 +87,7 @@ export const WCC_PHOTOS: {
   venue: PhotoCredit & { og: string };
 } = {
   gukesh: {
-    // Looking down, head turned toward the viewer's right (faces centre when placed on the left).
+    // Looking down, head turned toward the viewer's right (faces center when placed on the left).
     portrait: {
       ...GUKESH_PORTRAIT_SOURCE,
       src: '/players/wcc/gukesh-portrait.webp',

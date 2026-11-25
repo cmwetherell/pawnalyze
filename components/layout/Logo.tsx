@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { LOGO_MARK, LOGO_MARK_SMALL, LOGO_VIEWBOX, LOGO_WORD, LOGO_WORD_AT } from '@/lib/theme/logo';
 
-/** `full`: mark and wordmark. `pawn`: the mark alone. Inherits its colour; size it by height. */
+/** `full`: mark and wordmark. `pawn`: the mark alone. Inherits its color; size it by height. */
 export function Logo({ kind = 'full', className }: { kind?: 'full' | 'pawn'; className?: string }) {
   if (kind === 'pawn') {
     return (

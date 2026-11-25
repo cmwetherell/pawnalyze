@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 interface LiveDotProps {
   /** Words beside the dot; without them the surrounding control must say "live". */
   label?: string;
-  /** Takes the text colour: for the dot inside a filled button. */
+  /** Takes the text color: for the dot inside a filled button. */
   inherit?: boolean;
   className?: string;
 }

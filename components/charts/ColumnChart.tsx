@@ -12,7 +12,7 @@ import { useOutsidePress } from './useOutsidePress';
 
 export interface Column {
   key: string;
-  /** Under the column; empty for an unlabelled one. Labels that would touch are thinned out. */
+  /** Under the column; empty for an unlabeled one. Labels that would touch are thinned out. */
   label: string;
   /** Second line, where the columns are wide enough for it. */
   sub?: string;
@@ -79,7 +79,7 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
   const left = (i: number) => Math.round(i * step);
   const wide = (i: number) => Math.max(1, Math.round((i + 1) * step) - gap - left(i));
   const mid = (i: number) => left(i) + wide(i) / 2;
-  /** Centre of a text that has to stay inside the box. */
+  /** Center of a text that has to stay inside the box. */
   const inside = (i: number, w: number) => (w >= W ? W / 2 : clamp(mid(i), w / 2, W - w / 2));
 
   const totals = columns.map(c => c.parts.reduce((s, p) => s + p.value, 0));
@@ -100,11 +100,11 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
     return plot - shown.reduce((s, p) => s + Math.max(1, tall(p.value)), 0) - 2 * Math.max(0, shown.length - 1);
   };
   const valueBox = (i: number) => ({ x: inside(i, valueWidth(i)), w: valueWidth(i), bottom: crown(i), h: big(i) ? 30 : 22 });
-  // The peak and the selected number come first; a neighbour they would touch is left to the tooltip.
+  // The peak and the selected number come first; a neighbor they would touch is left to the tooltip.
   const numbers = [...printed].sort((a, b) => Number(big(b)) - Number(big(a)) || Number(marked(b)) - Number(marked(a))).reduce<number[]>((kept, i) => {
     const a = valueBox(i);
     const hit = kept.some(k => { const b = valueBox(k); return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && a.bottom - a.h < b.bottom && b.bottom - b.h < a.bottom; });
-    // Nor may a number wider than its column stand on a taller neighbour.
+    // Nor may a number wider than its column stand on a taller neighbor.
     const covered = columns.some((_, k) => k !== i && crown(k) < a.bottom - 2 && left(k) < a.x + a.w / 2 - 2 && left(k) + wide(k) > a.x - a.w / 2 + 2);
     return (hit || covered) && !big(i) ? kept : [...kept, i];
   }, []);

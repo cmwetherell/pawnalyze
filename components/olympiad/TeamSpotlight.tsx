@@ -101,17 +101,17 @@ export function TeamSpotlight({
   const wide = useMediaQuery('(min-width: 768px)');
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     const params = new URLSearchParams({ event, run: String(run.runId), teamId: String(team.teamId) });
     if (filtersKey) params.set('filters', filtersKey);
     cachedJson<TeamDetail>(requestKey, `/api/sims/olympiad-2026/team?${params.toString()}`)
-      .then(d => { if (!cancelled) setResult({ key: requestKey, data: d }); })
+      .then(d => { if (!canceled) setResult({ key: requestKey, data: d }); })
       .catch(e => {
-        if (cancelled) return;
+        if (canceled) return;
         if (e instanceof StaleRunError) { onStale?.(); setResult({ key: requestKey, error: 'New simulations are available: reload the page.' }); return; }
         setResult({ key: requestKey, error: e.message });
       });
-    return () => { cancelled = true; };
+    return () => { canceled = true; };
   }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale]);
 
   useEffect(() => {

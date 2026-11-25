@@ -28,7 +28,7 @@ interface SimsTable {
 interface SummaryTable {
   run_id: number; variant: string; p_win1: number; p_win2: number; p_tb: number;
   stages: Record<Stage, StageOdds>; end_game: EndGameRow[]; score_dist: ScoreRow[]; prize: Prize; wdl: WdlSet;
-  by_colour: MatchOdds['byColour']; game_played: number[] | null; mc: McCheck | null;
+  by_colour: MatchOdds['byColor']; game_played: number[] | null; mc: McCheck | null;
 }
 interface GridTable {
   model_version: string; tc: string; elo_min: number; elo_step: number; n: number; wdl: number[]; smoothed: boolean; created_at: Date;
@@ -163,7 +163,7 @@ function toSummary(r: SummaryTable): WccSummary {
     scoreDist: r.score_dist,
     prize: r.prize,
     wdl: r.wdl,
-    byColour: r.by_colour,
+    byColor: r.by_colour,
     gamePlayed: r.game_played ?? [],
     mc: r.mc,
   };

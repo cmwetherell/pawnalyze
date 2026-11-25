@@ -40,7 +40,7 @@ export function PlayerGames({ event, player, games, lastRound, knownFideIds }: P
         const { form, game } = entry;
         const result = resultOf(form.score);
         const opponent = displayName(form.oppName);
-        const colour = form.colour === 'w' ? 'white' : 'black';
+        const color = form.color === 'w' ? 'white' : 'black';
         const isOpen = open === r;
         const href = form.oppFideId !== null && known.has(form.oppFideId) ? playerHref(event, form.oppFideId) : null;
         return (
@@ -59,7 +59,7 @@ export function PlayerGames({ event, player, games, lastRound, knownFideIds }: P
             title={href ? <TextLink quiet href={href}>{opponent}</TextLink> : opponent}
             meta={
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                <span className="inline-flex items-center gap-1.5"><PieceDot side={colour} />{colour === 'white' ? 'White' : 'Black'}</span>
+                <span className="inline-flex items-center gap-1.5"><PieceDot side={color} />{color === 'white' ? 'White' : 'Black'}</span>
                 <span className="tnum">{form.oppRating || 'unrated'}</span>
                 {form.oppTeamId !== null && form.oppFedCode && <TextLink quiet href={`${eventHref(event)}?team=${form.oppTeamId}`}>{form.oppFedCode}</TextLink>}
               </span>
@@ -75,10 +75,10 @@ export function PlayerGames({ event, player, games, lastRound, knownFideIds }: P
               <div className="pb-6 pt-2">
                 <GameViewer
                   moves={game.moves}
-                  white={{ name: form.colour === 'w' ? displayName(player.name) : opponent, rating: form.colour === 'w' ? player.rating : form.oppRating }}
-                  black={{ name: form.colour === 'b' ? displayName(player.name) : opponent, rating: form.colour === 'b' ? player.rating : form.oppRating }}
+                  white={{ name: form.color === 'w' ? displayName(player.name) : opponent, rating: form.color === 'w' ? player.rating : form.oppRating }}
+                  black={{ name: form.color === 'b' ? displayName(player.name) : opponent, rating: form.color === 'b' ? player.rating : form.oppRating }}
                   result={game.result}
-                  orientation={form.colour}
+                  orientation={form.color}
                 />
               </div>
             )}

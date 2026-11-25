@@ -13,7 +13,7 @@ import { PictureSpecimens, StatusSpecimens, WordSpecimens } from '@/components/s
 import { ButtonSpecimens, ChoiceSpecimens, FormSpecimens, OverlaySpecimens } from '@/components/styleguide/ControlSpecimens';
 import { ListSpecimens, PanelSpecimens, StatSpecimens, StripSpecimens, SurfaceSpecimens } from '@/components/styleguide/DataSpecimens';
 import { ODDS } from '@/components/styleguide/fixtures';
-import { ColourSpecimens, FrameSpecimens, TypeSpecimens } from '@/components/styleguide/FoundationSpecimens';
+import { ColorSpecimens, FrameSpecimens, TypeSpecimens } from '@/components/styleguide/FoundationSpecimens';
 import { LayoutSpecimens, SplitSpecimens } from '@/components/styleguide/LayoutSpecimens';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/CopyButton';
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 const GROUPS: SectionBarProps['groups'] = [
-  { label: 'Foundations', items: [{ id: 'colour', label: 'Colour' }, { id: 'type', label: 'Type' }, { id: 'frame', label: 'Space' }, { id: 'layout', label: 'Layout' }] },
+  { label: 'Foundations', items: [{ id: 'color', label: 'Color' }, { id: 'type', label: 'Type' }, { id: 'frame', label: 'Space' }, { id: 'layout', label: 'Layout' }] },
   {
     label: 'Primitives',
     items: [
@@ -44,13 +44,13 @@ export default function StyleguidePage() {
         <PageHead
           size="mega" enter title="Gukesh vs Sindarov"
           crumbs={[{ label: 'Pawnalyze', href: '/' }, { label: 'Styleguide' }]}
-          facts={['FIDE World Championship 2026', '22 Nov to 13 Dec, Fondation Martin Bodmer, Cologny, Geneva', '14 classical games, first to 7½, $2.5M prize fund']}
+          facts={['FIDE World Championship 2026', 'Nov 22 to Dec 13, Fondation Martin Bodmer, Cologny, Geneva', '14 classical games, first to 7½, $2.5M prize fund']}
         />
         <Container className="pb-8"><HeroSpecimen /></Container>
       </div>
       <SectionBar eventLabel="Styleguide" heroId="hero" groups={GROUPS} live={<OddsChip sides={ODDS} />} actions={<><Button size="sm" variant="quiet" icon="reset">Reset</Button><CopyButton kind="link" variant="secondary" label="Share scenario" /></>} />
       <SectionGroup label="Foundations">
-        <ColourSpecimens />
+        <ColorSpecimens />
         <TypeSpecimens />
         <FrameSpecimens />
         <LayoutSpecimens />

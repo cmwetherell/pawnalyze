@@ -23,7 +23,7 @@ async function renderWccOg() {
     ? `${PLAYER_DEFAULTS[state.winner].shortName} is World Champion`
     : state.lastFinal > 0
       ? `After game ${state.lastFinal} of 14, ${fmtScore(state.score1, state.score2)}`
-      : 'Geneva, 22 Nov – 13 Dec 2026';
+      : 'Geneva, Nov 22 – Dec 13, 2026';
   const credit = (p: { cutoutOg: typeof gukesh.cutoutOg }) => `${p.cutoutOg.author.split(' (')[0]}, ${p.cutoutOg.license.split(' (')[0]}`;
 
   return (

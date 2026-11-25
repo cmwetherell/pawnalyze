@@ -101,7 +101,7 @@ export function ChartSpecimens() {
             rows={[
               { key: 'own', title: 'Pawnalyze model', meta: 'Exact match odds from ratings', left: P1, own: true },
               { key: 'kalshi', title: 'Kalshi', href: 'https://kalshi.com', meta: 'Mid-price', left: 0.274, cells: ['995k contracts', '2 min ago'] },
-              { key: 'bet365', title: 'bet365', meta: 'Bookmaker reference, margin removed', left: 0.313, cells: [null, '27 Sept 2026'] },
+              { key: 'bet365', title: 'bet365', meta: 'Bookmaker reference, margin removed', left: 0.313, cells: [null, 'Sept 27, 2026'] },
               { key: 'none', title: 'Polymarket', meta: 'Prices are unavailable right now.', left: null },
             ]}
           />

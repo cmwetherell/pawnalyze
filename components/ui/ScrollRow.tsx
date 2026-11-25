@@ -56,7 +56,7 @@ export function ScrollRow({ label, arrows = false, drag = false, snap = false, b
     if (!box || !el) return;
     const b = box.getBoundingClientRect();
     const r = el.getBoundingClientRect();
-    // Centred, so its neighbours on both sides show that there is more. Straight there the first time.
+    // Centered, so its neighbors on both sides show that there is more. Straight there the first time.
     const left = box.scrollLeft + r.left + r.width / 2 - (b.left + b.width / 2);
     box.scrollTo({ left, behavior: followed.current && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'smooth' : 'auto' });
     followed.current = true;

@@ -46,7 +46,7 @@ export default function WccMethodology({ run, summary, rawSummary, players }: Pr
           <p>
             We scale the odds of a draw by a single factor θ{theta !== null ? <> = {theta.toFixed(2)}</> : null}, fitted by maximum likelihood on the 84 classical
             games of the 2013–2024 World Championship matches, which gives {drawCal !== null ? <>about {formatPct(drawCal, 0)}</> : 'roughly two-thirds'} draws.
-            Extra draws come out of both players’ wins, which shrinks the favourite’s edge in each game and makes a 7–7 tiebreak more likely, so
+            Extra draws come out of both players’ wins, which shrinks the favorite’s edge in each game and makes a 7–7 tiebreak more likely, so
             calibration helps the underdog
             {rawSummary && summary ? <> ({p1.shortName} {formatPct(rawSummary.pWin1)} raw, {formatPct(summary.pWin1)} calibrated)</> : null}.
           </p>
@@ -58,7 +58,7 @@ export default function WccMethodology({ run, summary, rawSummary, players }: Pr
       body: (
         <>
           <p>
-            Because each game depends only on colours and ratings, the whole match can be solved exactly: a small dynamic program over the score,
+            Because each game depends only on colors and ratings, the whole match can be solved exactly: a small dynamic program over the score,
             game by game, stopping as soon as someone reaches 7½, then a closed form for the tiebreak ladder.
           </p>
           <p>

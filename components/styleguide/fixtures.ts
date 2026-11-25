@@ -1,5 +1,5 @@
 /**
- * Sample data for the styleguide only: a snapshot of the site's own numbers on 24 November 2026
+ * Sample data for the styleguide only: a snapshot of the site's own numbers on November 24, 2026
  * (World Championship after game 1, Chess Olympiad 2026 and Candidates 2026 as finished; pick previews are samples). Pages load live data.
  */
 import { createElement } from 'react';
@@ -30,8 +30,8 @@ export const P1 = 0.155;
 export const ODDS: [OddsSide, OddsSide] = [{ name: 'Gukesh', p: P1, tone: 'p1' }, { name: 'Sindarov', p: 1 - P1, tone: 'p2' }];
 
 const PLAYED = [1, 1, 1, 1, 1, 1, 1, 0.999, 0.999, 0.997, 0.98, 0.89, 0.7, 0.41];
-const DATE = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
-const label = (iso: string) => DATE.format(new Date(iso)).replace(',', '');
+const DATE = new Intl.DateTimeFormat('en-US', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+const label = (iso: string) => DATE.format(new Date(iso));
 
 /** Games 1 final, 2 next; 9, 13 and 14 show the picked, live and unreachable states. */
 export const gameCells = (picks: Record<number, '1' | 'd' | '2'>): GameCellView[] =>
@@ -51,8 +51,8 @@ export const GAMES: WccGame[] = CLASSICAL_SCHEDULE.map(({ gameNo, startsAt }) =>
 }));
 
 export const CLINCH = [
-  ['G8', 'Thu 3 Dec', 0, 0.0005], ['G9', 'Fri 4 Dec', 0, 0.002], ['G10', 'Sun 6 Dec', 0, 0.019], ['G11', 'Mon 7 Dec', 0.002, 0.092],
-  ['G12', 'Tue 8 Dec', 0.011, 0.172], ['G13', 'Thu 10 Dec', 0.031, 0.258], ['G14', 'Fri 11 Dec', 0.078, 0.199], ['TB', 'Sat 12 Dec', 0.033, 0.102],
+  ['G8', 'Thu, Dec 3', 0, 0.0005], ['G9', 'Fri, Dec 4', 0, 0.002], ['G10', 'Sun, Dec 6', 0, 0.019], ['G11', 'Mon, Dec 7', 0.002, 0.092],
+  ['G12', 'Tue, Dec 8', 0.011, 0.172], ['G13', 'Thu, Dec 10', 0.031, 0.258], ['G14', 'Fri, Dec 11', 0.078, 0.199], ['TB', 'Sat, Dec 12', 0.033, 0.102],
 ] as const;
 
 export const SCORES = [

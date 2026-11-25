@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 const linkCls = 'text-ink-2 underline decoration-control decoration-1 underline-offset-2 transition-colors duration-in hover:text-ink';
 
-/** Author and licence, each a link. */
+/** Author and license, each a link. */
 function Source({ photo }: { photo: Credit }) {
   return (
     <>
@@ -18,7 +18,7 @@ function Source({ photo }: { photo: Credit }) {
   );
 }
 
-/** "Photo: Frans Peeters, CC BY-SA 2.0", linking to the Commons page and the licence. */
+/** "Photo: Frans Peeters, CC BY-SA 2.0", linking to the Commons page and the license. */
 export function PhotoCaption({ photo, className }: { photo: Credit; className?: string }) {
   return (
     <span className={cn('type-micro text-ink-3', className)}>
@@ -28,7 +28,7 @@ export function PhotoCaption({ photo, className }: { photo: Credit; className?: 
   );
 }
 
-/** Several photos in one line: "Photos: A, licence; B, licence. Backgrounds removed, black and white." `changes` says what was altered. */
+/** Several photos in one line: "Photos: A, license; B, license. Backgrounds removed, black and white." `changes` says what was altered. */
 export function PhotoCreditLine({ photos, changes, className }: { photos: Credit[]; changes?: string; className?: string }) {
   return (
     <span className={cn('type-micro text-ink-3', className)}>
@@ -39,7 +39,7 @@ export function PhotoCreditLine({ photos, changes, className }: { photos: Credit
   );
 }
 
-/** Full TASL attribution list (title, author, source, licence, changes). */
+/** Full TASL attribution list (title, author, source, license, changes). */
 export function PhotoCreditList({ credits, className }: { credits: Credit[]; className?: string }) {
   return (
     <ul className={cn('space-y-3', className)}>

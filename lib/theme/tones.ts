@@ -15,7 +15,7 @@ export const fillClass: Record<Tone, string> = {
   'series-5': 'bg-series-5', 'series-6': 'bg-series-6', 'series-7': 'bg-series-7', 'series-8': 'bg-series-8',
 };
 
-/** Text colour that sits on `fillClass` of the same tone. Every pair passes 4.5:1 in both themes: check-theme.mjs reads this map. */
+/** Text color that sits on `fillClass` of the same tone. Every pair passes 4.5:1 in both themes: check-theme.mjs reads this map. */
 export const onClass: Record<Tone, string> = {
   ink: 'text-ink-inverse', context: 'text-on-mid', p1: 'text-on-p1', p2: 'text-on-p2', draw: 'text-on-draw',
   win: 'text-ink-inverse', loss: 'text-ink', level: 'text-ink',

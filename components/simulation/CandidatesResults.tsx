@@ -48,13 +48,13 @@ function story(history: RaceHistory, winner: string | undefined) {
     now: odds[last], from: odds[0],
     seed: start.findIndex(e => e[0] === leader) + 1,
     field: start.length,
-    favourite: start[0],
+    favorite: start[0],
     lead: tookTheLead(history, leader),
   };
 }
 
 const ORDINAL = ['', 'First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth'];
-const standing = (seed: number, field: number) => (seed === 1 ? 'Favourite' : seed === field ? `Lowest of ${field} players` : `${ORDINAL[seed] ?? `Number ${seed}`} favourite`);
+const standing = (seed: number, field: number) => (seed === 1 ? 'Favorite' : seed === field ? `Lowest of ${field} players` : `${ORDINAL[seed] ?? `Number ${seed}`} favorite`);
 
 /** The odds of a Candidates tournament: what happened, round by round, and the scenario builder. */
 export function CandidatesResults({ eventTable, rounds, initialData, winner, intro }: CandidatesResultsProps) {
@@ -122,7 +122,7 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
                 { key: 'from', label: 'Chance before round 1', value: formatPct(told.from), sub: standing(told.seed, told.field) },
                 told.seed === 1
                   ? { key: 'now', label: `Chance after round ${lastRound}`, value: formatPct(told.now) }
-                  : { key: 'favourite', label: 'Favourite before round 1', value: <Named name={told.favourite[0]} />, sub: formatPct(told.favourite[1]) },
+                  : { key: 'favorite', label: 'Favorite before round 1', value: <Named name={told.favorite[0]} />, sub: formatPct(told.favorite[1]) },
                 behind
                   ? { key: 'lead', label: `Ahead after round ${lastRound}`, value: <Named name={told.ahead[0]} />, sub: formatPct(told.ahead[1]) }
                   : told.lead ? { key: 'lead', label: 'Ahead for good', value: `After round ${told.lead.round}`, sub: `Passed ${getPlayerName(told.lead.from)}` }

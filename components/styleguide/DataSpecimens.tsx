@@ -70,7 +70,7 @@ export function StatSpecimens() {
           <SplitBar height={32} labels="inside" ariaLabel="Gukesh 17%, Sindarov 59%, still level 24%" segments={[{ key: '1', value: 0.17, tone: 'p1', label: 'Gukesh' }, { key: '2', value: 0.59, tone: 'p2', label: 'Sindarov' }, { key: 'x', value: 0.24, tone: 'level', label: 'Still level' }]} />
         </div>
       </Specimen>
-      <Specimen name="Pips" from="ui/Pips" note="Win filled, draw grey, loss outlined. Letters inside from 20px.">
+      <Specimen name="Pips" from="ui/Pips" note="Win filled, draw gray, loss outlined. Letters inside from 20px.">
         <div className="grid gap-4">
           {([12, 20, 32] as const).map(s => <Pips key={s} kind="form" size={s} ariaLabel="Gukesh at the Olympiad" items={FORM.map((f, i) => ({ label: `Round ${i + 1}: ${f}`, letter: f, tone: FORM_TONE[f] }))} />)}
           <Pips kind="result" size={32} fill ariaLabel="Simulated match" items={DEAL.map((f, i) => ({ label: `Game ${i + 1}`, letter: f === ' ' ? '–' : f, tone: f === 'S' ? 'p2' : f === ' ' ? 'none' : 'draw' }))} />

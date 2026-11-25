@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 
 export type SwatchShape = 'square' | 'line' | 'circle' | 'triangle' | 'diamond';
 
-/** The mark itself, beside its name. Identity never rides on colour alone. */
+/** The mark itself, beside its name. Identity never rides on color alone. */
 export function Swatch({ tone, shape = 'square', className }: { tone: Tone; shape?: SwatchShape; className?: string }) {
   if (shape === 'square') return <span aria-hidden className={cn('inline-block h-3 w-3 shrink-0 rounded-sm', fillClass[tone], className)} />;
   if (shape === 'line') return <span aria-hidden className={cn('inline-block h-[3px] w-4 shrink-0', fillClass[tone], className)} />;

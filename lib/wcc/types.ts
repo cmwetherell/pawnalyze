@@ -72,7 +72,7 @@ export interface StageOdds { reach: number; p1: number; p2: number }
 export interface EndGameRow { g: number | 'tb'; p1: number; p2: number }
 export interface ScoreRow { p1_hp: number; p2_hp: number; games: number; p: number }
 export interface Prize { exp1: number; exp2: number; p_split: number }
-export interface ColourOdds { p_win1: number; end_game: EndGameRow[] }
+export interface ColorOdds { p_win1: number; end_game: EndGameRow[] }
 export interface McCheck { n: number; p_win1: number; p_tb: number; max_z: number }
 
 /** The exact match odds: what match.ts computes and what the summary row stores. */
@@ -85,7 +85,7 @@ export interface MatchOdds {
   scoreDist: ScoreRow[];
   prize: Prize;
   gamePlayed: number[];
-  byColour: Record<PlayerKey, ColourOdds>;
+  byColor: Record<PlayerKey, ColorOdds>;
 }
 
 export interface WccSummary extends MatchOdds {
@@ -146,7 +146,7 @@ export interface SimStats {
 
 export interface LiveQuote {
   source: 'kalshi' | 'polymarket';
-  /** Normalised P(Gukesh) = mid1 / (mid1 + mid2). */
+  /** Normalized P(Gukesh) = mid1 / (mid1 + mid2). */
   pWin1: number;
   players: Record<PlayerKey, { bid: number | null; ask: number | null; last: number | null; mid: number | null }>;
   volume: number | null;

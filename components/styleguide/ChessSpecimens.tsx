@@ -49,7 +49,7 @@ export function HeroSpecimen() {
       variant="hero" sides={SIDES} p1={P1} score="½–½" scoreLabel="after game 1"
       verdict={<>Sindarov wins about 85 in 100 matches. 13.6% go to tiebreaks. <span className="text-ink-3">Kalshi traders give Gukesh 27.4%.</span></>}
       notes={['Chance to win the match. Each pawn is 1 in 100.', 'Exact odds, confirmed by 10,000 simulations.']}
-      next="Game 2, Wed 25 Nov at 15:00 CET"
+      next="Game 2, Wed, Nov 25 at 3:00 PM CET"
       actions={<><Button variant="primary" href="/world-chess-championship-2026/live">Watch live</Button><Button href="#forms">Pick results</Button></>}
       credit={CREDIT}
     />
@@ -68,7 +68,7 @@ export function ChessSpecimens() {
     <>
       <Section id="match" title="Face-off, smaller" layout="plain" finding="The feature variant, on home and the index. Below it, a scenario that moves the odds, and a finished match.">
         <Specimen name="FaceOff feature" from="chess/FaceOff">
-          <FaceOff variant="feature" sides={SIDES} p1={P1} score="½–½" scoreLabel="after game 1" heading={<Heading level={3} style="h3">World Chess Championship 2026, Geneva</Heading>} next="Game 2, Wed 25 Nov at 15:00 CET" notes={['Chance to win the match. Each pawn is 1 in 100.', 'Exact odds, confirmed by 10,000 simulations.']} actions={<><Button variant="primary" href="/world-chess-championship-2026">See the match odds</Button><Button href="/world-chess-championship-2026/live">Watch live</Button></>} credit={CREDIT} />
+          <FaceOff variant="feature" sides={SIDES} p1={P1} score="½–½" scoreLabel="after game 1" heading={<Heading level={3} style="h3">World Chess Championship 2026, Geneva</Heading>} next="Game 2, Wed, Nov 25 at 3:00 PM CET" notes={['Chance to win the match. Each pawn is 1 in 100.', 'Exact odds, confirmed by 10,000 simulations.']} actions={<><Button variant="primary" href="/world-chess-championship-2026">See the match odds</Button><Button href="/world-chess-championship-2026/live">Watch live</Button></>} credit={CREDIT} />
         </Specimen>
         <Specimen name="FaceOff, scenario" from="chess/FaceOff" note="A delta over each figure, in room the hero keeps for it."><FaceOff variant="feature" sides={SIDES} p1={0.343} base={P1} score="½–½" scoreLabel="after game 1" /></Specimen>
         <Specimen name="FaceOff, before odds" from="chess/FaceOff"><FaceOff variant="feature" sides={SIDES} p1={null} score="–" scoreLabel="before game 1" /></Specimen>

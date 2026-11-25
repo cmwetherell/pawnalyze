@@ -20,7 +20,7 @@ interface Props { odds: MatchOdds; players: Players; finished: boolean }
 const SMALLEST = 0.001;
 
 const date = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-GB', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' }).replace(',', '');
+  new Date(iso).toLocaleDateString('en-US', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' });
 
 /** When the match is decided, with what score, and at which stage. */
 export const MatchEnding = memo(function MatchEnding(props: Props) {
@@ -61,7 +61,7 @@ function WhenDecided({ odds, players, finished }: Props) {
       <ColumnChart
         columns={cols.map(c => ({
           key: c.key, label: c.label, sub: c.date, title: `${c.name}, ${c.date}`,
-          // A share too small to draw would look as large as its neighbour.
+          // A share too small to draw would look as large as its neighbor.
           parts: [{ tone: 'p1' as const, value: c.p1, label: p1 }, { tone: 'p2' as const, value: c.p2, label: p2 }].filter(p => p.value > SMALLEST || p.value * 2 >= c.total),
         }))}
         format={v => formatPct(v, v < 0.1 ? 1 : 0)}

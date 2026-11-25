@@ -13,6 +13,6 @@ const OPTIONS: Record<LocalTimeFormat, Intl.DateTimeFormatOptions> = {
 /** The reader's own clock once hydrated; Geneva time (the match's) in the server markup. */
 export function LocalTime({ iso, format = 'datetime' }: { iso: string; format?: LocalTimeFormat }) {
   const mounted = useMounted();
-  const text = new Date(iso).toLocaleString(mounted ? undefined : 'en-GB', { ...OPTIONS[format], ...(mounted ? {} : { timeZone: 'Europe/Zurich' }) });
+  const text = new Date(iso).toLocaleString('en-US', { ...OPTIONS[format], ...(mounted ? {} : { timeZone: 'Europe/Zurich' }) });
   return <time dateTime={iso} suppressHydrationWarning>{text}</time>;
 }

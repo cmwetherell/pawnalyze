@@ -27,7 +27,7 @@ import { LIVE_REFRESH_MS, N_CLASSICAL, WCC_HREF } from '@/lib/wcc/config';
 import type { Players } from '@/lib/wcc/display';
 import { exact, gameOdds, whiteInGame } from '@/lib/wcc/match';
 import { ZERO_OFFSETS, adjustedWdl, drawRate, type RatingOffsets } from '@/lib/wcc/model';
-import { PICK_HP, parseColour, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome } from '@/lib/wcc/scenario';
+import { PICK_HP, parseColor, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome } from '@/lib/wcc/scenario';
 import { currentOdds, fmtScore, isLagging, matchState } from '@/lib/wcc/status';
 import type { HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, WccGame, WccRun, WccSummary } from '@/lib/wcc/types';
 import { MatchEnding } from './MatchEnding';
@@ -55,7 +55,7 @@ interface Props {
 }
 
 const HERO = 'headline';
-const COLOUR_UNKNOWN = '0';
+const COLOR_UNKNOWN = '0';
 
 const navFor = (finished: boolean): SectionBarProps['groups'] => [
   {
@@ -79,16 +79,16 @@ const navFor = (finished: boolean): SectionBarProps['groups'] => [
 ];
 
 const genevaDate = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleDateString('en-GB', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' }).replace(',', '') : '';
+  iso ? new Date(iso).toLocaleDateString('en-US', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' }) : '';
 
 export default function WccDashboard({ players, games, run, summary, history, markets, kalshi, finished, slots }: Props) {
   const router = useRouter();
   const state = useMemo(() => matchState(games, run.params.g1_white ?? null), [games, run.params.g1_white]);
-  const colourKnown = state.g1White !== null;
+  const colorKnown = state.g1White !== null;
   const runTheta = run.params.theta?.classical ?? 1;
 
   const [picks, setPicks] = useState<Map<number, PickOutcome>>(() => new Map());
-  const [colour, setColour] = useState<PlayerId | null>(null);
+  const [color, setColor] = useState<PlayerId | null>(null);
   const [offsets, setOffsets] = useState<RatingOffsets>(ZERO_OFFSETS);
   const [theta, setTheta] = useState<number>(runTheta);
   const [grid, setGrid] = useState<ModelGrid | null>(null);
@@ -118,13 +118,13 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     const qs = new URLSearchParams(window.location.search);
     const decided = (g: number) => state.fixed.has(g);
     const { picks: p, dropped } = parsePicks(qs.get('s'), decided);
-    const c = parseColour(qs.get('c'));
+    const c = parseColor(qs.get('c'));
     const r = parseOffsets(qs.get('r'));
     const t = parseTheta(qs.get('t'));
     restored.current = true;
     if (finished) return;
     if (p.size) setPicks(p);
-    if (c !== null && !colourKnown) setColour(c);
+    if (c !== null && !colorKnown) setColor(c);
     if (r.g !== 0 || r.s !== 0) { setOffsets(r); requestGrid(); }
     if (t !== null) setTheta(t);
     if (dropped > 0) setRestoreNote(`${dropped} shared pick${dropped === 1 ? ' is' : 's are'} already decided or invalid and ${dropped === 1 ? 'was' : 'were'} dropped.`);
@@ -135,11 +135,11 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   useEffect(() => {
     if (!restored.current) return;
     const url = new URL(window.location.href);
-    writeScenario(url, { picks, g1White: colour, offsets, theta }, runTheta, colourKnown);
+    writeScenario(url, { picks, g1White: color, offsets, theta }, runTheta, colorKnown);
     // Keep shared links readable: ?s=3:1,5:d rather than ?s=3%3A1%2C5%3Ad.
     const next = url.toString().replace(/%3A/gi, ':').replace(/%2C/gi, ',');
     if (next !== window.location.href) window.history.replaceState(null, '', next);
-  }, [picks, colour, offsets, theta, runTheta, colourKnown]);
+  }, [picks, color, offsets, theta, runTheta, colorKnown]);
 
   // Live days: pick up new results and runs without a manual reload.
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
 
   // ---- exact odds
 
-  const effG1: PlayerId | null = colourKnown ? state.g1White : colour;
+  const effG1: PlayerId | null = colorKnown ? state.g1White : color;
   const labActive = offsets.g !== 0 || offsets.s !== 0 || Math.abs(theta - runTheta) > 1e-9;
   const wdl = useMemo(
     () => (labActive ? adjustedWdl(summary.wdl, run.params, grid, offsets, theta) : summary.wdl),
@@ -188,7 +188,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     return m;
   }, [state.fixed, picks]);
 
-  const scenarioActive = !finished && (picks.size > 0 || (!colourKnown && colour !== null) || labActive);
+  const scenarioActive = !finished && (picks.size > 0 || (!colorKnown && color !== null) || labActive);
   const odds: MatchOdds = useMemo(
     () => (scenarioActive ? exact({ wdl, fixed: fixedAll, g1White: effG1, tb: state.tbFixed }) : baseline),
     [scenarioActive, wdl, fixedAll, effG1, state.tbFixed, baseline],
@@ -219,7 +219,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
         gameNo: game.gameNo,
         dateLabel: genevaDate(game.startsAt),
         whiteName: white === null ? null : players[white].shortName,
-        whiteAssumed: game.whitePlayerId === null && !colourKnown && white !== null,
+        whiteAssumed: game.whitePlayerId === null && !colorKnown && white !== null,
         odds: gameOdds(wdl, game.gameNo, effG1),
         pPlayed,
         result,
@@ -231,7 +231,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
         href: liveHref(game.gameNo),
       };
     });
-  }, [state, finished, effG1, colourKnown, wdl, odds.gamePlayed, picks, swings, players]);
+  }, [state, finished, effG1, colorKnown, wdl, odds.gamePlayed, picks, swings, players]);
 
   const breakEven = useMemo(() => {
     if (!grid) return null;
@@ -260,7 +260,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   }, []);
   const resetAll = useCallback(() => {
     setPicks(new Map());
-    setColour(null);
+    setColor(null);
     setOffsets(ZERO_OFFSETS);
     setTheta(runTheta);
     setRestoreNote(null);
@@ -273,12 +273,12 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   const pickCount = picks.size;
   const labelParts = [
     pickCount ? `your ${pickCount} pick${pickCount === 1 ? '' : 's'}` : null,
-    !colourKnown && colour !== null ? `${players[colour].shortName} White in game 1` : null,
+    !colorKnown && color !== null ? `${players[color].shortName} White in game 1` : null,
     labActive ? 'the what-if settings' : null,
   ].filter(Boolean);
   const joined = labelParts.length > 1 ? `${labelParts.slice(0, -1).join(', ')} and ${labelParts[labelParts.length - 1]}` : labelParts[0];
   const scenarioLabel = scenarioActive && joined ? `With ${joined}:` : null;
-  const byColour = { '1': odds.byColour['1']?.p_win1 ?? odds.pWin1, '2': odds.byColour['2']?.p_win1 ?? odds.pWin1 };
+  const byColor = { '1': odds.byColor['1']?.p_win1 ?? odds.pWin1, '2': odds.byColor['2']?.p_win1 ?? odds.pWin1 };
   const champion = finished && state.winner ? players[state.winner] : null;
   const fav = odds.pWin1 >= 0.5 ? p1 : p2;
   const nSims = run.rebasedFrom || lagging ? null : run.nSims;
@@ -288,7 +288,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
     run.rebasedFrom ? `the match-start ratings (${p1.shortName} ${p1.ratings.classical}, ${p2.shortName} ${p2.ratings.classical})` : null,
     lagging && state.lastFinal > run.afterGame
       ? `results since the last simulation run (${state.lastFinal > run.afterGame + 1 ? `games ${run.afterGame + 1}–${state.lastFinal}` : `game ${state.lastFinal}`})`
-      : lagging ? `the colour draw (${players[state.g1White ?? 1].shortName} White in game 1)` : null,
+      : lagging ? `the color draw (${players[state.g1White ?? 1].shortName} White in game 1)` : null,
   ].filter((x): x is string => x !== null);
   const source = scenarioLabel
     ? 'Exact odds, recomputed for this scenario.'
@@ -297,7 +297,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
 
   const last = state.lastFinal > 0 ? state.fixed.get(state.lastFinal) : undefined;
   const lastGame = last === undefined
-    ? { value: 'None yet', sub: 'Game 1 is on 24 Nov' }
+    ? { value: 'None yet', sub: 'Game 1 is on Nov 24' }
     : { value: last === 1 ? 'Draw ½–½' : `${players[last === 2 ? 1 : 2].shortName} won`, sub: `Game ${state.lastFinal}, ${genevaDate(state.classical[state.lastFinal - 1].startsAt)}` };
   const rating = (tc: 'classical' | 'rapid' | 'blitz', label: string) => ({
     key: tc,
@@ -407,22 +407,22 @@ export default function WccDashboard({ players, games, run, summary, history, ma
           actions={!finished && <>{scenarioActive && <Button size="sm" icon="reset" onClick={resetAll}>Reset</Button>}<CopyButton kind="link" label="Share scenario" variant="secondary" /></>}
           legend={!finished && (
             <ul className="flex flex-wrap gap-x-6 gap-y-2 type-small text-ink-2">
-              <li className="inline-flex items-center gap-2"><PieceDot side="white" />Has White{!colourKnown && colour !== null ? ' (assumed until the 22 Nov draw)' : ''}</li>
-              <li>Percentages are {p1.shortName} win, draw, {p2.shortName} win for that game{effG1 === null ? ', averaged over the colour draw' : ''}.</li>
+              <li className="inline-flex items-center gap-2"><PieceDot side="white" />Has White{!colorKnown && color !== null ? ' (assumed until the Nov 22 draw)' : ''}</li>
+              <li>Percentages are {p1.shortName} win, draw, {p2.shortName} win for that game{effG1 === null ? ', averaged over the color draw' : ''}.</li>
             </ul>
           )}
         >
-          {!finished && !colourKnown && (
+          {!finished && !colorKnown && (
             <div className="mb-6 flex flex-col items-start gap-2">
               <p aria-hidden className="type-ui text-ink">White in game 1</p>
               <Segmented
                 ariaLabel="White in game 1"
-                value={String(colour ?? 0)}
-                onChange={v => setColour(v === COLOUR_UNKNOWN ? null : Number(v) as PlayerId)}
+                value={String(color ?? 0)}
+                onChange={v => setColor(v === COLOR_UNKNOWN ? null : Number(v) as PlayerId)}
                 items={[
-                  { value: COLOUR_UNKNOWN, label: 'Not drawn yet', hint: '50/50 average' },
-                  { value: '1', label: `${p1.shortName} (${p1.shortName} ${formatPct(byColour['1'])})` },
-                  { value: '2', label: `${p2.shortName} (${p1.shortName} ${formatPct(byColour['2'])})` },
+                  { value: COLOR_UNKNOWN, label: 'Not drawn yet', hint: '50/50 average' },
+                  { value: '1', label: `${p1.shortName} (${p1.shortName} ${formatPct(byColor['1'])})` },
+                  { value: '2', label: `${p2.shortName} (${p1.shortName} ${formatPct(byColor['2'])})` },
                 ]}
               />
             </div>

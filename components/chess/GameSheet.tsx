@@ -126,10 +126,10 @@ export function GameCell({ game: g, players, locked, onPick, onPreview, classNam
           <span className={cn('hidden whitespace-nowrap type-label lg:block', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{when}</span>
         </div>
         <p className={cn('type-label lg:hidden', g.unreachable ? 'text-ink-3' : 'text-ink-2')}>{when}</p>
-        <p className={cn('mt-1 flex items-center gap-1.5 type-label lg:mt-0 xl:gap-2 xl:type-small', g.unreachable ? 'text-ink-3' : 'text-ink-2')} title={g.whiteAssumed ? 'Colours are assumed until the draw' : undefined}>
+        <p className={cn('mt-1 flex items-center gap-1.5 type-label lg:mt-0 xl:gap-2 xl:type-small', g.unreachable ? 'text-ink-3' : 'text-ink-2')} title={g.whiteAssumed ? 'Colors are assumed until the draw' : undefined}>
           <PieceDot side="white" />
           <span className="min-w-0 truncate">White: {g.whiteName ?? 'to be drawn'}</span>
-          {black && <span className="sr-only">, {black} Black{g.whiteAssumed ? ' (assumed colours)' : ''}</span>}
+          {black && <span className="sr-only">, {black} Black{g.whiteAssumed ? ' (assumed colors)' : ''}</span>}
         </p>
       </div>
 

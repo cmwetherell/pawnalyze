@@ -10,7 +10,7 @@ interface PlayerClockProps {
   clock?: string | null;
   running?: boolean;
   tone: Tone;
-  /** Shows the piece colour instead of the tone, where there is no player colour. */
+  /** Shows the piece color instead of the tone, where there is no player color. */
   side?: 'white' | 'black';
   className?: string;
 }

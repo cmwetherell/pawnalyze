@@ -74,7 +74,7 @@ async function MarketRows({ modelPWin1, players, stored }: Pick<Props, 'modelPWi
     ...(bet ? [{
       key: 'bet365', title: MARKETS.bet365.label, left: bet.pWin1,
       meta: <>Bookmaker reference{odds ? `: ${p1} ${odds['1']}, ${p2} ${odds['2']}` : ''}, margin removed</>,
-      cells: [null, null, new Date(bet.asOf).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })],
+      cells: [null, null, new Date(bet.asOf).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })],
     }] : []),
   ];
   return <SplitRows label="Match odds by source" head="Source" names={[p1, p2]} tones={['p1', 'p2']} columns={['Bid / ask', 'Traded', 'Updated']} rows={rows} />;
@@ -96,7 +96,7 @@ export default function ModelVsMarkets({ modelPWin1, players, stored, ratingGap,
       id="markets"
       layout="wide"
       title="What the money says"
-      finding="Our exact odds next to live prediction-market prices. Markets are shown as the mid-price, renormalised so both players sum to 100%."
+      finding="Our exact odds next to live prediction-market prices. Markets are shown as the mid-price, renormalized so both players sum to 100%."
     >
       <Suspense fallback={<Skeleton kind="bars" rows={4} label="Loading market prices" />}>
         <MarketRows modelPWin1={modelPWin1} players={players} stored={stored} />
@@ -111,11 +111,11 @@ export default function ModelVsMarkets({ modelPWin1, players, stored, ratingGap,
               ? <>The markets are less optimistic about {p1} than our model. </>
               : ratio !== null ? <>The markets and our model broadly agree. </> : null}
           Our model only knows ratings: {higher} is <strong>{Math.abs(ratingGap)} points</strong> higher on the rating list the match uses
-          {drawRate !== null && <>. Even after calibrating to how drawish title matches are (about {formatPct(drawRate, 0)} of classical games here), that gap makes {higher} the favourite in every game, and over 14 games small per-game edges add up</>}.
+          {drawRate !== null && <>. Even after calibrating to how drawish title matches are (about {formatPct(drawRate, 0)} of classical games here), that gap makes {higher} the favorite in every game, and over 14 games small per-game edges add up</>}.
         </p>
         <p>
           Traders may be pricing what a ratings model cannot see: {p1}’s experience of winning a title match, months of targeted preparation,
-          and the usual pull of betting markets toward underdogs (the favourite-longshot bias). Neither view is “right”.
+          and the usual pull of betting markets toward underdogs (the favorite-longshot bias). Neither view is “right”.
         </p>
       </Prose>
 

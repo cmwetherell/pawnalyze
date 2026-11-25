@@ -46,7 +46,7 @@ export function NextGame({ state }: { state: MatchState }) {
   return (
     <>
       {when}: game {next.gameNo} at <LocalTime iso={next.startsAt} format="time" />
-      {first ? beforeDraw && '. Colours drawn 22 Nov' : now !== null && at - now > 30 * HOUR && ', after a rest day'}
+      {first ? beforeDraw && '. Colors drawn Nov 22' : now !== null && at - now > 30 * HOUR && ', after a rest day'}
     </>
   );
 }

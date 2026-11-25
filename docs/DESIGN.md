@@ -1,8 +1,8 @@
 # Pawnalyze design system: Scoresheet
 
-Pawnalyze is a chess graphics desk. Every page is set like a page of a serious newspaper's data section: a serif that can carry a headline and a fraction, ruled sections instead of boxes, and colour that only ever means data. This file is the whole contract. If something you need is not here, add it here and to the library first, then use it.
+Pawnalyze is a chess graphics desk. Every page is set like a page of a serious newspaper's data section: a serif that can carry a headline and a fraction, ruled sections instead of boxes, and color that only ever means data. This file is the whole contract. If something you need is not here, add it here and to the library first, then use it.
 
-Contents: 1 Principles. 2 Tokens. 3 Tailwind. 4 Fonts and type. 5 Layout. 6 Motion. 7 Charts. 8 Component library. 9 Rules against drift. 10 Copy. 11 Pages. 12 OG images. 13 Assets and licences. 14 Build order and ownership. 15 Acceptance.
+Contents: 1 Principles. 2 Tokens. 3 Tailwind. 4 Fonts and type. 5 Layout. 6 Motion. 7 Charts. 8 Component library. 9 Rules against drift. 10 Copy. 11 Pages. 12 OG images. 13 Assets and licenses. 14 Build order and ownership. 15 Acceptance.
 
 Files that ship with this document (`design/`):
 
@@ -15,19 +15,19 @@ Files that ship with this document (`design/`):
 | `assets/players/*` | `public/players/wcc/` |
 | `assets/game-of-the-century.json` | `lib/elocator/game-of-the-century.json` |
 
-How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23.6, Broadcast 21.8. Scoresheet supplies the look (type, rules, face-off, pawn bar, petrol palette). Instrument supplies the engineering (token-only sizes, sticky section bar with live odds, hairline stat cells, ruled race table, recompute everywhere, petrol action colour in light). Broadcast supplies the controls (pick buttons that hold the percentage, one-row-per-game phone list, odds chip and phone bottom bar, data/field/ink split per player, Elocator's single teal ramp, aligned market bars).
+How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23.6, Broadcast 21.8. Scoresheet supplies the look (type, rules, face-off, pawn bar, petrol palette). Instrument supplies the engineering (token-only sizes, sticky section bar with live odds, hairline stat cells, ruled race table, recompute everywhere, petrol action color in light). Broadcast supplies the controls (pick buttons that hold the percentage, one-row-per-game phone list, odds chip and phone bottom bar, data/field/ink split per player, Elocator's single teal ramp, aligned market bars).
 
 ---
 
 ## 1. Principles
 
 1. **Rules, not boxes.** A 2px `rule` opens a section; 1px `line` separates rows. `Panel` (the only box) is for instruments people operate: the scenario builder, the what-if lab, the Elocator input, the live board, a team spotlight, a sheet. Static charts, tables and text sit on the ground.
-2. **Colour means data.** Orange, blue, medals, series and teal appear only on data, players, flags and photographs. The interface is ink on paper (dark: paper on petrol).
+2. **Color means data.** Orange, blue, medals, series and teal appear only on data, players, flags and photographs. The interface is ink on paper (dark: paper on petrol).
 3. **Gold has five small jobs:** the link hairline, the current-page mark, the champion's crown, the marker on Pawnalyze's own row among the markets, and ceremony labels in the calendar (with brand `Tag`/`Callout` washes for titles and archive notes). Gold medals use their own token. Gold is never a button, focus ring, chart line or heading.
 4. **Say the finding first.** Every data section states in words what its figure shows, computed from the data, next to the figure.
 5. **One of each.** One container width, one button pair, one segmented control, one table, one legend, one tooltip, one heading scale, one radius scale.
 6. **The answer follows you.** On a dashboard the live number is always on screen: in the hero, then in the section bar (desktop) or bottom bar (phone).
-7. **Nothing by colour alone.** Names, letters, position, hatch or direct labels carry every distinction too.
+7. **Nothing by color alone.** Names, letters, position, hatch or direct labels carry every distinction too.
 8. **Readable at arm's length.** Data 15px, text 16px, labels 13 to 14px; 12px is for chart ticks and photo credits only.
 
 ---
@@ -36,9 +36,9 @@ How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23
 
 ## 2. Tokens
 
-`app/tokens.css` is the only file in the repo with colour literals. Colours are `R G B` channel triplets so Tailwind opacity modifiers work. Light on `:root`, dark on `.dark` (the existing class on `<html>`, default dark). Verified by `scripts/check-theme.mjs`: every pair of `fillClass` and `onClass` included, 0 failures (text 4.5:1 on every ground it may use, `ink`/`ink-2` 7:1, marks and control edges 3:1). Series 1 to 8, p1/p2 and the four complexity steps pass the colour-blind validator in both themes on `canvas` and `surface`. There is no violet and none may be added.
+`app/tokens.css` is the only file in the repo with color literals. Colors are `R G B` channel triplets so Tailwind opacity modifiers work. Light on `:root`, dark on `.dark` (the existing class on `<html>`, default dark). Verified by `scripts/check-theme.mjs`: every pair of `fillClass` and `onClass` included, 0 failures (text 4.5:1 on every ground it may use, `ink`/`ink-2` 7:1, marks and control edges 3:1). Series 1 to 8, p1/p2 and the four complexity steps pass the color-blind validator in both themes on `canvas` and `surface`. There is no violet and none may be added.
 
-### 2.1 Colour
+### 2.1 Color
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
@@ -51,7 +51,7 @@ How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23
 | `ink-2` | #384a54 | #bcc8c9 | body text, labels that carry data |
 | `ink-3` | #55666f | #93a2a6 | meta, axis ticks, credits |
 | `ink-inverse` | #fbfcfa | #0a1418 | text on ink |
-| `line` | #d6ddda | #23343b | hairlines between rows; default border colour |
+| `line` | #d6ddda | #23343b | hairlines between rows; default border color |
 | `control` | #6f7e86 | #6b7f86 | 3:1 edge of inputs, toggles, chips, axes |
 | `rule` | #0c1f2b | #cdd6d3 | the 2px section rule |
 | `action` | #023048 | #f1f4f0 | primary button, active segment (logo petrol in light) |
@@ -98,7 +98,7 @@ How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23
 | `series-7` | #0a8ca6 | #1aa0bd | categorical series 7 |
 | `series-8` | #c02f3d | #e05563 | categorical series 8 |
 | `on-mid` | #050b0e | #000000 | text on the mid tones: context, cx-1, series 4, 5, 7, brand-mark |
-| `context` | #7c8b93 | #667a82 | de-emphasised series |
+| `context` | #7c8b93 | #667a82 | de-emphasized series |
 | `grid` | #e2e8e5 | #1b2a30 | gridlines |
 | `axis` | #6f7e86 | #6b7f86 | baseline |
 | `board-light` | #e8ece4 | #cbd6d0 | light squares |
@@ -116,7 +116,7 @@ How the direction was chosen: judges' totals were Scoresheet 23.8, Instrument 23
 
 Rules of use:
 
-- **Text colours:** `ink`, `ink-2`, `ink-3`, `brand`, `positive`, `negative`, `warning`, `live`, `p1-ink`, `p2-ink` and the `on-*` tokens. Never put text in `p1`, `p2`, `series-*`, `gold`, `silver`, `bronze`, `draw` or `control`. Never put an opacity modifier on a text colour.
+- **Text colors:** `ink`, `ink-2`, `ink-3`, `brand`, `positive`, `negative`, `warning`, `live`, `p1-ink`, `p2-ink` and the `on-*` tokens. Never put text in `p1`, `p2`, `series-*`, `gold`, `silver`, `bronze`, `draw` or `control`. Never put an opacity modifier on a text color.
 - **Player identity:** `p1`/`p2` for every mark, in every chart, both themes (one data shade). `p1-field`/`p2-field` only behind a portrait. `p1-ink`/`p2-ink` only for words. `p1-wash`/`p2-wash` only for a tinted row or cell. These six belong to the World Championship 2026 pages, the live page, the home and index face-off and their OG image. Everything else uses `series-*`.
 - **Results:** win = `ink` fill, draw = `draw` fill, loss = outline only (`control` inset). Same in pips and W/D/L bars, so result never rests on red against green. Deltas use `positive`/`negative` plus an arrow glyph and a sign.
 - **Opacity modifiers** are allowed on `overlay/60`, `board-mark/55` and area fills `/15`. Nowhere else.
@@ -139,7 +139,7 @@ Rules of use:
 export type Tone = 'ink' | 'context' | 'p1' | 'p2' | 'draw' | 'win' | 'loss' | 'level' | 'gold' | 'silver' | 'bronze'
   | 'positive' | 'negative' | 'brand' | 'cx-1' | 'cx-2' | 'cx-3' | 'cx-4' | `series-${1|2|3|4|5|6|7|8}`;
 export const fillClass: Record<Tone, string>;   // 'bg-p1', 'bg-series-3', 'hatch' for level, ...
-export const onClass: Record<Tone, string>;     // text colour on that fill
+export const onClass: Record<Tone, string>;     // text color on that fill
 export const strokeVar: (t: Tone) => string;    // token(...) for SVG
 export const playerTone = (id: 1 | 2): 'p1' | 'p2';
 export const medalTone = (rank: 1 | 2 | 3): 'gold' | 'silver' | 'bronze';
@@ -154,9 +154,9 @@ export const seriesTone = (slot: number): Tone; // 0 -> series-1 ... 7 -> series
 
 ## 3. Tailwind
 
-Use the supplied `tailwind.config.ts` unchanged. It **replaces** the palette, font sizes, weights, radii, shadows and z-index, so `bg-red-500`, `text-white`, `text-sm`, `rounded-xl`, `shadow-lg` and `z-50` do not exist (they compile to nothing, and the drift check fails them). The default border colour is `line`, which fixes the near-white table rules.
+Use the supplied `tailwind.config.ts` unchanged. It **replaces** the palette, font sizes, weights, radii, shadows and z-index, so `bg-red-500`, `text-white`, `text-sm`, `rounded-xl`, `shadow-lg` and `z-50` do not exist (they compile to nothing, and the drift check fails them). The default border color is `line`, which fixes the near-white table rules.
 
-Useful names it adds: colours by token (`bg-surface`, `text-ink-2`, `border-control`, `fill-p1`), `type-*` styles, `p-gutter`, `py-section`, `h-header`, `h-bar`, `min-h-tap`, `min-h-hero`, `max-w-page`, `max-w-reading`, `scroll-mt-bar`, `pb-safe`, `pb-bottom-bar`, `z-bar|header|tooltip|sheet|skip`, `duration-in|out|press|slide|data|image`, `ease-enter`, `animate-rise|up|settle|grow|wipe|live-dot|sheet|fade|skeleton`, utilities `tnum`, `hatch`, `press`, `logo`, `scrollbar-none`.
+Useful names it adds: colors by token (`bg-surface`, `text-ink-2`, `border-control`, `fill-p1`), `type-*` styles, `p-gutter`, `py-section`, `h-header`, `h-bar`, `min-h-tap`, `min-h-hero`, `max-w-page`, `max-w-reading`, `scroll-mt-bar`, `pb-safe`, `pb-bottom-bar`, `z-bar|header|tooltip|sheet|skip`, `duration-in|out|press|slide|data|image`, `ease-enter`, `animate-rise|up|settle|grow|wipe|live-dot|sheet|fade|skeleton`, utilities `tnum`, `hatch`, `press`, `logo`, `scrollbar-none`.
 
 Spacing uses Tailwind's 4px scale, steps 1, 2, 3, 4, 6, 8, 12, 16, 24, 32 (4 to 128px) only.
 
@@ -186,7 +186,7 @@ export const text = Hanken_Grotesk({ subsets: ['latin', 'latin-ext'], variable: 
 export const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', preload: false });
 ```
 
-- **Pawnalyze Display** is Merriweather (OFL) pinned to width 87, weight 420, with its optical-size axis kept, subset to Latin and renamed as its licence requires: 90KB instead of Google's 369KB three-axis file. Ship `OFL-Merriweather.txt` beside it. It exists in one weight; never bold it or set it in italics.
+- **Pawnalyze Display** is Merriweather (OFL) pinned to width 87, weight 420, with its optical-size axis kept, subset to Latin and renamed as its license requires: 90KB instead of Google's 369KB three-axis file. Ship `OFL-Merriweather.txt` beside it. It exists in one weight; never bold it or set it in italics.
 - **Hanken Grotesk** 400/500/600 does everything else. **JetBrains Mono** only for FEN, PGN, SAN moves and clocks.
 - Delete Inter and `assets/fonts/CalSans-SemiBold.woff2`.
 
@@ -210,7 +210,7 @@ export const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono'
 | `type-micro` | Text | 12 | 1.45 | chart ticks, photo credits |
 | `type-mono` | Mono | 14 | 1.55 | moves, FEN, clocks |
 
-Rules: one `type-*` per element. **Numbers that stack in a column are always `type-data`** (tabular Hanken); the serif is for figures that stand alone. Sentence case everywhere; no tracked capitals, no eyebrows. Colour is separate (`type-h2 text-ink`). Headings step down one level at a time. A long title (over 22 characters, for example "United States of America" in the podium) drops one style via `fitTitle()` in `components/ui/Heading.tsx`. Measure: `max-w-reading` for paragraphs.
+Rules: one `type-*` per element. **Numbers that stack in a column are always `type-data`** (tabular Hanken); the serif is for figures that stand alone. Sentence case everywhere; no tracked capitals, no eyebrows. Color is separate (`type-h2 text-ink`). Headings step down one level at a time. A long title (over 22 characters, for example "United States of America" in the podium) drops one style via `fitTitle()` in `components/ui/Heading.tsx`. Measure: `max-w-reading` for paragraphs.
 
 ---
 
@@ -218,7 +218,7 @@ Rules: one `type-*` per element. **Numbers that stack in a column are always `ty
 
 ### 5.1 Frame
 
-- One content width: `Container` = `width: min(100% - 2 * gutter, 1280px)`. Header, hero, sections, section bar, footer and bottom bar share its edges. `size="reading"` (680) is only for running text, left-aligned to the container's left edge, never centred.
+- One content width: `Container` = `width: min(100% - 2 * gutter, 1280px)`. Header, hero, sections, section bar, footer and bottom bar share its edges. `size="reading"` (680) is only for running text, left-aligned to the container's left edge, never centered.
 - 12-column grid, 24px gap, inside a `Section`. Breakpoints 640, 768, 1024, 1280.
 - Grounds: `canvas`, and one `surface` band per movement. No other grounds.
 - Phone: one column, 20px gutter, buttons full width, 44px targets (real size, no negative-inset pseudo-elements).
@@ -244,14 +244,14 @@ Rules: one `type-*` per element. **Numbers that stack in a column are always `ty
 | `split` | 6 + 6 (or `ratio="5/7"`, `"7/5"`) | two related figures under one heading |
 | `plain` | 12 | text, rows, quotes |
 
-A section opens with the 2px rule, 24px, then the `h2`. Padding below: `section`. Landing pages use `pace="landing"`: padding `section-landing`, `min-h-screen` from 1024 so one section holds a screen, content top-aligned, filled to at least 70% of the screen or merged into its neighbour. Dashboards use normal pace and no minimum height. `SectionGroup` wraps sections into a movement with a ground; a `surface` group bleeds full width and pads `section` top and bottom.
+A section opens with the 2px rule, 24px, then the `h2`. Padding below: `section`. Landing pages use `pace="landing"`: padding `section-landing`, `min-h-screen` from 1024 so one section holds a screen, content top-aligned, filled to at least 70% of the screen or merged into its neighbor. Dashboards use normal pace and no minimum height. `SectionGroup` wraps sections into a movement with a ground; a `surface` group bleeds full width and pads `section` top and bottom.
 
 ### 5.4 Dashboard shell
 
 Order: `SiteHeader` (static), `PageHead`, hero figure, `SectionBar` (sticky, `top-0`, `h-bar`), groups of sections, `SiteFooter`, `BottomBar` (phones).
 
 - **PageHead**: breadcrumb; title; on the right (desktop) or below (phone) a facts column in `type-small` with the first fact in `font-medium text-ink`; optional status `Tag`, actions, sibling `Segmented` (Open / Women) at the right end of the breadcrumb line, and section `Tabs` along the bottom. On phones the first data figure must start within 440px of the top at 390x844: title on one line where it fits, facts cut to one line plus a "Details" disclosure.
-- **SectionBar**, desktop: left a 28px pawn glyph link to home (global navigation while the header is gone); then the live slot (`OddsChip` or event name), which fades in when the hero sentinel leaves view; centre the section links (`type-ui`, 2px `ink` bar on the current one, `aria-current="location"`, 1px `line` between groups); right the actions (Reset, Share) and a menu `IconButton` that opens the same site menu. At most 8 links; every anchor that exists today stays valid, and the full list with group headings is in the "All sections" disclosure.
+- **SectionBar**, desktop: left a 28px pawn glyph link to home (global navigation while the header is gone); then the live slot (`OddsChip` or event name), which fades in when the hero sentinel leaves view; center the section links (`type-ui`, 2px `ink` bar on the current one, `aria-current="location"`, 1px `line` between groups); right the actions (Reset, Share) and a menu `IconButton` that opens the same site menu. At most 8 links; every anchor that exists today stays valid, and the full list with group headings is in the "All sections" disclosure.
 - **SectionBar**, phone: pawn glyph, one disclosure button reading the current section ("Scenarios", chevron) opening a two-column grouped list with 48px rows, menu button. No odds here (the bottom bar has them).
 - Scroll spy: `IntersectionObserver`, rootMargin `-20% 0px -70% 0px`. Anchors use `scroll-mt-bar`.
 - **BottomBar** (under 1024 only): fixed, `bg-raised`, 1px `control` top line, height 64 + `env(safe-area-inset-bottom)`, sets `--bottom-bar` on `body` so `Page` pads by it (`pb-bottom-bar`), and is hidden (translated and `inert`) until the hero sentinel has left view and while a text field has focus. Contents: WCC = two solid halves with name and live percentage (tap jumps to `#scenario`), Reset when there are picks, Share. Olympiad live = builder button with pick count + Simulate. Nothing on finished Olympiads or Candidates with no picks. It never covers content.
@@ -269,41 +269,41 @@ Three places only: the hero enters once, the hover/press layer, and data changes
 | What | How |
 |---|---|
 | Hero entrance | `HeroEnter` wrapper, once per load: title lines `animate-rise` (80ms apart), then lead and buttons `animate-up` (60ms apart, from 400ms). Portrait block `animate-grow`, portrait `animate-settle`. Server-rendered content is visible without JS and under reduced motion |
-| The one moment | **Pawn bar deal**: 100 pawns stand in `draw` grey, then the two colours wipe in left to right once (`animate-wipe` on the coloured layer's wrapper, 900ms). Animate the wrapper only, never 100 SVG children |
+| The one moment | **Pawn bar deal**: 100 pawns stand in `draw` gray, then the two colors wipe in left to right once (`animate-wipe` on the colored layer's wrapper, 900ms). Animate the wrapper only, never 100 SVG children |
 | Buttons | hover fill step and 1px up, press 1px down and scale .985 (`duration-press`) |
 | Links | hairline 1px grows to 2px |
 | Rows that link | background to `surface`, title underlines |
 | Photo in a link | scale 1.025 inside its frame, 600ms |
-| Tabs, segments | state change, 150ms colour; no sliding pill |
+| Tabs, segments | state change, 150ms color; no sliding pill |
 | Data | numbers tween (`useTween`, 450ms), bar widths and heights transition `duration-data`; lines do not animate |
 | Sheet, menu | `animate-sheet` / `animate-fade` |
 | Live | `LiveDot` pulses 2s; the only loop on the site |
 | Simulated match | existing step timer, 420ms, with "Skip to the end" |
 
-Hover only inside `@media (hover: hover) and (pointer: fine)` (use Tailwind `hover:` on colour only; transforms go through component classes guarded by that query). Focus ring appears instantly. `usePrefersReducedMotion` and `useTween` move to `hooks/`.
+Hover only inside `@media (hover: hover) and (pointer: fine)` (use Tailwind `hover:` on color only; transforms go through component classes guarded by that query). Focus ring appears instantly. `usePrefersReducedMotion` and `useTween` move to `hooks/`.
 
 ---
 
 ## 7. Charts
 
-Everything is custom SVG from `components/charts`, sized by `useSize` (ResizeObserver) and drawn at real pixels so text never shrinks on phones. `chart.js`, `react-chartjs-2`, `chartjs-plugin-datalabels` and `recharts` imports are removed from pages: `DisplayEval`, `currentPredictions`, `MedalChart`, `WCCSims` migrate to `LineChart`/`BarRows`. If a migration truly blocks, `components/charts/adapters.ts` is the only file that may import them, through `useChartTheme()` (resolved token strings, re-read on theme change) and shared option builders. Uninstall the four packages when the adapter file is empty.
+Everything is custom SVG from `components/charts`, sized by `useSize` (ResizeObserver) and drawn at real pixels so text never shrinks on phones. `chart.js`, `react-chartjs-2`, `chartjs-plugin-datalabels` and `recharts` imports are removed from pages: `DisplayEval`, `currentPredictions`, `MedalChart`, `WCCSims` migrate to `LineChart`/`BarRows`. All four packages are uninstalled.
 
 - **Frame.** `ChartFrame` renders: optional caption line (`type-small`, what the y axis is), the plot, legend, and `TableFallback`. SVG has `role="img"` and an `aria-label` that states the finding. Every chart has a table.
 - **Axes.** Ticks `type-micro ink-3`, tabular. Gridlines 1px `grid`, solid. Baseline 1px `axis`. No y axis line, no tick marks, no axis titles (the caption says it). The unit is on the top tick only ("100%", then 75, 50). Phone: every second or third x label, never rotated.
 - **Domain.** Percent charts run 0 to the next of 25, 50, 75, 100 above the maximum. Bars always start at 0. A future region (games not played) is empty ground with a 1px dashed `line` at "now".
-- **Line.** 1.75px; the emphasised series 3px over a 7px ground-coloured halo with a 6px end dot. At most one `strong` series; others `context` (1.5px). Hover or focus on a label promotes that series to its own `series-*` tone. When five or fewer series matter equally (player against player, live charts) each takes its tone and all are direct-labelled.
-- **Labels, not legends.** End labels right of the plot, 15px 600 for strong, 14px `ink-3` for context, resolved by the existing push-down/push-up solver with 20px minimum gap (22 on phones) and a 1px leader when moved more than 8px. A label may never sit on a line: it gets a 5px ground-coloured stroke halo and is nudged. Under 560px names shorten to federation code or short name, the gutter is at most 80px, the value goes under the name, and a reference is named on its line inside the plot. A context label with no clear spot within 12px of its own line, nearer to it than to any other, is left out (tooltip and table have it). A legend appears only when marks repeat (bars, scatter markers) and uses `Legend`.
+- **Line.** 1.75px; the emphasized series 3px over a 7px ground-colored halo with a 6px end dot. At most one `strong` series; others `context` (1.5px). Hover or focus on a label promotes that series to its own `series-*` tone. When five or fewer series matter equally (player against player, live charts) each takes its tone and all are direct-labelled.
+- **Labels, not legends.** End labels right of the plot, 15px 600 for strong, 14px `ink-3` for context, resolved by the existing push-down/push-up solver with 20px minimum gap (22 on phones) and a 1px leader when moved more than 8px. A label may never sit on a line: it gets a 5px ground-colored stroke halo and is nudged. Under 560px names shorten to federation code or short name, the gutter is at most 80px, the value goes under the name, and a reference is named on its line inside the plot. A context label with no clear spot within 12px of its own line, nearer to it than to any other, is left out (tooltip and table have it). A legend appears only when marks repeat (bars, scatter markers) and uses `Legend`.
 - **Peak.** In column charts the largest value is set in `type-stat-sm`; the rest in `type-small`. Columns: 2px gaps, radius 2 on the outer end.
 - **Split and stacked bars.** 2px gaps; height 12 (28 to 34 with inside labels); a segment under 8%, or too narrow for its label, shows no inside label but stays in the aria-label and table. Zero value: no bar and no track, just "0.0%" in `ink-3`. Race tables have a ruled header 0/25/50/75/100% with faint full-height ticks.
 - **Tooltip and crosshair.** One `ChartTooltip` (raised, 1px `line`, `shadow-pop`, 220px max, `type-small`, values tabular and right-aligned, sorted high to low, six rows at most) and a 1px `ink-3` crosshair. Pointer, touch (drag) and keyboard (arrow keys move, Escape clears). It flips side near the edge and never covers a control. It keeps off the strong end label.
-- **Colour** follows the entity, never the rank. Sequential = teal ramp. Medals = medal tokens. Match sides = p1/p2. No gradient fills; areas at 15%.
-- **Preview.** Hovering or focusing a pick shows the resulting odds in the `OddsChip`/hero figure slot as "would be 34.3%" (`Delta`), not in a floating box over neighbouring buttons.
+- **Color** follows the entity, never the rank. Sequential = teal ramp. Medals = medal tokens. Match sides = p1/p2. No gradient fills; areas at 15%.
+- **Preview.** Hovering or focusing a pick shows the resulting odds in the `OddsChip`/hero figure slot as "would be 34.3%" (`Delta`), not in a floating box over neighboring buttons.
 
 ---
 
 ## 8. Component library
 
-Server components unless marked **C** (client). Every component takes `className?` for layout only (margin, grid placement, width), never for colour, type or radius. Icons, labels and sizes are props. `children` omitted where obvious.
+Server components unless marked **C** (client). Every component takes `className?` for layout only (margin, grid placement, width), never for color, type or radius. Icons, labels and sizes are props. `children` omitted where obvious.
 
 ### 8.1 Layout: `components/layout`
 
@@ -347,7 +347,7 @@ Server components unless marked **C** (client). Every component takes `className
 | `TableFallback` | `summary?`, `columns`, `rows` | `wcc/ui TableFallback`, MedalHistory details |
 | `Disclosure` | `summary`, `meta?`, `open?`, `variant?: 'plain' \| 'row'` (native details) | 5 raw `details`, completed rounds, Spotlight mobile sections |
 | `Tabs` | `items: {label, href, active} \| {key,label,live?}[]`, `value?`, `onChange?`, `ariaLabel`; link tabs or ARIA tabs with arrow keys | header subnav, HeroPanel tablist |
-| `Segmented` **C** | `items: {value, label, hint?, icon?, dot?}[]`, `value`, `onChange` \| `href` per item, `role?: 'tablist' \| 'radiogroup' \| 'nav'`, `size`, `full?` | header switcher, metric toggle, builder view, sort toggle, min-games, board picker, `ColourDrawToggle`, LikelyOpponents split |
+| `Segmented` **C** | `items: {value, label, hint?, icon?, dot?}[]`, `value`, `onChange` \| `href` per item, `role?: 'tablist' \| 'radiogroup' \| 'nav'`, `size`, `full?` | header switcher, metric toggle, builder view, sort toggle, min-games, board picker, `ColorDrawToggle`, LikelyOpponents split |
 | `Chip` **C** | `onClick \| href`, `icon?`, `pressed?`, `onClear?`, `tone?: 'neutral' \| 'positive' \| 'negative'` | MoversStrip chips, team filter chip, restore picks, game header chips |
 | `PickToggle` **C** | see 8.5 | `wcc PickToggle`, `OutcomeToggle`, `MatchOutcomeToggle`, `GamePicker`, MatchPickerCard draw/team buttons |
 | `Field` | `label`, `hint?`, `error?`, `hideLabel?`; wraps one control, wires ids | loose labels |
@@ -374,7 +374,7 @@ Server components unless marked **C** (client). Every component takes `className
 | `Meter` | `value`, `baseline?`, `max?`, `tone?`, `label?: 'right' \| 'none'`, `ruled?`; hides fill and track at 0 | `ProbBar`, GoldPanel bar, TournamentCard bar |
 | `SplitBar` | `segments: {key, value, tone, label}[]`, `height?: 8 \| 12 \| 20 \| 32`, `labels?: 'none' \| 'inside' \| 'ends'`, `ariaLabel`, `tick?` | WinSplitBar bar, TriBar, market bars, MedalHero bar, W/D/L bars (Spotlight, MatchPicker, LikelyOpponents), H2H bar, home split |
 | `Pips` | `kind: 'result' \| 'form' \| 'games' \| 'eligibility'`, `items`, `size?: 12 \| 20 \| 32`; letter inside from 20px | `FormPips`, `EligibilityPips`, HeadToHead pips, H2HBar, SimReplay `Pip` |
-| `Podium` | `places: {rank, name, flag, stats, note?, pre?}[]`, `layout?: 'stack' \| 'row'`; a 3px medal-coloured rule over each place, first place larger | `FinalPodium`, `PodiumStrip` cards |
+| `Podium` | `places: {rank, name, flag, stats, note?, pre?}[]`, `layout?: 'stack' \| 'row'`; a 3px medal-colored rule over each place, first place larger | `FinalPodium`, `PodiumStrip` cards |
 | `Quote` | `text`, `logo`, `cite` | home press cards |
 | `LogoRow` | `label`, `logos` (class `press`) | "As seen in" |
 | `RelativeTime`, `LocalTime`, `Countdown` **C** | `iso`, `format`; `Countdown variant: 'full' \| 'inline'` | `RelativeTime`, `localTime/localDay`, `Countdown`, `CompactCountdown` |
@@ -406,7 +406,7 @@ Server components unless marked **C** (client). Every component takes `className
 | `GameViewer` **C** | existing props | `chess/GameViewer` (rebuilt on the above; `scrollIntoView` replaced by list-only scrolling) |
 | `EvalBar` | `evaluation`, `stale`, `flipped`; 28px wide, 13px label | `live/EvalBar` |
 | `PlayerClock` | `name`, `rating?`, `clock?`, `running?`, `tone` | LiveGame `PlayerRow`, SideLabel |
-| `PieceDot` | `side: 'white' \| 'black'`; always next to the words "White: Gukesh" | `Piece`, `PieceIcon`, colour-draw dots |
+| `PieceDot` | `side: 'white' \| 'black'`; always next to the words "White: Gukesh" | `Piece`, `PieceIcon`, color-draw dots |
 | `ComplexityScale` | `score`, `size?: 'lg' \| 'sm'`; four teal segments, marker, word, "94 / 100" | `ComplexityBar` |
 | `FaceOff` **C** | 8.5 | `FaceOffHero` portraits, `WccHomeFeature`, `WinSplitBar` |
 | `OddsChip` | `sides: [{name, p, tone}, {...}]`, `preview?` | mobile bar odds |
@@ -436,7 +436,7 @@ interface FaceOffProps {
   verdict?: ReactNode;                   // standfirst
   notes?: [ReactNode, ReactNode];        // line under the pawn bar
   actions?: ReactNode;                   // Watch live + second button
-  next?: ReactNode;                      // "Game 2, Wed 25 Nov at 15:00 CET"
+  next?: ReactNode;                      // "Game 2, Wed, Nov 25 at 3:00 PM CET"
   credit?: ReactNode;
   champion?: { name: string; line: string } | null; // finished state
 }
@@ -515,11 +515,11 @@ Additions to the props in 8.1 to 8.5 (nothing was removed):
 | `Slider` | `hint` under the track | says what the marker is |
 | `EmptyState` | `level: 2 \| 3` | |
 | `Skeleton` | `label`; `Spinner` `size` | |
-| `ScrollRow` | `follow`, `followKey` (centres that element, scrolling only the row); arrows sit together at the right end; `stretch`: children touch, are equally tall and share the width from 1024 | round tabs; `PodiumStrip` |
+| `ScrollRow` | `follow`, `followKey` (centers that element, scrolling only the row); arrows sit together at the right end; `stretch`: children touch, are equally tall and share the width from 1024 | round tabs; `PodiumStrip` |
 | `AvatarStack`, `FlagStack` | `label`; `FlagStack decorative`; `Medal decorative` | |
 | `Meter` | `format`; `max` scales the bar only, the label is still `value` | as `ProbBar` did |
 | `Pips` | `items[].caption` at size 32; linked pips are 44px tall | simulated match |
-| `PhotoCreditLine` | `photos`, `changes?`: one line for several photos, with what was altered | every `FaceOff` credit: "Photos: A, licence; B, licence. Backgrounds removed, black and white." |
+| `PhotoCreditLine` | `photos`, `changes?`: one line for several photos, with what was altered | every `FaceOff` credit: "Photos: A, license; B, license. Backgrounds removed, black and white." |
 | `PodiumStrip` (`ui/PodiumStrip`) | `label`, `columns: {key, label, meta?, places}[]`, `selected`, `onSelect` | the board-prize strip in 11.8; `Podium layout="row"` stays three ruled columns |
 | `Photo` | `photo` is a `PhotoSource`: a credited `PhotoCredit`, or `{src, alt, focal?}` for the site's own picture, which has no caption | about photo |
 | `Prose` | `columns: 1 \| 2` | "Why the gap?" |
@@ -529,7 +529,7 @@ Additions to the props in 8.1 to 8.5 (nothing was removed):
 | `LogoItem` | `width` and `height` as drawn, in the ratio of the file | no shift, no warning |
 | `OddsChip` | `variant: 'inline' \| 'halves'` | the bottom bar is two solid halves |
 | `FaceOff` | `preview`: side one's odds a pointed-at pick would give, in the place of the delta | section 7, Preview |
-| `PlayerClock` | `side: 'white' \| 'black'` shows the piece instead of the tone | games of players with no colour |
+| `PlayerClock` | `side: 'white' \| 'black'` shows the piece instead of the tone | games of players with no color |
 | `LineChart` | `x.titles` (longer words for the tooltip), `values` (the last value after each end label), `series[].labelAt: 'none'`, `series[].notes` (second line under a printed value), `seriesAction` (what a series button does, after its name), `extraRows(i)` (tooltip rows), `ground` (`raised` in a Sheet; a Panel or a surface group is found by itself) | |
 | `ChartGroup` (`charts/ChartGroup`) | children: charts with the same `x.labels` share one crosshair and line up | complexity and evaluation on the live page |
 | `ColumnChart` | drawn in `ChartFrame`: gaps, labels and printed values follow its own width, so it works in a narrow column | section 11.7 |
@@ -559,7 +559,7 @@ Additions to the props in 8.1 to 8.5 (nothing was removed):
 | `FaceOff` | `heading`: a ruled row over the portraits with `next` at its right end. Two short `actions` share a line on phones | the home hero, which has no title of its own for the match |
 | `Row` | `aside`: a fact of its own, at the right of the words from 768 and under them on phones. `figure` and `value` go under the words on phones | winners on the index, the meter on home |
 | `FlagStack` | `more`: how many there are beyond `items` | "+203" |
-| `LogoItem` | `colour`: never turned white | NPR |
+| `LogoItem` | `color`: never turned white | NPR |
 | `ComplexityScale` | `words={false}`: the scale alone | beside a figure that says the score |
 | `ScenarioPanel` | `note` (a line over the buttons), `fit` (from 1024 no taller than the window, so it can be sticky), `bare` (in a Sheet: rounds, tools and games only), state `unpaired`; the round row has arrows and mouse drag | Olympiad builder |
 | `BottomBar` | `until: 'lg' \| 'xl'`: the live Olympiad keeps it up to 1280, because the table and the builder do not fit side by side before | |
@@ -585,7 +585,6 @@ From 1024 to 1439 `SectionBar` shows the buttons in `actions` as icons (the word
 
 `components/ui/styles.ts` holds the class strings primitives share (hover and selected ground, gold hairline, control edge, row bleed); only the library (`ui`, `layout`, `charts`, `chess`) imports it. The gold hairline is written there once: `linkLine`, `proseLinks`, `cellLink`, and `goldLine` for a title that gets its line on hover. `Panel`, `Sheet` and the Combobox list set `data-panel` on `group/panel`, which is how a row inside them picks a tint that shows. Hover and selected grounds of rows run 12px past their rules on both sides.
 
-`app/legacy.css` and `components/ThemeProvider.tsx` exist only for pages not migrated yet. Delete them with the last one.
 
 ---
 
@@ -595,9 +594,9 @@ From 1024 to 1439 `SectionBar` shows the buttons in `actions` as icons (the word
 
 | Rule | Rejected | Allowed only in |
 |---|---|---|
-| raw-colour | `#rgb`, `#rrggbb(aa)`, `rgb() rgba() hsl() hsla() oklch() color-mix()` | `app/tokens.css`, `lib/theme/**` |
+| raw-color | `#rgb`, `#rrggbb(aa)`, `rgb() rgba() hsl() hsla() oklch() color-mix()` | `app/tokens.css`, `lib/theme/**` |
 | default-palette | `bg-red-500`, `text-white`, `border-black`, any Tailwind hue | nowhere |
-| arbitrary-colour | `bg-[#..]`, `text-[var(--x)]`, `ring-[rgb(..)]` | nowhere |
+| arbitrary-color | `bg-[#..]`, `text-[var(--x)]`, `ring-[rgb(..)]` | nowhere |
 | arbitrary-type | `text-[13px]`, `leading-[..]`, `tracking-[..]`, `font-[..]`, `text-sm` to `text-9xl` | nowhere |
 | tracked-caps | `uppercase`, `tracking-wide*`, `textTransform` | nowhere |
 | raw-element | `<button> <table> <thead> <tbody> <input> <select> <textarea> <details> <summary> <dialog>` | `components/{ui,layout,charts,chess}` |
@@ -606,10 +605,10 @@ From 1024 to 1439 `SectionBar` shows the buttons in `actions` as icons (the word
 | own-width | `max-w-xl` to `7xl`, `max-w-[..px]` | same |
 | own-scroller | `overflow-(x-\|y-)auto\|scroll` | same (and those set `relative`) |
 | gradient-glow | gradients, `blur-2xl`, `backdrop-blur` | nowhere |
-| chart-lib | `chart.js`, `react-chartjs-2`, `recharts`, datalabels | `components/charts/adapters.ts` |
+| chart-lib | `chart.js`, `react-chartjs-2`, `recharts`, datalabels | none |
 | old-token | `--bg-*`, `--text-*`, `--wcc-*`, `chess-gold`, `gold-ink`, `medal-gold` | nowhere |
 | emoji-glyph | emoji and media glyphs | nowhere |
-| inline-colour | `style={{ color, background, borderColor, fill, boxShadow }}` | library folders, OG files |
+| inline-color | `style={{ color, background, borderColor, fill, boxShadow }}` | library folders, OG files |
 
 A line may carry `drift-ok: reason` (Polymarket iframe attributes are the only expected case). ESLint adds `no-restricted-imports` for `react-icons/*` outside `components/ui/Icon.tsx`, `next/image` outside `ui/Avatar`, `ui/Photo`, `ui/LogoRow`, `chess/FaceOff`, `layout/*`, and `next/font/*` outside `app/fonts.ts`. Review rule: a page or feature file that needs a class combination twice adds a prop to the library instead.
 
@@ -628,9 +627,9 @@ All URLs, query parameters, hashes, metadata, JSON-LD, revalidation, polling, ke
 ### 11.1 Home `/` (landing)
 
 1. **Hero** (`min-h-hero`, alone on the first screen at 1440x900). `PageHead size="mega" enter`: h1 "Forecasts for championship chess"; lead right of it, bottom-aligned: "Exact match odds, tournament simulations you can steer, and a complexity score for any position." Then a 1px `line`, then `FaceOff variant="feature"` fed by the existing `WccHomeFeature` loader (renamed `components/wcc/WccFeature.tsx`): row above the portraits with "World Chess Championship 2026, Geneva" (`type-h3`) left and next game right; score or `Countdown inline`; `PawnBar deal`; note "Exact odds, confirmed by 10,000 simulations" (or the pre-run text). **Actions: `Watch live` (to `/world-chess-championship-2026/live`) and `See the match odds`.** While a game is live, `Watch live` is primary with `live` dot and reads "Watch game 2 live"; otherwise `See the match odds` is primary and `Watch live` secondary. After the match: "See how it ended" and "Replay the games". Credit line under the figure (`PhotoCreditLine` with "Backgrounds removed, black and white"). No dead band above the portraits: 24px.
-2. **Recent results** (`Section rail`). Finding: "The chance our model gave each winner before round 1." `Rows`, four: Uzbekistan (Chess Olympiad 2026), China (Women's Olympiad), Javokhir Sindarov (2026 Candidates), Vaishali Rameshbabu (2026 Women's Candidates). Lead = `Flag` (no avatars: several have no recorded licence). Meta keeps today's description and format text; value = pre-event chance from `getOlympiadSummaryHistory` (roundsCompleted 0) or the `Pre` row of `getBaseSimulationData`, as `type-stat-sm` + `Meter ruled`. If a number is missing, drop the figure, keep the row. While an Olympiad is live, its row shows the live leader, as `OlympiadCards` does today. Action: `See every simulation`.
+2. **Recent results** (`Section rail`). Finding: "The chance our model gave each winner before round 1." `Rows`, four: Uzbekistan (Chess Olympiad 2026), China (Women's Olympiad), Javokhir Sindarov (2026 Candidates), Vaishali Rameshbabu (2026 Women's Candidates). Lead = `Flag` (no avatars: several have no recorded license). Meta keeps today's description and format text; value = pre-event chance from `getOlympiadSummaryHistory` (roundsCompleted 0) or the `Pre` row of `getBaseSimulationData`, as `type-stat-sm` + `Meter ruled`. If a number is missing, drop the figure, keep the row. While an Olympiad is live, its row shows the live leader, as `OlympiadCards` does today. Action: `See every simulation`.
 3. **2026 Candidates** (`Section rail`). `LineChart` of the Candidates history: winner `strong` in its series tone, the others `context`, labels for any player who peaked above 10%. Finding computed: "Javokhir Sindarov won from a starting chance of 8.2%." plus "He was behind Fabiano Caruana until round 5." built from the first round after which the winner led for good. Link: `Replay the Candidates`. Chance to win, so y 0 to 100%.
-4. **Elocator** (`SectionGroup surface`, `Section split ratio="5/7"`). h2 "Elocator scores how hard a position is"; body "Paste a FEN or PGN. A neural network trained on more than 100,000 grandmaster moves rates the position from 1 to 100 for the player to move."; button `Analyze a position`, all in the section's heading row. Left: `Board` after 17. Kf1 from Byrne vs Fischer, 1956 (`lib/elocator/game-of-the-century.json`, real API scores). Right, as tall as the board: "94" in `type-mega` size (as a figure, not a heading), "Extreme, out of 100", `ComplexityScale lg`; under them a `ColumnChart` of all 83 positions in `complexityTone`, move 17 labelled.
+4. **Elocator** (`SectionGroup surface`, `Section split ratio="5/7"`). h2 "Elocator scores how hard a position is"; body "Paste a FEN or PGN. A neural network trained on more than 100,000 grandmaster moves rates the position from 1 to 100 for the player to move."; button `Analyze a position`, all in the section's heading row. Left: `Board` after 17. Kf1 from Byrne vs Fischer, 1956 (`lib/elocator/game-of-the-century.json`, real API scores). Right, as tall as the board: "94" in `type-mega` size (as a figure, not a heading), "Extreme, out of 100", `ComplexityScale lg`; under them a `ColumnChart` of all 83 positions in `complexityTone`, move 17 labeled.
 5. **In the press** (`Section rail`): `Quote` with the NYT text and cite; NPR `Row`; `LogoRow label="Also seen in"` Japan Times, Gulf News, Deccan Herald. Text unchanged.
 
 ### 11.2 Simulations index `/simulations` (landing)
@@ -652,11 +651,11 @@ Split `page.tsx` into a server page (adds metadata title "Elocator: Chess Comple
 `SectionBar` groups: **Forecast** Odds `#odds`, Scenarios `#scenario`, Endings `#when` (also `#scores`, `#how-it-ends`); **Play** Replay `#replay`, What-if `#what-if`; **Context** Markets `#markets` (also `#history`), Form `#head-to-head` (also `#prize`), Schedule `#schedule`, Method `#methodology` (also `#photo-credits`). Live slot `OddsChip`; actions Reset (when a scenario is active) and `CopyButton "Share scenario"`.
 
 Forecast (canvas):
-1. `PageHead size="mega"`: crumbs Simulations / World Championship 2026; h1 "Gukesh vs Sindarov"; facts: "FIDE World Championship 2026", "22 Nov to 13 Dec, Fondation Martin Bodmer, Cologny, Geneva", "14 classical games, first to 7½, $2.5M prize fund".
+1. `PageHead size="mega"`: crumbs Simulations / World Championship 2026; h1 "Gukesh vs Sindarov"; facts: "FIDE World Championship 2026", "Nov 22 to Dec 13, Fondation Martin Bodmer, Cologny, Geneva", "14 classical games, first to 7½, $2.5M prize fund".
 2. `#odds` `FaceOff variant="hero"`. Score slot = `MatchStatus` logic (countdown, score after game N, live, level at 7–7, awaiting results). Verdict (standfirst): scenario label if any, "Sindarov wins about 85 in 100 matches. 13.6% go to tiebreaks.", then in `ink-3` the market contrast "Kalshi traders give Gukesh 27.4%." when a stored Kalshi quote exists. Notes: "Chance to win the match. Each pawn is 1 in 100." and the existing exact/simulations/freshness sentences. **Actions: `Watch live` primary always on this page** ("Watch game 2 live" with dot while live), second `Pick results` to `#scenario`; next game line above them in local time with "rest day" logic. Champion state: `champion` block with crown, name, "Won 7½–5½ after game 13.", frozen-odds sentence. Credits under the figure.
 3. `StatStrip` six: Classical, Rapid, Blitz (Gukesh / Sindarov), Goes to tiebreaks, Last game, Draw rate.
 4. `SectionBar`, then restore note `Callout` (aria-live).
-5. `#scenario` `Section wide` "Pick the results" (finished: "Game by game"). Description: "Choose a result for any game and every number on this page updates at once." Actions: `ColourDrawToggle` as `Segmented` while the colours are unknown, Reset, Share. `GameSheet`. Legend: `PieceDot` who has White (assumed note), "Percentages are Gukesh win, draw, Sindarov win for that game". Each game links to `/live?game=N`.
+5. `#scenario` `Section wide` "Pick the results" (finished: "Game by game"). Description: "Choose a result for any game and every number on this page updates at once." Actions: `ColorDrawToggle` as `Segmented` while the colors are unknown, Reset, Share. `GameSheet`. Legend: `PieceDot` who has White (assumed note), "Percentages are Gukesh win, draw, Sindarov win for that game". Each game links to `/live?game=N`.
 6. **How the match ends** (one heading family): `#when` `Section wide`, h2 computed "Game 13 is the likeliest finish" (or "Tiebreaks are the likeliest finish"), finding as today, `ColumnChart` full width, p1 under p2, peak large, "Games 1 to 7 cannot decide the match" note. Then `Section split`: `#scores` `ButterflyChart` (h2 from the most likely score) and `#how-it-ends` `LadderChart` (stages, rules, reach, hatch for still level). Tables kept.
 
 Play (surface group):
@@ -674,17 +673,17 @@ Empty state (no run): hero without figures, `EmptyState` "Match odds are on thei
 
 ### 11.6 Live game `/world-chess-championship-2026/live` (dashboard)
 
-`PageHead` h1 "Gukesh vs Sindarov, live"; lead unchanged; action `See the match odds`. Under it the game picker: `ScrollRow` of 14 link-style `Segmented` cells (44px): "1" to "14" with result glyph (½, or the winner's initial) when finished, `LiveDot` when ongoing, muted when not started, `aria-current`, date in `title`; keeps `?game=` and `?round=` behaviour. Then `Section plain` with `Split asideWidth="wide"`: left `PlayerClock`, `EvalBar` + `Board` (max 560), `PlayerClock`, `BoardControls` with `Back to live`; right: heading "Game 2: Gukesh – Sindarov", status `Tag` (live, connecting, reconnecting, unreachable, final, starts in), opening, `StatStrip` of two (Stockfish with note and stale state; Complexity with `ComplexityScale sm`), `MoveList follow`. Phone order: title line + tag, clocks and board, controls, stats two-up, moves (max 220px), charts. Section "Complexity and evaluation" (`wide`): two `LineChart`s on one shared x and crosshair (`ChartFrame` group): complexity 0 to 100 with p1/p2 lines and averages in the end labels; evaluation in `ink` with zero line and 15% area; click selects the ply; table. Sources line kept. Loading and unreachable = `EmptyState busy`. Keyboard arrows, Home, End, f kept. A "Match odds and predictions" link stays.
+`PageHead` h1 "Gukesh vs Sindarov, live"; lead unchanged; action `See the match odds`. Under it the game picker: `ScrollRow` of 14 link-style `Segmented` cells (44px): "1" to "14" with result glyph (½, or the winner's initial) when finished, `LiveDot` when ongoing, muted when not started, `aria-current`, date in `title`; keeps `?game=` and `?round=` behavior. Then `Section plain` with `Split asideWidth="wide"`: left `PlayerClock`, `EvalBar` + `Board` (max 560), `PlayerClock`, `BoardControls` with `Back to live`; right: heading "Game 2: Gukesh – Sindarov", status `Tag` (live, connecting, reconnecting, unreachable, final, starts in), opening, `StatStrip` of two (Stockfish with note and stale state; Complexity with `ComplexityScale sm`), `MoveList follow`. Phone order: title line + tag, clocks and board, controls, stats two-up, moves (max 220px), charts. Section "Complexity and evaluation" (`wide`): two `LineChart`s on one shared x and crosshair (`ChartFrame` group): complexity 0 to 100 with p1/p2 lines and averages in the end labels; evaluation in `ink` with zero line and 15% area; click selects the ply; table. Sources line kept. Loading and unreachable = `EmptyState busy`. Keyboard arrows, Home, End, f kept. A "Match odds and predictions" link stays.
 
 ### 11.7 Olympiad 2026 open and women `/simulations/(womens-)chess-olympiad-2026` (dashboard)
 
 `PageHead`: crumbs; `switcher` Open / Women; h1 short title; status `Tag`; facts = format, the existing meta fragments, chess-results link; `media` = `FlagStack` (medalists or top 8 seeds); `tabs` Medal odds / Board prizes. `SectionBar` (finished): Podium `#podium`, Final-round odds `#race`, Teams `#teams`, How it works `#method`; (live): Gold race, Results, Teams, How it works; live slot = event name and "After round N" or leader and gold odds.
 
-Finished, first screen: `Section split ratio="5/7"` `#podium`: left `Podium layout="stack"` (flag `hero` for first, `xl` for others, name `type-h1` / `type-h3` through `fitTitle`, MP, GP, SB as `Stat sm`, tiebreak note, "18.0% before round 1"); right the gold-odds `LineChart` (`MedalHistoryChart` data, champion `strong`, others `context`, metric `Segmented` Gold / Medal / Top 10, `onSeries` opens the team). Finding computed: pre-tournament favourite and value, and the round from which the champion led for good. No player photo in the hero.
+Finished, first screen: `Section split ratio="5/7"` `#podium`: left `Podium layout="stack"` (flag `hero` for first, `xl` for others, name `type-h1` / `type-h3` through `fitTitle`, MP, GP, SB as `Stat sm`, tiebreak note, "18.0% before round 1"); right the gold-odds `LineChart` (`MedalHistoryChart` data, champion `strong`, others `context`, metric `Segmented` Gold / Medal / Top 10, `onSeries` opens the team). Finding computed: pre-tournament favorite and value, and the round from which the champion led for good. No player photo in the hero.
 
 `#race` (`HeroPanel` as `Section wide` with `Tabs`): Gold race / "Final-round odds" = `RaceRows` with ruled header, gold/silver/bronze legend, scenario baseline tick and `Delta`, selected state, prefetch on hover/focus; Round N = `MatchRow` list with team filter `Input`, apply-results `Callout`, show more; Trend = `LineChart` (live events only; finished ones already show it above). `MoversStrip` = `ScrollRow` of `Chip`s. Default tab logic unchanged.
 
-Team spotlight = `Panel` under the race: head (flag, name, seed and average, standing line, next match, `Sparkline`, Copy link, prev/next/close `IconButton`s, arrow-key behaviour, focus management), `StatStrip` of four (Gold, Podium with medal `SplitBar`, Top 10, Expected finish), then four columns (two on tablet, `Disclosure`s on phone): Roster `Table compact` with links and TPR; Results and `LikelyOpponents`; Finish distribution `ColumnChart` (medal tones for 1 to 3, median marked); Remaining rounds `SplitBar` W/D/L with result tones. `Skeleton`s, errors and stale run handling kept.
+Team spotlight = `Panel` under the race: head (flag, name, seed and average, standing line, next match, `Sparkline`, Copy link, prev/next/close `IconButton`s, arrow-key behavior, focus management), `StatStrip` of four (Gold, Podium with medal `SplitBar`, Top 10, Expected finish), then four columns (two on tablet, `Disclosure`s on phone): Roster `Table compact` with links and TPR; Results and `LikelyOpponents`; Finish distribution `ColumnChart` (medal tones for 1 to 3, median marked); Remaining rounds `SplitBar` W/D/L with result tones. `Skeleton`s, errors and stale run handling kept.
 
 `#teams`: `Split` while live: main = scenario summary `Callout` (sentence, matched count, low-sample warnings, copy, clear), `SpotlightHint` `Callout`, "All 206 teams" `Table`; aside = `ScenarioPanel` sticky under the bar. Finished: table full width. Table: Pos (2), Team with flag and seed (1), Rating (4), MP (1), Gold `Meter` (1), Podium `Meter tone="ink"` (2), Finish (1), chevron; podium rows carry a `Medal`; sortable heads; `SearchInput`; 25 rows then "Show all 206"; row click toggles the spotlight with the same aria labels.
 
@@ -694,11 +693,11 @@ No run yet: `EmptyState` "Simulations coming soon".
 
 ### 11.8 Board prizes `.../boards` (dashboard)
 
-Same `PageHead` with the Board prizes tab. Board `Segmented` (Board 1 to 4, Reserve with leader flag) doubles as the section's control; keeps `?board=`, `?team=` and the phone sticky behaviour by living in the `SectionBar` live slot. `Podium layout="row"` strip: five columns separated by `line` (phone: `ScrollRow` snap), each a button with label, ranked count or "New leader", three rows with `Medal`, flag, name, mover `Delta`, TPR. `Section wide` "Board 1 race": player `Combobox`, Copy link, min-games `Segmented`, reachable `Checkbox`, team `Chip` with clear; `Table`: rank, player (flag, title, name link, team), TPR, Score, Form `Pips`, 8 games `Pips eligibility`, Avg opp; show all; error `Callout`; before round 1 `EmptyState`. `Explainer` for "How board medals work" with its note.
+Same `PageHead` with the Board prizes tab. Board `Segmented` (Board 1 to 4, Reserve with leader flag) doubles as the section's control; keeps `?board=`, `?team=` and the phone sticky behavior by living in the `SectionBar` live slot. `Podium layout="row"` strip: five columns separated by `line` (phone: `ScrollRow` snap), each a button with label, ranked count or "New leader", three rows with `Medal`, flag, name, mover `Delta`, TPR. `Section wide` "Board 1 race": player `Combobox`, Copy link, min-games `Segmented`, reachable `Checkbox`, team `Chip` with clear; `Table`: rank, player (flag, title, name link, team), TPR, Score, Form `Pips`, 8 games `Pips eligibility`, Avg opp; show all; error `Callout`; before round 1 `EmptyState`. `Explainer` for "How board medals work" with its note.
 
 ### 11.9 Player `.../players/[fideId]` (dashboard, no SectionBar)
 
-`PageHead` h1 = name with title as `Tag brand`; facts: team link, board, rating; actions: Copy link, previous/next on the board; `media` flag `hero`. `StatStrip`: Performance (with `Delta` against rating), Board rank (`Medal` when 1 to 3), Score (W D L, average opponent), Eligibility (`Pips`). `Split`: main "Games" (`Pips form size=20`; `Rows` of games, each expanding a `GameViewer`; hash behaviour kept); aside "Round by round" `LineChart points="all"` with rating `refs`, "Board 1 top 5" `Rows` with current player highlighted, full race link. TPR footnote.
+`PageHead` h1 = name with title as `Tag brand`; facts: team link, board, rating; actions: Copy link, previous/next on the board; `media` flag `hero`. `StatStrip`: Performance (with `Delta` against rating), Board rank (`Medal` when 1 to 3), Score (W D L, average opponent), Eligibility (`Pips`). `Split`: main "Games" (`Pips form size=20`; `Rows` of games, each expanding a `GameViewer`; hash behavior kept); aside "Round by round" `LineChart points="all"` with rating `refs`, "Board 1 top 5" `Rows` with current player highlighted, full race link. TPR footnote.
 
 ### 11.10 Candidates `/simulations/candidates-2026`, `womens-candidates-2026`, `candidates-2024`, `womens-candidates-2024` (dashboard)
 
@@ -721,7 +720,7 @@ Loading (`Skeleton`/`EmptyState busy`), no data, error (`Callout negative`), liv
 
 ## 12. OG images
 
-`lib/og/kit.tsx` (Satori; inline styles allowed, colours only from `ogColor`, which is `TOKENS.dark`): `OgFrame` (1200x630, `canvas`, 56px sides, 4px `rule` line at the top, logo left, stage right, footer line with the address), `OgTitle`, `OgRow` (rank, flag, name, bar, value), `OgFigure` (figure with a small unit), `OgSplit` (20px split bar), `OgPortrait` (field block + cut-out PNG), `OgFlag`, `OgMedal`, `OgPips`, `OgLogo`, `OgMark`, `ogPlayerPhoto()`, `ogDisplay()` (the serif at a size), `clip()`. Fonts: `PawnalyzeDisplay-og.ttf` and `HankenGrotesk-{Regular,SemiBold}-og.ttf`, read with `readFileSync` from `assets/fonts`; they, the flags and `public/players/wcc/*-og.png` are in `outputFileTracingIncludes`. `ogImage(title, card)` draws the card and waits for the bytes: if the data fails it draws a title card, if a font is rejected it draws with Satori's own. A letter the subset lacks comes from Satori's fallback face. No gradients, no tracked capitals.
+`lib/og/kit.tsx` (Satori; inline styles allowed, colors only from `ogColor`, which is `TOKENS.dark`): `OgFrame` (1200x630, `canvas`, 56px sides, 4px `rule` line at the top, logo left, stage right, footer line with the address), `OgTitle`, `OgRow` (rank, flag, name, bar, value), `OgFigure` (figure with a small unit), `OgSplit` (20px split bar), `OgPortrait` (field block + cut-out PNG), `OgFlag`, `OgMedal`, `OgPips`, `OgLogo`, `OgMark`, `ogPlayerPhoto()`, `ogDisplay()` (the serif at a size), `clip()`. Fonts: `PawnalyzeDisplay-og.ttf` and `HankenGrotesk-{Regular,SemiBold}-og.ttf`, read with `readFileSync` from `assets/fonts`; they, the flags and `public/players/wcc/*-og.png` are in `outputFileTracingIncludes`. `ogImage(title, card)` draws the card and waits for the bytes: if the data fails it draws a title card, if a font is rejected it draws with Satori's own. A letter the subset lacks comes from Satori's fallback face. No gradients, no tracked capitals.
 
 Cards: site default (`app/opengraph-image.tsx`, for every page that has none of its own); WCC and live (portraits either side on their fields, names, two 110px figures, split bar, tiebreak share, stage, simulations line, photo credit); Olympiad odds x2 (top five rows; finished: podium with medal rules); boards x2 (five columns of three); player x2 (flag, name, TPR, rank medal, score, eligibility, form). The root metadata names no image: the file convention supplies it to Open Graph and X.
 
@@ -729,13 +728,13 @@ Board medals, on the cards and the pages, go to players who have or can still re
 
 ---
 
-## 13. Assets and licences
+## 13. Assets and licenses
 
 - `gukesh-cut.webp` / `sindarov-cut.webp` (704x948, transparent, black and white) and `*-cut-og.png` are adaptations of the repo's Commons portraits. Add `cutout` and `cutoutOg` entries to `WCC_PHOTOS` with the same source objects and `modified: 'Background removed, converted to black and white, resized and converted to WebP'` (PNG for og). Gukesh's stays **CC BY-SA 2.0, adaptation shared under CC BY-SA 2.0**; Sindarov's CC BY 4.0. Include both in `ALL_WCC_PHOTO_CREDITS`.
 - Wherever a photograph appears, its `PhotoCaption` is visible on the same page near it; full TASL list at `#photo-credits` on the WCC page. Home and index show caption lines under the face-off.
-- Candidates avatars have no licence records in the repo. They keep their current small use and get no new, larger use. Do not add photographs without a licence entry.
+- Candidates avatars have no license records in the repo. They keep their current small use and get no new, larger use. Do not add photographs without a license entry.
 - Fonts: OFL texts ship in `assets/fonts`. Chess pieces: SVG set in `public/img/chesspieces` (the PNG copies are unused after `Board`).
-- Logo: `lib/theme/logo.ts` holds the paths (mark, small cut, outlined wordmark). `components/layout/Logo.tsx`, the Open Graph images and the app icons (`app/icon.svg`, `favicon.ico`, `apple-icon.png`, `public/img/icon-*.png`) are drawn from them. The mark is a pawn whose body is a bell curve, standing on a rule: one colour, always `ink` on the page, light on petrol in icons.
+- Logo: `lib/theme/logo.ts` holds the paths (mark, small cut, outlined wordmark). `components/layout/Logo.tsx`, the Open Graph images and the app icons (`app/icon.svg`, `favicon.ico`, `apple-icon.png`, `public/img/icon-*.png`) are drawn from them. The mark is a pawn whose body is a bell curve, standing on a rule: one color, always `ink` on the page, light on petrol in icons.
 
 ---
 
@@ -761,5 +760,5 @@ A change to a shared prop is a change to this file first. Nobody edits a file ou
 3. Home and WCC each show a `Watch live` button above the fold at 1440x900 and within the first 900px at 390; every game number in the sheet and calendar opens `/world-chess-championship-2026/live?game=N`.
 4. WCC phone: first percentage starts by y=440 at 390x844; bottom bar hidden over the hero, shown after it, never over content; picks update hero, chip, charts and prize.
 5. All old anchors, query parameters, keyboard shortcuts, aria labels, tables and credits still present (compare with `main` route by route).
-6. `grep -rE "chart\.js|recharts"` finds nothing outside `components/charts/adapters.ts`; gold appears only in its listed jobs; one `type-figure` pair per page.
+6. `grep -rE "chart\.js|recharts"` finds nothing; gold appears only in its listed jobs; one `type-figure` pair per page.
 7. Reduced motion: nothing animates, nothing is hidden. Keyboard: skip link, visible ring everywhere, focus never under the bar.

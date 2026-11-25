@@ -33,7 +33,7 @@ interface XAxisProps {
   ticks: number[];
   x: (i: number) => number;
   y: number;
-  /** The pointed-at index: printed in ink, over its neighbours. */
+  /** The pointed-at index: printed in ink, over its neighbors. */
   active?: number | null;
   max: number;
   ground?: Ground;

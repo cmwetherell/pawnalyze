@@ -1,4 +1,4 @@
-/** What a chart sits on: marks and labels are cut out of it with a halo of the same colour. */
+/** What a chart sits on: marks and labels are cut out of it with a halo of the same color. */
 export type Ground = 'auto' | 'canvas' | 'surface' | 'raised';
 
 /** `auto` follows the page: canvas, surface in a surface SectionGroup or in a Panel, raised in a Panel on one. A Sheet or menu has to say. Full class names, so Tailwind finds them. */

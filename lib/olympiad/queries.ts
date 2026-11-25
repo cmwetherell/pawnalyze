@@ -653,10 +653,10 @@ export async function getOlympiadRoundOdds(
 
 // ---- Board-prize race
 
-function scoreFor(result: string, colour: 'w' | 'b'): 0 | 0.5 | 1 | null {
+function scoreFor(result: string, color: 'w' | 'b'): 0 | 0.5 | 1 | null {
   if (result === '1/2-1/2') return 0.5;
-  if (result === '1-0') return colour === 'w' ? 1 : 0;
-  if (result === '0-1') return colour === 'w' ? 0 : 1;
+  if (result === '1-0') return color === 'w' ? 1 : 0;
+  if (result === '0-1') return color === 'w' ? 0 : 1;
   return null;
 }
 
@@ -707,18 +707,18 @@ export async function getOlympiadPlayerGames(event: OlympiadEvent, fideId: numbe
     .orderBy('round')
     .execute();
   return rows.map(r => {
-    const colour: 'w' | 'b' = r.white_fide_id === fideId ? 'w' : 'b';
-    const own = colour === 'w';
+    const color: 'w' | 'b' = r.white_fide_id === fideId ? 'w' : 'b';
+    const own = color === 'w';
     return {
       round: r.round,
       boardNo: r.board_no,
-      colour,
+      color,
       ownRating: own ? r.white_elo : r.black_elo,
       oppFideId: own ? r.black_fide_id : r.white_fide_id,
       oppName: own ? r.black_player : r.white_player,
       oppRating: own ? r.black_elo : r.white_elo,
       result: r.result as PlayerGame['result'],
-      score: scoreFor(r.result, colour),
+      score: scoreFor(r.result, color),
       moves: parseGamePgn(r.pgn).moves,
     };
   });

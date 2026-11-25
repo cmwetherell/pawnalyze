@@ -26,7 +26,7 @@ import { useNow } from '@/hooks/useNow';
 import { setUrlParam, useUrlParam } from '@/hooks/useUrlParam';
 import { moveLabel } from '@/lib/chess/moves';
 import { BroadcastFeed, RoundsStore, defaultRound, type FeedSnapshot, type RoundInfo } from '@/lib/live/feed';
-import { fenKey, fmtEval, parseLiveGame, type Colour, type Evaluation, type LivePosition } from '@/lib/live/pgn';
+import { fenKey, fmtEval, parseLiveGame, type Color, type Evaluation, type LivePosition } from '@/lib/live/pgn';
 import { complexityInputs, createComplexityStore, createEvalStore, evalInputs } from '@/lib/live/scores';
 import { playerTone, type Tone } from '@/lib/theme/tones';
 import { CLASSICAL_SCHEDULE, G1_WHITE, PLAYER_DEFAULTS, WCC_HREF } from '@/lib/wcc/config';
@@ -96,7 +96,7 @@ function GamePicker({ rounds, results, current, clock, onPick }: GamePickerProps
   const items = rounds.map((r): SegmentedItem => {
     const result = r.ongoing ? undefined : results[r.gameNo];
     const started = clock && r.startsAt ? new Date(r.startsAt) : null;
-    const when = started && `${started.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}, ${started.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+    const when = started && `${started.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}, ${started.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
     const state = r.ongoing ? 'live' : result !== undefined ? WORD[result] : r.finished ? 'finished' : null;
     return {
       value: String(r.gameNo),
@@ -142,8 +142,8 @@ function fmtClock(s: number): string {
 
 interface SideInfo { name: string; rating: string | null; tone: Tone }
 
-/** From the broadcast; before it arrives, from the colour draw. */
-function sideInfo(headers: Record<string, string>, c: Colour, gameNo: number): SideInfo {
+/** From the broadcast; before it arrives, from the color draw. */
+function sideInfo(headers: Record<string, string>, c: Color, gameNo: number): SideInfo {
   const k = c === 'w' ? 'White' : 'Black';
   const fide = Number(headers[`${k}FideId`]);
   const white = gameNo > 0 ? whiteInGame(gameNo, G1_WHITE) : null;
@@ -215,16 +215,16 @@ function GameView({ round }: { round: RoundInfo }) {
   // While the newest position has no evaluation yet, show the one before it, marked as such.
   const prevEval = loadingMoves ? null : cur.evaluation ?? (ply > 0 ? points[ply - 1].evaluation : null);
   const stale = !cur.evaluation && prevEval !== null;
-  const sides: Record<Colour, SideInfo> = { w: sideInfo(game.headers, 'w', round.gameNo), b: sideInfo(game.headers, 'b', round.gameNo) };
+  const sides: Record<Color, SideInfo> = { w: sideInfo(game.headers, 'w', round.gameNo), b: sideInfo(game.headers, 'b', round.gameNo) };
   const names = { w: sides.w.name, b: sides.b.name };
-  const clockOf = (c: Colour): { value: number | null; running: boolean } => {
+  const clockOf = (c: Color): { value: number | null; running: boolean } => {
     const own = [...positions.slice(0, ply + 1)].reverse().find(p => p.clock !== null && p.ply > 0 && p.toMove !== c);
     const value = own?.clock ?? null;
     const running = inPlay && ply === last && cur.pos.toMove === c;
     if (value === null || !running || f.lastMoveAt === null || now === null) return { value, running };
     return { value: value - (now - f.lastMoveAt) / 1000, running };
   };
-  const nameLine = (c: Colour) => {
+  const nameLine = (c: Color) => {
     const k = clockOf(c);
     return <PlayerClock name={sides[c].name} rating={sides[c].rating} tone={sides[c].tone} clock={k.value === null ? null : fmtClock(k.value)} running={k.running} />;
   };
@@ -303,7 +303,7 @@ function GameView({ round }: { round: RoundInfo }) {
 }
 
 /** The averages and the hardest position, once nearly every position has its score. */
-function Finding({ points, names }: { points: ChartPoint[]; names: Record<Colour, string> }) {
+function Finding({ points, names }: { points: ChartPoint[]; names: Record<Color, string> }) {
   const scored = points.filter(p => p.complexity !== null);
   if (points.length < 11 || scored.length < points.length * 0.9) return null;
   const at = points.map(p => ({ ply: p.pos.ply, san: p.pos.san, toMove: p.pos.toMove, complexity: p.complexity }));
@@ -326,7 +326,7 @@ function firstGamePicker() {
   };
 }
 
-interface EvalStatInput { evaluation: Evaluation | null; stale: boolean; names: Record<Colour, string>; failing: boolean; over: boolean }
+interface EvalStatInput { evaluation: Evaluation | null; stale: boolean; names: Record<Color, string>; failing: boolean; over: boolean }
 
 function evalStat({ evaluation, stale, names, failing, over }: EvalStatInput): StatProps {
   let note: string;

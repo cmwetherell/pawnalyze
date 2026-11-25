@@ -13,7 +13,7 @@ export interface EndLabel {
   strong: boolean;
   /** Ink instead of the quiet ink-3 (a normal, not a context, series). */
   plain?: boolean;
-  /** Colour of the leader. */
+  /** Color of the leader. */
   color: string;
   ariaLabel?: string;
   onSelect?: () => void;

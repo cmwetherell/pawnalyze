@@ -25,7 +25,7 @@ function placeholder(gameNo: number, startsAt: string): WccGame {
 }
 
 /**
- * Fill in what the pipeline's games table may not have yet: who has White (from the colour draw)
+ * Fill in what the pipeline's games table may not have yet: who has White (from the color draw)
  * and official classical results. Anything the table already has wins.
  */
 function withKnown(g: WccGame): WccGame {
@@ -98,7 +98,7 @@ export function matchState(games: WccGame[], runG1White: PlayerId | null = null)
   };
 }
 
-/** True when results (or the colour draw) are newer than the run the stored odds come from. */
+/** True when results (or the color draw) are newer than the run the stored odds come from. */
 export function isLagging(run: WccRun, state: MatchState): boolean {
   if (state.winner !== null) return false;
   return state.lastFinal > run.afterGame

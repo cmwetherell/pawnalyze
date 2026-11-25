@@ -67,7 +67,7 @@ export function WordSpecimens() {
 
 export function StatusSpecimens() {
   return (
-    <Section id="status" title="Status and feedback" layout="rail" finding="Live, loading, empty, changed, wrong. A word or an icon always goes with the colour.">
+    <Section id="status" title="Status and feedback" layout="rail" finding="Live, loading, empty, changed, wrong. A word or an icon always goes with the color.">
       <Specimen name="Tag and LiveDot" from="ui/Tag, ui/LiveDot" note="The live dot is the only looping animation on the site.">
         <Variants>
           <Tag>Final</Tag><Tag tone="live">Live, round 4</Tag><Tag tone="positive" icon="check">Verified</Tag><Tag tone="negative">High</Tag><Tag tone="warning" icon="warning">Projected</Tag><Tag tone="brand">GM</Tag>

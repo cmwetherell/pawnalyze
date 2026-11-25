@@ -10,7 +10,7 @@ export interface DeltaProps {
    */
   unit?: 'pts' | 'pct' | 'places' | 'plain';
   better?: 'up' | 'down';
-  /** No colour: for dense tables where direction is enough. */
+  /** No color: for dense tables where direction is enough. */
   quiet?: boolean;
   /** Decimals for places and plain (default 0): an average finish moves by tenths. */
   digits?: 0 | 1;
@@ -24,7 +24,7 @@ export interface DeltaProps {
 }
 
 /**
- * Change against a base: arrow, sign, size. Never colour alone. Renders nothing when it rounds to zero.
+ * Change against a base: arrow, sign, size. Never color alone. Renders nothing when it rounds to zero.
  * For places the arrow and sign say which way the entry moved, so rank 5 to 3 reads "up 2 places".
  */
 export function Delta({ value, base, unit = 'pts', better = 'up', quiet = false, digits = 0, short = false, format, label, className }: DeltaProps) {

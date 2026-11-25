@@ -101,7 +101,7 @@ export default async function WccPage() {
         crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: 'World Championship 2026' }]}
         facts={[
           'FIDE World Championship 2026',
-          `22 Nov to 13 Dec, ${EVENT.venue}, ${EVENT.venueArea}`,
+          `Nov 22 to Dec 13, ${EVENT.venue}, ${EVENT.venueArea}`,
           '14 classical games, first to 7½, $2.5M prize fund',
           `${defender.name} (${defender.country}) defends against Candidates winner ${challenger.name} (${challenger.country})`,
         ]}
@@ -139,7 +139,7 @@ export default async function WccPage() {
               <EmptyState
                 className="mt-8"
                 title="Match odds are on their way"
-                body={`Exact match probabilities, confirmed by 10,000 simulations, will appear here shortly. The match starts in ${EVENT.city} on 22 November.`}
+                body={`Exact match probabilities, confirmed by 10,000 simulations, will appear here shortly. The match starts in ${EVENT.city} on November 22.`}
               />
             </Container>
           </section>

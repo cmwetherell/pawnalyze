@@ -2,7 +2,7 @@
 module.exports = {
     siteUrl: process.env.SITE_URL || 'https://pawnalyze.com',
     generateRobotsTxt: true, // Optional: to generate robots.txt
-    // The component catalogue is for people working on the site.
+    // The component catalog is for people working on the site.
     exclude: ['/styleguide'],
     additionalPaths: async (config) => [
         await config.transform(config, '/world-chess-championship-2026'),

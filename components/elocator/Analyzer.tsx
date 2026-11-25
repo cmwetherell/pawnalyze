@@ -184,7 +184,7 @@ function Averages({ positions }: { positions: Position[] }) {
   return <StatStrip columns={2} items={[{ label: 'White, average complexity', value: avg('w') }, { label: 'Black, average complexity', value: avg('b') }]} />;
 }
 
-/** One column per position, in the colour of its complexity. */
+/** One column per position, in the color of its complexity. */
 function SampleChart({ positions, ply, onGo }: { positions: Position[]; ply: number; onGo: (ply: number) => void }) {
   const top = positions.reduce((m, p) => ((p.complexity ?? 0) > (m.complexity ?? 0) ? p : m));
   return (

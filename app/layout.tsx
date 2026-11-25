@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/react";
 import "./tokens.css";
 import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
-import "./legacy.css"; // pages not yet migrated; see the note in the file
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SkipLink } from "@/components/layout/SkipLink";

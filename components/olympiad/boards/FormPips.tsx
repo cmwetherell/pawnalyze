@@ -26,7 +26,7 @@ export function FormPips({ form, lastRound, size = 'sm', className }: FormPipsPr
   const items = Array.from({ length: Math.max(lastRound, 1) }, (_, i): PipItem => {
     const f = byRound.get(i + 1);
     return f
-      ? { label: `R${f.round}: ${against(f)}, ${f.colour === 'w' ? 'white' : 'black'}`, letter: RESULT[f.score].letter, tone: RESULT[f.score].tone }
+      ? { label: `R${f.round}: ${against(f)}, ${f.color === 'w' ? 'white' : 'black'}`, letter: RESULT[f.score].letter, tone: RESULT[f.score].tone }
       : { label: `R${i + 1}: sat out`, tone: 'rest' };
   });
   const summary = form.map(f => `R${f.round} ${against(f)}`).join(', ') || 'No games yet';

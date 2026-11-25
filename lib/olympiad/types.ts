@@ -195,7 +195,7 @@ export interface TeamOdds {
 // ---- Board-prize race (individual medals by performance rating)
 
 export type GameResult = '1-0' | '0-1' | '1/2-1/2' | '*';
-export type Colour = 'w' | 'b';
+export type Color = 'w' | 'b';
 
 /** One board game from the broadcast (no moves; see PlayerGame). Team ids are omitted on purpose: they go stale on renumbering. */
 export interface Game {
@@ -213,7 +213,7 @@ export interface Game {
 
 export interface FormEntry {
   round: number;
-  colour: Colour;
+  color: Color;
   score: 0 | 0.5 | 1;
   oppFideId: number | null;
   oppName: string;
@@ -253,7 +253,7 @@ export interface PlayerRaceRow {
 /** Form entry shipped with leaderboard rows: enough for the pips and their tooltips. */
 export interface FormEntryLite {
   round: number;
-  colour: Colour;
+  color: Color;
   score: 0 | 0.5 | 1;
   oppFedCode: string | null;
   oppRating: number;
@@ -308,7 +308,7 @@ export interface BoardRace {
 export interface PlayerGame {
   round: number;
   boardNo: number;
-  colour: Colour;
+  color: Color;
   ownRating: number;
   oppFideId: number | null;
   oppName: string;

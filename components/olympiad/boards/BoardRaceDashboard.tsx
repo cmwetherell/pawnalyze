@@ -82,17 +82,17 @@ export function BoardRaceDashboard({ event, finished, rule, summary, newLeaders,
 
   // Load the selected board when it is not in memory yet; warm the others when idle.
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     if (!loaded[board]) {
       fetchBoard(board)
-        .then(rows => { if (!cancelled) { setLoaded(prev => ({ ...prev, [board]: rows })); setError(null); } })
-        .catch((e: unknown) => { if (!cancelled) setError(e instanceof Error ? e.message : 'Could not load this board'); });
+        .then(rows => { if (!canceled) { setLoaded(prev => ({ ...prev, [board]: rows })); setError(null); } })
+        .catch((e: unknown) => { if (!canceled) setError(e instanceof Error ? e.message : 'Could not load this board'); });
     }
     const idle = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 800));
     const handle = idle(() => {
-      for (let b = 1; b <= N_PRIZE_BOARDS; b++) if (b !== board && !loaded[b]) void fetchBoard(b).then(rows => { if (!cancelled) setLoaded(prev => (prev[b] ? prev : { ...prev, [b]: rows })); }).catch(() => {});
+      for (let b = 1; b <= N_PRIZE_BOARDS; b++) if (b !== board && !loaded[b]) void fetchBoard(b).then(rows => { if (!canceled) setLoaded(prev => (prev[b] ? prev : { ...prev, [b]: rows })); }).catch(() => {});
     });
-    return () => { cancelled = true; (window.cancelIdleCallback ?? window.clearTimeout)(handle as number); };
+    return () => { canceled = true; (window.cancelIdleCallback ?? window.clearTimeout)(handle as number); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [board, event, summary.lastRound]);
 

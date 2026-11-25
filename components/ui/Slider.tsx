@@ -26,7 +26,7 @@ interface SliderProps {
 export function Slider({ label, value, min, max, step, onChange, format, tone = 'ink', marker, hint, disabled = false, className }: SliderProps) {
   const id = useId();
   const share = (v: number) => Math.min(1, Math.max(0, (v - min) / (max - min)));
-  // The centre of a 24px thumb travels between 12px from either end.
+  // The center of a 24px thumb travels between 12px from either end.
   const at = (v: number) => `calc(12px + (100% - 24px) * ${share(v)})`;
   return (
     <div className={cn(disabled && 'opacity-50', className)}>

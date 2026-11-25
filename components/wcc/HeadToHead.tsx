@@ -45,7 +45,7 @@ function FormRow({ games, player }: { games: PlayerGame[]; player: DisplayPlayer
             ariaLabel={`${player.shortName}'s Olympiad games`}
             items={played.map(g => {
               const r = RESULT[String(g.score)];
-              return { label: `Round ${g.round} against ${g.oppName} (${g.oppRating}) with ${g.colour === 'w' ? 'White' : 'Black'}: ${r.word}`, letter: r.letter, tone: r.tone };
+              return { label: `Round ${g.round} against ${g.oppName} (${g.oppRating}) with ${g.color === 'w' ? 'White' : 'Black'}: ${r.word}`, letter: r.letter, tone: r.tone };
             })}
           />
         )}

@@ -1,14 +1,14 @@
 import type { HistoryPoint, OfficialStandings } from '@/lib/olympiad/types';
 
 export interface GoldStory {
-  favouriteId: number;
-  favouriteP: number;
+  favoriteId: number;
+  favoriteP: number;
   /** Rounds completed when the champion went ahead for good; 0 is before round 1. */
   ledFrom: number;
   lastRound: number;
 }
 
-/** Who started as favourite, and after which round the champion led for good. Null without a run from before round 1. */
+/** Who started as favorite, and after which round the champion led for good. Null without a run from before round 1. */
 export function goldStory(history: HistoryPoint[], championId: number): GoldStory | null {
   const leaders = new Map<number, HistoryPoint>();
   for (const h of history) {
@@ -23,7 +23,7 @@ export function goldStory(history: HistoryPoint[], championId: number): GoldStor
     if (leaders.get(r)?.teamId !== championId) break;
     ledFrom = r;
   }
-  return { favouriteId: start.teamId, favouriteP: start.pGold, ledFrom, lastRound: rounds[0] };
+  return { favoriteId: start.teamId, favoriteP: start.pGold, ledFrom, lastRound: rounds[0] };
 }
 
 /** Places 1 to 3, when the official table has all of them. */

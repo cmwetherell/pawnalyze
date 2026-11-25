@@ -2,7 +2,7 @@ import { Section } from '@/components/layout/Section';
 import { Explainer } from '@/components/ui/Explainer';
 
 const ITEMS = [
-  { title: 'Board-by-board Monte Carlo', body: 'Every remaining match is played out on all four boards from the players’ ratings, colour and draw tendencies, then scored 2/1/0 in match points.' },
+  { title: 'Board-by-board Monte Carlo', body: 'Every remaining match is played out on all four boards from the players’ ratings, color and draw tendencies, then scored 2/1/0 in match points.' },
   { title: 'Swiss pairings, simulated', body: 'Each simulation re-pairs the field round after round by score group, so future opponents are uncertain, exactly as in the real event.' },
   { title: 'Scenario explorer', body: 'Picking a result keeps only the simulations where it happened. Pick a published pairing, or a team’s result in a round whose pairings aren’t out yet.' },
 ];

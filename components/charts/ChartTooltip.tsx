@@ -9,10 +9,10 @@ export interface TooltipRow {
   key: string;
   label: string;
   value: string;
-  /** Colour of the key; leave out for a row that has no mark. */
+  /** Color of the key; leave out for a row that has no mark. */
   tone?: Tone;
   shape?: 'line' | 'square';
-  /** An outlined marker instead of a colour. */
+  /** An outlined marker instead of a color. */
   marker?: MarkerShape;
   /** The promoted or strong series. */
   strong?: boolean;

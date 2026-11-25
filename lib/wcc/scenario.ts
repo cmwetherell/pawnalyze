@@ -1,7 +1,7 @@
 /**
  * Shareable scenario state in the URL:
  *   ?s=3:1,5:d,9:2   classical game picks: 1 = Gukesh wins, 2 = Sindarov wins, d = draw
- *   ?c=1|2           who has White in game 1 (before the colour draw)
+ *   ?c=1|2           who has White in game 1 (before the color draw)
  *   ?r=g+20,s-15     rating offsets for the what-if lab (±100)
  *   ?t=2.4           classical draw-propensity θ for the what-if lab
  * Parsing is lenient: unknown or out-of-range tokens are dropped and counted.
@@ -47,7 +47,7 @@ export function parsePicks(param: string | null, blocked: (g: number) => boolean
   return { picks, dropped };
 }
 
-export function parseColour(param: string | null): PlayerId | null {
+export function parseColor(param: string | null): PlayerId | null {
   return param === '1' ? 1 : param === '2' ? 2 : null;
 }
 
@@ -81,10 +81,10 @@ export function parseTheta(param: string | null): number | null {
 }
 
 /** Apply a scenario to a URL (only non-default values are written). */
-export function writeScenario(url: URL, s: Scenario, runTheta: number, colourKnown: boolean) {
+export function writeScenario(url: URL, s: Scenario, runTheta: number, colorKnown: boolean) {
   const set = (k: string, v: string) => { if (v) url.searchParams.set(k, v); else url.searchParams.delete(k); };
   set('s', encodePicks(s.picks));
-  set('c', !colourKnown && s.g1White !== null ? String(s.g1White) : '');
+  set('c', !colorKnown && s.g1White !== null ? String(s.g1White) : '');
   set('r', encodeOffsets(s.offsets));
   set('t', s.theta !== null && Math.abs(s.theta - runTheta) > 1e-9 ? String(s.theta) : '');
 }

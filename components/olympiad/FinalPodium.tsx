@@ -57,19 +57,19 @@ export function FinalPodium({ standings, teamsById, history, eventLabel, selecte
   });
 
   const story = goldStory(history, champion.teamId);
-  const favourite = story && teamsById.get(story.favouriteId);
+  const favorite = story && teamsById.get(story.favoriteId);
   const name = sentenceName(champion.name);
 
   return (
     <Section
       id="podium" rule={false} className="pt-6 md:pt-0" layout={hasTrend(history) ? 'split' : 'plain'} ratio="5/7"
       title={`${name} won gold`}
-      finding={story && favourite && (
-        story.favouriteId === champion.teamId
-          ? <>{name} started as favourite at {formatPct(story.favouriteP)} {story.ledFrom === 0
+      finding={story && favorite && (
+        story.favoriteId === champion.teamId
+          ? <>{name} started as favorite at {formatPct(story.favoriteP)} {story.ledFrom === 0
               ? <strong className="text-ink">and led after every round.</strong>
               : <>and lost the lead, <strong className="text-ink">then took it back for good after round {story.ledFrom}.</strong></>}</>
-          : <>{sentenceName(favourite.name)} started as favourite at {formatPct(story.favouriteP)}. <strong className="text-ink">{name} {story.ledFrom === story.lastRound
+          : <>{sentenceName(favorite.name)} started as favorite at {formatPct(story.favoriteP)}. <strong className="text-ink">{name} {story.ledFrom === story.lastRound
               ? 'went ahead in the last round.'
               : `took the lead after round ${story.ledFrom} and never gave it back.`}</strong></>
       )}

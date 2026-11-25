@@ -7,7 +7,7 @@
  */
 import { CLINCH_HP, N_CLASSICAL, PRIZE, TB_STAGE_GAMES } from './config';
 import type {
-  ColourOdds, EndGameRow, HalfPoints, MatchOdds, PlayerId, PlayerKey, ScoreRow, Stage, StageOdds, TbStage, Triplet, WdlByWhite, WdlSet,
+  ColorOdds, EndGameRow, HalfPoints, MatchOdds, PlayerId, PlayerKey, ScoreRow, Stage, StageOdds, TbStage, Triplet, WdlByWhite, WdlSet,
 } from './types';
 
 export interface FixedTbGame {
@@ -22,7 +22,7 @@ export interface ExactInput {
   wdl: WdlSet;
   /** Classical game number (1..14) -> P1 half-points. */
   fixed?: ReadonlyMap<number, HalfPoints>;
-  /** Game-1 White; null averages both colour orders 50/50. */
+  /** Game-1 White; null averages both color orders 50/50. */
   g1White: PlayerId | null;
   /** Tiebreak results already played, in play order. */
   tb?: FixedTbGame[];
@@ -43,7 +43,7 @@ export function whiteInGame(g: number, g1White: PlayerId): PlayerId {
   return g % 2 === 1 ? g1White : other(g1White);
 }
 
-/** P1 [win, draw, loss] in classical game g; averaged over the colour draw when unknown. */
+/** P1 [win, draw, loss] in classical game g; averaged over the color draw when unknown. */
 export function gameOdds(wdl: WdlSet, g: number, g1White: PlayerId | null): Triplet {
   if (g1White !== null) return p1Probs(wdl.classical, whiteInGame(g, g1White));
   const a = p1Probs(wdl.classical, 1);
@@ -63,7 +63,7 @@ export function resultToHp(result: string | null, whitePlayerId: PlayerId | null
 interface StageOutcome { p1: number; p2: number; tie: number }
 
 function stageWithLot(t: WdlByWhite, n: number, lot: PlayerId, known: Map<number, HalfPoints>): StageOutcome {
-  // Distribution of P1 half-points over the n stage games; colours alternate from the lot.
+  // Distribution of P1 half-points over the n stage games; colors alternate from the lot.
   let dist = new Float64Array(2 * n + 1);
   dist[0] = 1;
   for (let k = 1; k <= n; k++) {
@@ -267,7 +267,7 @@ function fromClassical(c: ClassicalOutcome, tb: TiebreakOdds): MatchOdds {
       p_split: c.pSplit + c.pTb,
     },
     gamePlayed: c.gamePlayed,
-    byColour: {} as Record<PlayerKey, ColourOdds>,
+    byColor: {} as Record<PlayerKey, ColorOdds>,
   };
 }
 
@@ -294,7 +294,7 @@ function averageOdds(a: MatchOdds, b: MatchOdds): MatchOdds {
     scoreDist: Array.from(scores.values()).sort((x, y) => x.games - y.games || y.p1_hp - x.p1_hp),
     prize: { exp1: avg(a.prize.exp1, b.prize.exp1), exp2: avg(a.prize.exp2, b.prize.exp2), p_split: avg(a.prize.p_split, b.prize.p_split) },
     gamePlayed: a.gamePlayed.map((v, i) => avg(v, b.gamePlayed[i])),
-    byColour: a.byColour,
+    byColor: a.byColor,
   };
 }
 
@@ -305,12 +305,12 @@ export function exact({ wdl, fixed = EMPTY_FIXED, g1White, tb = [] }: ExactInput
   const tbOdds = tiebreakOdds(wdl, tb);
   const one = fromClassical(classical(wdl, 1, fixed), tbOdds);
   const two = fromClassical(classical(wdl, 2, fixed), tbOdds);
-  const byColour: Record<PlayerKey, ColourOdds> = {
+  const byColor: Record<PlayerKey, ColorOdds> = {
     '1': { p_win1: one.pWin1, end_game: one.endGame },
     '2': { p_win1: two.pWin1, end_game: two.endGame },
   };
   const top = g1White === 1 ? one : g1White === 2 ? two : averageOdds(one, two);
-  return { ...top, byColour };
+  return { ...top, byColor };
 }
 
 /** Only P(P1 wins the match): cheaper, for bisection and per-game swings. */

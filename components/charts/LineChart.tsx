@@ -139,9 +139,9 @@ function Plot({
 
   const labelInset = phone ? 12 : 14;
 
-  // Margins. Lines that stop before the last x (a match in progress) are labelled inside the plot.
-  const labelled = all.filter(a => a.pts.length > 0 && a.s.labelAt !== 'none');
-  const ended = labelled.filter(a => (a.s.labelAt ?? 'end') === 'end');
+  // Margins. Lines that stop before the last x (a match in progress) are labeled inside the plot.
+  const labeled = all.filter(a => a.pts.length > 0 && a.s.labelAt !== 'none');
+  const ended = labeled.filter(a => (a.s.labelAt ?? 'end') === 'end');
   const lastX = ended.length ? Math.max(...ended.map(a => a.pts[a.pts.length - 1].i)) : n - 1;
   // White and Black alternate, so one line may stop a half-move before the other.
   const near = Math.max(1, Math.floor(n / 40));
@@ -267,7 +267,7 @@ function Plot({
     ...(lastX === n - 1 && !phone ? refs.map((r): EndLabel => ({ id: `r-${r.label}`, text: r.label, y: Y(r.y), strong: false, color: token('ink-3') })) : []),
   ];
   const solved = solveLabels(column, T, H - B - 4, gap);
-  const inlineSeries = labelled.filter(a => !inColumn.includes(a));
+  const inlineSeries = labeled.filter(a => !inColumn.includes(a));
   const anchor = (a: { s: LineSeries; pts: Point[] }): Point => {
     const want = a.s.labelAt === 'start' ? a.pts[0].i : typeof a.s.labelAt === 'number' ? a.s.labelAt : a.pts[a.pts.length - 1].i;
     return a.pts.find(p => p.i === want) ?? a.pts.reduce((b, p) => (Math.abs(p.i - want) < Math.abs(b.i - want) ? p : b));
@@ -392,7 +392,7 @@ function Plot({
 
 interface PointValuesProps { series: LineSeries; pts: Point[]; X: (i: number) => number; Y: (v: number) => number; fmt: (v: number) => string; halo: string; bottom: number; right: number }
 
-/** Every value beside its point. The newest, highest and lowest are placed first; one that would touch a neighbour is left to the tooltip. */
+/** Every value beside its point. The newest, highest and lowest are placed first; one that would touch a neighbor is left to the tooltip. */
 function PointValues({ series, pts, X, Y, fmt, halo, bottom, right }: PointValuesProps) {
   const placed: Box[] = [];
   const latest = pts.length - 1;

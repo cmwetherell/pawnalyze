@@ -5,7 +5,7 @@ export type MarkerShape = 'circle' | 'square' | 'triangle';
 
 interface MarkerProps { shape: MarkerShape; x: number; y: number; r?: number; ground?: Ground }
 
-/** An outlined point. Shape, not colour, says which source it is. */
+/** An outlined point. Shape, not color, says which source it is. */
 export function Marker({ shape, x, y, r = 6, ground = 'auto' }: MarkerProps) {
   const cls = cn('stroke-ink-2', groundFill[ground]);
   if (shape === 'square') return <rect x={x - r + 0.5} y={y - r + 0.5} width={2 * r - 1} height={2 * r - 1} strokeWidth={1.75} className={cls} />;

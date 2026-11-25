@@ -23,19 +23,19 @@ interface GameRowProps {
   disabled?: boolean;
 }
 
-const Colour = ({ side }: { side: 'white' | 'black' }) => (
+const Color = ({ side }: { side: 'white' | 'black' }) => (
   <span className="inline-flex items-center gap-1.5"><PieceDot side={side} />{side === 'white' ? 'White' : 'Black'}</span>
 );
 
 /** One game: its result, or the cells to pick one. White is always on the left. */
 export function GameRow({ game, pick = null, onPick, label, disabled }: GameRowProps) {
   const result = game.outcome ? SCORE[game.outcome] : undefined;
-  const side = (name: string, colour: 'white' | 'black'): MatchSide => ({
+  const side = (name: string, color: 'white' | 'black'): MatchSide => ({
     name: result === undefined ? getPlayerShortName(name) : getPlayerName(name),
-    meta: <Colour side={colour} />,
+    meta: <Color side={color} />,
     lead: result === undefined && getPlayerPhoto(name) ? <Avatar name={getPlayerName(name)} src={getPlayerPhoto(name)} size={32} mono decorative /> : undefined,
-    emphasis: game.outcome === colour,
-    muted: Boolean(game.outcome) && game.outcome !== 'draw' && game.outcome !== colour,
+    emphasis: game.outcome === color,
+    muted: Boolean(game.outcome) && game.outcome !== 'draw' && game.outcome !== color,
   });
   return (
     <MatchRow

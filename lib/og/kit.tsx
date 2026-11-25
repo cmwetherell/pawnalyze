@@ -9,7 +9,7 @@ import { TOKENS } from '@/lib/theme/tokens.generated';
 
 /**
  * Open Graph cards. Satori renders them, so styles are inline and every box with more than one child is `display: flex`.
- * Colours come from the dark tokens only; text is set in the site's own faces (assets/fonts, traced by next.config).
+ * Colors come from the dark tokens only; text is set in the site's own faces (assets/fonts, traced by next.config).
  */
 
 export const OG_SIZE = { width: 1200, height: 630 };
@@ -237,7 +237,7 @@ export function OgSplit({ share, height = 20, colors = [ogColor.p1, ogColor.p2] 
   );
 }
 
-/** A cut-out standing in a field of the player's colour and breaking out of its top edge. */
+/** A cut-out standing in a field of the player's color and breaking out of its top edge. */
 export function OgPortrait({ src, field, width, height }: { src: string | null; field: string; width: number; height: number }) {
   return (
     <div style={{ display: 'flex', position: 'relative', width, height, flexShrink: 0 }}>
@@ -252,7 +252,7 @@ export function OgPortrait({ src, field, width, height }: { src: string | null; 
 
 const RESULT = { 1: ['W', ogColor.ink, ogColor['ink-inverse']], 0.5: ['D', ogColor.draw, ogColor['on-draw']], 0: ['L', ogColor.canvas, ogColor.ink] } as const;
 
-/** One square per round: filled win, grey draw, outlined loss; a short line where there was no game. */
+/** One square per round: filled win, gray draw, outlined loss; a short line where there was no game. */
 export function OgPips({ results, size = 36 }: { results: (0 | 0.5 | 1 | null)[]; size?: number }) {
   return (
     <div style={{ display: 'flex', gap: 6 }}>

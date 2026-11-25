@@ -37,7 +37,7 @@ export const EVENT = {
   drawRule: 'No draw offers before Black’s 40th move',
 };
 
-/** Games start at 15:00 CET (14:00 UTC). */
+/** Games start at 3:00 PM CET (2:00 PM UTC). */
 const g = (day: string) => `${day}T14:00:00Z`;
 export const CLASSICAL_SCHEDULE: { gameNo: number; startsAt: string }[] = [
   ['2026-11-24', 1], ['2026-11-25', 2], ['2026-11-26', 3],
@@ -59,7 +59,7 @@ export const MATCH_RATINGS: Record<PlayerKey, RunRatings> = {
 };
 export const MATCH_RATING_SOURCE = 'FIDE rating list, November 2026 (in force at the start of the match)';
 
-/** From the 22 Nov colour draw: Sindarov has White in game 1, and so in every odd game. */
+/** From the Nov 22 color draw: Sindarov has White in game 1, and so in every odd game. */
 export const G1_WHITE: PlayerId = 2;
 
 /**
@@ -83,7 +83,7 @@ export const SCHEDULE_DAYS: ScheduleDay[] = (() => {
     const iso = d.toISOString().slice(0, 10);
     const game = byDate.get(iso);
     if (game) out.push({ date: iso, kind: 'game', label: `Game ${game.gameNo}`, gameNo: game.gameNo, startsAt: game.startsAt });
-    else if (iso === OPENING_CEREMONY) out.push({ date: iso, kind: 'ceremony', label: 'Opening · colour draw' });
+    else if (iso === OPENING_CEREMONY) out.push({ date: iso, kind: 'ceremony', label: 'Opening · color draw' });
     else if (iso === '2026-11-23') out.push({ date: iso, kind: 'free', label: 'No play' });
     else if (iso === '2026-12-12') out.push({ date: iso, kind: 'tiebreak', label: 'Tiebreaks · closing', startsAt: TIEBREAK_START });
     else if (iso === '2026-12-13') out.push({ date: iso, kind: 'departure', label: 'Departures' });
@@ -103,10 +103,10 @@ export const STAGE_TC: Record<Stage, TimeControl> = {
 
 export const LADDER: Record<Stage, { label: string; short: string; rule: string }> = {
   classical: { label: 'Classical', short: '14 games', rule: '14 games; first to 7½ points wins, and no further games are played.' },
-  rapid15: { label: 'Rapid 15+10', short: '4 games', rule: 'At 7–7: four rapid games (15 min + 10 s), colours drawn by lot.' },
+  rapid15: { label: 'Rapid 15+10', short: '4 games', rule: 'At 7–7: four rapid games (15 min + 10 s), colors drawn by lot.' },
   rapid10: { label: 'Rapid 10+5', short: '2 games', rule: 'Still level: two faster rapid games (10 min + 5 s), new lot.' },
   blitz: { label: 'Blitz 3+2', short: '2 games', rule: 'Still level: two blitz games (3 min + 2 s), new lot.' },
-  sd: { label: 'Sudden death', short: '3+2 until decisive', rule: 'Then 3+2 games with alternating colours until one is decisive. No Armageddon.' },
+  sd: { label: 'Sudden death', short: '3+2 until decisive', rule: 'Then 3+2 games with alternating colors until one is decisive. No Armageddon.' },
 };
 
 export const PRIZE = {

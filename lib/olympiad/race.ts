@@ -7,10 +7,10 @@ interface Roster {
   team: Team;
 }
 
-function scoreFor(result: string, colour: 'w' | 'b'): 0 | 0.5 | 1 | null {
+function scoreFor(result: string, color: 'w' | 'b'): 0 | 0.5 | 1 | null {
   if (result === '1/2-1/2') return 0.5;
-  if (result === '1-0') return colour === 'w' ? 1 : 0;
-  if (result === '0-1') return colour === 'w' ? 0 : 1;
+  if (result === '1-0') return color === 'w' ? 1 : 0;
+  if (result === '0-1') return color === 'w' ? 0 : 1;
   return null;
 }
 
@@ -53,11 +53,11 @@ export function buildBoardRace(event: OlympiadEvent, games: Game[], players: Pla
     const wr = g.blackFideId !== null ? roster.get(g.blackFideId) : undefined;
     const br = g.whiteFideId !== null ? roster.get(g.whiteFideId) : undefined;
     push(g.whiteFideId, {
-      round: g.round, colour: 'w', score: ws, oppFideId: g.blackFideId, oppName: g.blackName,
+      round: g.round, color: 'w', score: ws, oppFideId: g.blackFideId, oppName: g.blackName,
       oppFedCode: wr?.team.fedCode ?? null, oppTeamId: wr?.team.teamId ?? null, oppRating: g.blackElo,
     }, g.whiteElo);
     push(g.blackFideId, {
-      round: g.round, colour: 'b', score: bs, oppFideId: g.whiteFideId, oppName: g.whiteName,
+      round: g.round, color: 'b', score: bs, oppFideId: g.whiteFideId, oppName: g.whiteName,
       oppFedCode: br?.team.fedCode ?? null, oppTeamId: br?.team.teamId ?? null, oppRating: g.whiteElo,
     }, g.blackElo);
   }
@@ -108,7 +108,7 @@ export function buildBoardRace(event: OlympiadEvent, games: Game[], players: Pla
 
 export function liteRow(row: PlayerRaceRow): BoardRaceRowLite {
   const { tprByRound: _t, rankByRound: _r, form, ...rest } = row;
-  return { ...rest, form: form.map(f => ({ round: f.round, colour: f.colour, score: f.score, oppFedCode: f.oppFedCode, oppRating: f.oppRating })) };
+  return { ...rest, form: form.map(f => ({ round: f.round, color: f.color, score: f.score, oppFedCode: f.oppFedCode, oppRating: f.oppRating })) };
 }
 
 /** The compact, client-safe view of a race: podiums, counts and a search index. */

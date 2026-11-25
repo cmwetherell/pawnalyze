@@ -10,7 +10,7 @@ interface PawnBarProps {
   /** 0..1 */
   p1: number;
   names: [string, string];
-  /** Deal the colours in once, left to right, over grey pawns. */
+  /** Deal the colors in once, left to right, over gray pawns. */
   deal?: boolean;
   className?: string;
 }

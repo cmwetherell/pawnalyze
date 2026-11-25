@@ -5,7 +5,7 @@ import { token, type TokenName } from '@/lib/theme/css';
 import { TOKENS } from '@/lib/theme/tokens.generated';
 import { Specimen, Variant, Variants } from './Specimen';
 
-const COLOUR_GROUPS: { title: string; use: string; tokens: TokenName[] }[] = [
+const COLOR_GROUPS: { title: string; use: string; tokens: TokenName[] }[] = [
   { title: 'Grounds', use: 'Page, tinted band, wells, floating surfaces, scrim (always with an opacity).', tokens: ['canvas', 'surface', 'sunken', 'raised', 'overlay'] },
   { title: 'Ink', use: 'Headings and figures, body text, meta, text on ink.', tokens: ['ink', 'ink-2', 'ink-3', 'ink-inverse'] },
   { title: 'Lines', use: 'Hairlines, control edges, the 2px section rule.', tokens: ['line', 'control', 'rule'] },
@@ -14,8 +14,8 @@ const COLOUR_GROUPS: { title: string; use: string; tokens: TokenName[] }[] = [
   { title: 'Status', use: 'Gain, loss, caution, live. Always with an icon, sign or word.', tokens: ['positive', 'positive-wash', 'negative', 'negative-wash', 'warning', 'warning-wash', 'live', 'live-wash', 'on-live'] },
   { title: 'Match sides', use: 'World Championship pages only. Mark, text, portrait field, row tint, text on the mark.', tokens: ['p1', 'p1-ink', 'p1-field', 'p1-wash', 'on-p1', 'p2', 'p2-ink', 'p2-field', 'p2-wash', 'on-p2', 'draw', 'on-draw', 'on-field'] },
   { title: 'Medals', use: 'Places 1 to 3.', tokens: ['gold', 'silver', 'bronze', 'on-gold', 'on-silver', 'on-bronze'] },
-  { title: 'Series', use: 'Categorical, in this order. The colour follows the entity, never the rank. on-mid is text on series 4, 5 and 7 and the other mid tones.', tokens: ['series-1', 'series-2', 'series-3', 'series-4', 'series-5', 'series-6', 'series-7', 'series-8', 'on-mid'] },
-  { title: 'Chart furniture', use: 'De-emphasised series, gridlines, baseline.', tokens: ['context', 'grid', 'axis'] },
+  { title: 'Series', use: 'Categorical, in this order. The color follows the entity, never the rank. on-mid is text on series 4, 5 and 7 and the other mid tones.', tokens: ['series-1', 'series-2', 'series-3', 'series-4', 'series-5', 'series-6', 'series-7', 'series-8', 'on-mid'] },
+  { title: 'Chart furniture', use: 'De-emphasized series, gridlines, baseline.', tokens: ['context', 'grid', 'axis'] },
   { title: 'Board', use: 'Squares, last move, coordinates, side markers, evaluation.', tokens: ['board-light', 'board-dark', 'board-mark', 'board-ink', 'piece-white', 'piece-black', 'eval-white', 'eval-black'] },
   { title: 'Complexity', use: 'One teal ramp, Simple to Extreme.', tokens: ['cx-1', 'cx-2', 'cx-3', 'cx-4'] },
 ];
@@ -38,7 +38,7 @@ const TYPE: { cls: string; use: string; sample: string }[] = [
   { cls: 'type-ui', use: 'Nav, tabs, segments, sortable heads', sample: 'World Championship' },
   { cls: 'type-data', use: 'Tables, rows, chart values', sample: '2710 2782 15.5% 84.5%' },
   { cls: 'type-small', use: 'Legends, notes, facts', sample: 'Chance to win the match. Each pawn is 1 in 100.' },
-  { cls: 'type-label', use: 'Stat labels, dates, units', sample: 'Wed 25 Nov' },
+  { cls: 'type-label', use: 'Stat labels, dates, units', sample: 'Wed, Nov 25' },
   { cls: 'type-micro', use: 'Chart ticks and photo credits only', sample: 'Photo: Frans Peeters, CC BY-SA 2.0' },
   { cls: 'type-mono', use: 'Moves, FEN, clocks', sample: '17. Kf1 Bxc4+ 18. Kg1 Ne2+' },
 ];
@@ -51,10 +51,10 @@ const ICONS: IconName[] = [
   'clock', 'calendar', 'info', 'warning', 'error', 'medal', 'half-circle', 'circle', 'list', 'first', 'prev', 'next', 'last', 'play', 'pause', 'up', 'down', 'crown', 'pawn', 'x', 'github',
 ];
 
-export function ColourSpecimens() {
+export function ColorSpecimens() {
   return (
-    <Section id="colour" title="Colour" layout="rail" finding="Ink on paper, paper on petrol. Every other colour is data. Values live in app/tokens.css and nowhere else; switch the theme in the menu to see the other set.">
-      {COLOUR_GROUPS.map(g => (
+    <Section id="color" title="Color" layout="rail" finding="Ink on paper, paper on petrol. Every other color is data. Values live in app/tokens.css and nowhere else; switch the theme in the menu to see the other set.">
+      {COLOR_GROUPS.map(g => (
         <Specimen key={g.title} name={g.title} note={g.use}>
           <ul className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 xl:grid-cols-4">
             {g.tokens.map(t => (

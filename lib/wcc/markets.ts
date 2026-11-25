@@ -17,7 +17,7 @@ function mid(side: Side): number | null {
   return side.last;
 }
 
-function normalise(source: LiveQuote['source'], players: Record<PlayerKey, Side>, volume: number | null, url: string): LiveQuote | null {
+function normalize(source: LiveQuote['source'], players: Record<PlayerKey, Side>, volume: number | null, url: string): LiveQuote | null {
   const m1 = players['1'].mid;
   const m2 = players['2'].mid;
   if (m1 === null || m2 === null || m1 + m2 <= 0) return null;
@@ -48,7 +48,7 @@ async function fetchPolymarket(): Promise<LiveQuote | null> {
     return s;
   };
   const volume = num(event.volume);
-  return normalise('polymarket', { '1': side(1), '2': side(2) }, volume, cfg.url);
+  return normalize('polymarket', { '1': side(1), '2': side(2) }, volume, cfg.url);
 }
 
 async function fetchKalshi(): Promise<LiveQuote | null> {
@@ -62,7 +62,7 @@ async function fetchKalshi(): Promise<LiveQuote | null> {
   };
   const [a, b] = await Promise.all([one(1), one(2)]);
   const volume = a.volume !== null || b.volume !== null ? (a.volume ?? 0) + (b.volume ?? 0) : null;
-  return normalise('kalshi', { '1': a.side, '2': b.side }, volume, cfg.url);
+  return normalize('kalshi', { '1': a.side, '2': b.side }, volume, cfg.url);
 }
 
 async function settle<T>(label: string, p: Promise<T>): Promise<T | null> {
@@ -75,7 +75,7 @@ async function settle<T>(label: string, p: Promise<T>): Promise<T | null> {
 }
 
 /**
- * Live prediction-market prices (keyless public APIs), normalised to P(Gukesh wins).
+ * Live prediction-market prices (keyless public APIs), normalized to P(Gukesh wins).
  * Cached for minutes; returns null when both sources fail so the card can degrade gracefully.
  */
 export async function getLiveMarkets(): Promise<LiveMarkets | null> {
