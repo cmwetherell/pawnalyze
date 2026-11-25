@@ -19,7 +19,7 @@ export default function AboutPage() {
       <Section layout="split" ratio="5/7" label="About">
         {/* Stays beside the text, which is the taller column. */}
         <div>
-          <Photo className="lg:sticky lg:top-24" photo={{ src: '/img/selfie.jpeg', alt: 'Caleb Wetherell' }} ratio="1/1" sizes="(min-width: 1024px) 520px, 100vw" priority />
+          <Photo className="lg:sticky lg:top-24" photo={{ src: '/img/selfie.jpeg', alt: 'Caleb Wetherell' }} ratio="1/1" sizes="(min-width: 1024px) 700px, 134vw" priority />
         </div>
         <div className="flex flex-col gap-12">
           <Prose>

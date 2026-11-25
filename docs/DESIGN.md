@@ -231,7 +231,7 @@ Rules: one `type-*` per element. **Numbers that stack in a column are always `ty
 - Sticky on landing pages. On any page that renders `SectionBar` it scrolls away: `sticky top-0 group-has-[[data-section-bar]]/body:static` (body has `group/body`). No JS.
 - Under 768: logo, theme toggle, menu button (`aria-expanded`) opening a full-screen `Sheet side="full"` with 56px rows; closes on navigation, Escape and backdrop.
 - `SkipLink` is the first focusable element, to `#main`.
-- `SiteFooter`: 2px `rule` on top; logo and sentence (4 cols), Tools, Tournaments, Social (X and GitHub as text links with icons). Legal row: copyright left, credits link right. Pages with photographs pass credits through the page's own credit lines, not the footer.
+- `SiteFooter`: 2px `rule` on top; logo and sentence (4 cols), Tools, Tournaments; X and GitHub are icon buttons under the sentence, without words. Legal row: copyright left, credits link right. Pages with photographs pass credits through the page's own credit lines, not the footer.
 
 ### 5.3 Sections
 

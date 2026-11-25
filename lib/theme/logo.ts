@@ -10,3 +10,5 @@ export const LOGO_WORD = 'M4.25 -2.02V-32.11L1.17 -32.77V-34.18H6.92Q8.21 -34.18
 /** Lockup: the mark at the origin, the word at LOGO_WORD_AT. */
 export const LOGO_VIEWBOX = { width: 260.44, height: 64 } as const;
 export const LOGO_WORD_AT = { x: 74, y: 50.6 } as const;
+/** Empty room left of the mark's rule: cut off so the logo stands on the page edge. */
+export const LOGO_EDGE = 4;

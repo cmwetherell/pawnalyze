@@ -46,7 +46,7 @@ export const WhatIfLab = memo(function WhatIfLab({
     if (!el || typeof IntersectionObserver === 'undefined') { requestGrid(); return; }
     const io = new IntersectionObserver(entries => {
       if (entries.some(e => e.isIntersecting)) { requestGrid(); io.disconnect(); }
-    }, { rootMargin: '400px' });
+    }, { rootMargin: '1200px' });
     io.observe(el);
     return () => io.disconnect();
   }, [gridState, requestGrid]);

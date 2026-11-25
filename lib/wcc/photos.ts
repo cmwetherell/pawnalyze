@@ -219,14 +219,13 @@ export const ALL_WCC_PHOTO_CREDITS: PhotoCredit[] = (() => {
   const all: PhotoCredit[] = [WCC_PHOTOS.gukesh, WCC_PHOTOS.sindarov]
     .flatMap(p => [p.portrait, p.cutout, p.cutoutOg, p.og, p.avatar, ...(p.board ? [p.board] : [])])
     .concat(WCC_PHOTOS.venue);
-  // The same change in another file format is said once.
-  const change = (p: PhotoCredit) => p.modified.replace(/ and converted to \S+$/, '');
-  const bySource = new Map<string, PhotoCredit>();
+  // The same change in another file size or format is said once.
+  const change = (p: PhotoCredit) => p.modified.replace(/ and converted to .*$/, '').replace(/(, | and )?resized$/i, '');
+  const bySource = new Map<string, { credit: PhotoCredit; changes: Set<string> }>();
   for (const p of all) {
-    const seen = bySource.get(p.sourceUrl);
-    if (!seen) bySource.set(p.sourceUrl, { ...p, modified: change(p) });
-    else if (!seen.modified.includes(change(p))) bySource.set(p.sourceUrl, { ...seen, modified: `${seen.modified}; ${lowerFirst(change(p))}` });
+    const seen = bySource.get(p.sourceUrl) ?? { credit: p, changes: new Set<string>() };
+    if (change(p)) seen.changes.add(lowerFirst(change(p)));
+    bySource.set(p.sourceUrl, seen);
   }
-  // One sentence per photo: "Changes: cropped ..., resized; background removed ...".
-  return [...bySource.values()].map(p => ({ ...p, modified: `Versions used: ${lowerFirst(p.modified)}` }));
+  return [...bySource.values()].map(({ credit, changes }) => ({ ...credit, modified: `Changes: ${[...changes, 'resized'].join('; ')}` }));
 })();

@@ -31,8 +31,8 @@ export const FOOTER_GROUPS: { title: string; links: NavLink[] }[] = [
 ];
 
 export const SOCIAL_LINKS = [
-  { href: 'https://www.twitter.com/pawnalyze', label: 'X', icon: 'x' },
-  { href: 'https://www.github.com/cmwetherell/pawnalyze', label: 'GitHub', icon: 'github' },
+  { href: 'https://www.twitter.com/pawnalyze', label: 'Pawnalyze on X', icon: 'x' },
+  { href: 'https://www.github.com/cmwetherell/pawnalyze', label: 'Pawnalyze on GitHub', icon: 'github' },
 ] as const;
 
 export const isCurrent = (pathname: string | null, href: string): boolean =>
