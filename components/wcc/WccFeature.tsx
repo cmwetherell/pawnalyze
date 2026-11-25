@@ -37,6 +37,8 @@ export async function WccFeature({ as }: { as: 'hero' | 'section' }) {
       scoreLabel={scoreLabel(state)}
       heading={hero ? <Heading level={2} style="h3">{WCC_TITLE}, {EVENT.city}</Heading> : undefined}
       next={hero ? next : undefined}
+      href={WCC_HREF}
+      hrefLabel="World Chess Championship match odds"
       notes={p1 !== null && run ? [PAWN_NOTE, `Exact odds, confirmed by ${run.nSims.toLocaleString('en-US')} simulations.`] : undefined}
       verdict={!over && p1 === null ? 'Exact match odds, tiebreak paths and a scenario builder, arriving soon.' : undefined}
       actions={

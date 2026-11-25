@@ -775,3 +775,4 @@ A change to a shared prop is a change to this file first. Nobody edits a file ou
 - `lib/meta.ts` `pageMeta(name, description, { path, image })`: every page's title, description and share metadata.
 - `TextLink tap`: inline link with a 44px touch area. `ScenarioPanel primary` is optional (no footer when nothing is left to pick).
 - `LineChart markers`: under 560px only the latest marker of each group is drawn. `SplitRows`: the second share is 100% minus the first as printed.
+- `FaceOff href`: on home and the simulations index the whole figure opens the match page; the heading shows an arrow, and buttons and credit links stay separate targets above it.

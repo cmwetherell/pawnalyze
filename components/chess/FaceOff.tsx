@@ -1,12 +1,14 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useId, type ReactNode } from 'react';
 
 import { PawnBar } from '@/components/charts/PawnBar';
 import { Delta } from '@/components/ui/Delta';
 import { Flag } from '@/components/ui/Flag';
 import { Icon } from '@/components/ui/Icon';
+import { goldLine } from '@/components/ui/styles';
 import { useTween } from '@/hooks/useTween';
 import { formatPct } from '@/lib/format';
 import { cn } from '@/lib/utils';
@@ -43,14 +45,18 @@ export interface FaceOffProps {
   next?: ReactNode;
   /** A ruled row over the portraits, with `next` at its right end: where the page has no title of its own for the match. */
   heading?: ReactNode;
+  /** Where the whole figure leads: the heading becomes a link with an arrow, and the rest of the figure is its target too. */
+  href?: string;
+  /** Names the link where there is no heading. */
+  hrefLabel?: string;
   credit?: ReactNode;
   /** Finished state. */
   champion?: { name: string; line: string } | null;
   className?: string;
 }
 
-/** Two portraits on one rule, the two odds, a hundred pawns. Not a link; its buttons are. */
-export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, verdict, notes, actions, next, heading, credit, champion, className }: FaceOffProps) {
+/** Two portraits on one rule, the two odds, a hundred pawns. With `href` all of it is one link, under its own buttons and credit links. */
+export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, verdict, notes, actions, next, heading, href, hrefLabel, credit, champion, className }: FaceOffProps) {
   const titleId = useId();
   const [a, b] = sides;
   const hero = variant === 'hero';
@@ -67,19 +73,25 @@ export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, 
     <>
       {next && !heading && <div className="min-w-0 type-small text-ink-2">{next}</div>}
       {/* On phones two short buttons share the line and fill it; longer ones take a line each. */}
-      {actions && <div className="flex flex-wrap gap-3 [&>*]:grow sm:[&>*]:grow-0">{actions}</div>}
+      {actions && <div className="relative z-10 flex flex-wrap gap-3 [&>*]:grow sm:[&>*]:grow-0">{actions}</div>}
     </>
   );
 
   return (
-    <div role="group" aria-labelledby={titleId} className={className}>
+    <div role="group" aria-labelledby={titleId} className={cn(href && 'group/face relative isolate', className)}>
+      {href && !heading && <Link href={href} aria-label={hrefLabel} className="absolute inset-0 z-[1]" />}
       <p id={titleId} className="sr-only">
         {p1 === null ? `${a.name} against ${b.name}` : `${a.name} ${formatPct(p1)}, ${b.name} ${formatPct(1 - p1)} to win the match`}
       </p>
 
       {heading && (
         <div className="mb-4 mt-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-t border-line pt-4 md:mb-6 md:mt-0">
-          {heading}
+          {heading && href ? (
+            <Link href={href} className={cn('group/link inline-flex min-h-tap items-center gap-3 after:absolute after:inset-0 after:z-[1] group-hover/face:underline', goldLine)}>
+              {heading}
+              <Icon name="arrow-right" size={20} className="shrink-0 text-ink transition-transform duration-in group-hover/face:translate-x-1" />
+            </Link>
+          ) : heading}
           {next && <div className="type-small text-ink-2">{next}</div>}
         </div>
       )}
@@ -125,7 +137,7 @@ export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, 
       ) : foot && (
         <div className="mt-6 flex flex-col gap-3">{foot}</div>
       )}
-      {credit && <div className="mt-6 type-micro text-ink-3">{credit}</div>}
+      {credit && <div className="relative z-10 mt-6 w-fit type-micro text-ink-3">{credit}</div>}
     </div>
   );
 }
