@@ -4,6 +4,7 @@ import type { PlayerRaceRow } from './types';
 
 interface RaceRow { fideId: number; tpr: number | null; canReach: boolean }
 export type MedalPlace = 1 | 2 | 3;
+export const MEDAL_WORD = { 1: 'gold', 2: 'silver', 3: 'bronze' } as const;
 
 /** Players who can win a board medal, best first: a performance rating, and the eight games played or still within reach. */
 export function contenders<R extends RaceRow>(rows: readonly R[]): R[] {

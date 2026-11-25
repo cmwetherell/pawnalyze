@@ -31,7 +31,7 @@ interface PodiumProps {
 export function Podium({ places, layout = 'stack', label, className }: PodiumProps) {
   const stack = layout === 'stack';
   return (
-    <ol aria-label={label} className={cn('grid grid-cols-1 gap-x-6 gap-y-8', stack ? 'sm:grid-cols-2' : 'md:grid-cols-3', className)}>
+    <ol aria-label={label} className={cn('grid grid-cols-1 content-start gap-x-6 gap-y-8 self-start', stack ? 'sm:grid-cols-2' : 'md:grid-cols-3', className)}>
       {places.map(p => {
         const first = p.rank === 1 && stack;
         return (

@@ -10,6 +10,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Medal } from '@/components/ui/Medal';
 import { Meter } from '@/components/ui/Meter';
 import { Table, TBody, Td, Th, THead, Tr, type Align, type Priority } from '@/components/ui/Table';
+import { cn } from '@/lib/utils';
 import { formatRank } from '@/lib/olympiad/odds';
 import type { DerivedStanding, Team, TeamOdds } from '@/lib/olympiad/types';
 import { matchesTeam, shortTeamName } from './teams';
@@ -40,6 +41,9 @@ const PAGE = 25;
 
 /** A bar starts clear of the numbers before it. */
 const BAR = 'sm:pl-6';
+/** Under 360px the team keeps its name and the expected finish is left to its profile; gold odds are then the last column. */
+const WIDE = 'max-[359.98px]:hidden';
+const LAST_NARROW = 'max-[359.98px]:!pr-0';
 
 interface Column { key: SortKey; label: string; title?: string; align?: Align; priority?: Priority; width?: string | number; className?: string; needsPlay?: boolean }
 const COLUMNS: Column[] = [
@@ -47,9 +51,9 @@ const COLUMNS: Column[] = [
   { key: 'name', label: 'Team' },
   { key: 'rating', label: 'Rating', title: 'Average rating', align: 'right', priority: 4 },
   { key: 'mp', label: 'MP', title: 'Match points', align: 'right', needsPlay: true },
-  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', align: 'right', width: '19%', className: BAR },
+  { key: 'pGold', label: 'Gold', title: 'Probability of winning the gold medal', align: 'right', width: '19%', className: cn(BAR, LAST_NARROW) },
   { key: 'pMedal', label: 'Podium', title: 'Probability of any medal', align: 'right', priority: 2, width: '19%', className: BAR },
-  { key: 'expRank', label: 'Finish', title: 'Expected final position', align: 'right' },
+  { key: 'expRank', label: 'Finish', title: 'Expected final position', align: 'right', className: WIDE },
 ];
 const ASCENDING: SortKey[] = ['name', 'pos', 'expRank'];
 
@@ -134,15 +138,17 @@ export function TeamTable({ teams, standings, odds, baseline, isScenario, anyPla
             const exp = o?.expRank ?? null;
             const stale = isScenario && exp === null;
             return (
-              <Tr key={t.teamId} selected={selected} label={`${t.name}, seed ${t.teamId}${selected ? ', selected' : ''}`} onSelect={() => onSelect(t.teamId)} onPrefetch={onPrefetch && (() => onPrefetch(t.teamId))}>
+              <Tr key={t.teamId} selected={selected} onSelect={() => onSelect(t.teamId)} onPrefetch={onPrefetch && (() => onPrefetch(t.teamId))}>
                 {anyPlayed && <Td priority={2} muted>{medal ?? s?.rank ?? '–'}</Td>}
                 <Td
-                  header className={medal ? 'font-semibold' : 'font-medium'}
+                  header press={{ onPress: () => onSelect(t.teamId), label: `${t.name}, seed ${t.teamId}, details`, expanded: selected }}
+                  className={medal ? 'font-medium sm:font-semibold' : 'font-medium'}
                   lead={(
                     <>
                       {/* On phones the place column is gone and the seed is in the profile. */}
                       {medal && <span className="mr-2 flex sm:hidden"><Medal rank={s?.rank as 1 | 2 | 3} decorative /></span>}
-                      <Flag code={t.fedCode} size="md" decorative />
+                      <span className="flex sm:hidden"><Flag code={t.fedCode} size="sm" decorative /></span>
+                      <span className="hidden sm:flex"><Flag code={t.fedCode} size="md" decorative /></span>
                     </>
                   )}
                   meta={<span className="hidden sm:inline" title={`Seed #${t.teamId}`}>#{t.teamId}</span>}
@@ -151,9 +157,9 @@ export function TeamTable({ teams, standings, odds, baseline, isScenario, anyPla
                 </Td>
                 <Td align="right" priority={4}>{t.avgRating}</Td>
                 {anyPlayed && <Td align="right">{s?.mp ?? 0}<span className="hidden text-ink-3 sm:inline">/{(s?.played ?? 0) * 2}</span></Td>}
-                <Td align="right" className={BAR}><Meter value={o?.pGold ?? 0} baseline={base?.pGold} tone="gold" label="right" bar="sm" delta={base && <Delta value={o?.pGold ?? 0} base={base.pGold} short />} /></Td>
+                <Td align="right" className={cn(BAR, LAST_NARROW)}><Meter value={o?.pGold ?? 0} baseline={base?.pGold} tone="gold" label="right" bar="sm" delta={base && <Delta value={o?.pGold ?? 0} base={base.pGold} short />} /></Td>
                 <Td align="right" priority={2} className={BAR}><Meter value={o?.pMedal ?? 0} baseline={base?.pMedal} label="right" delta={base && <Delta value={o?.pMedal ?? 0} base={base.pMedal} short />} /></Td>
-                <Td align="right" muted={stale} title={stale ? 'Baseline value: expected finish is recomputed only for picked teams' : undefined}>
+                <Td align="right" muted={stale} className={WIDE} title={stale ? 'Baseline value: expected finish is recomputed only for picked teams' : undefined}>
                   {formatRank(exp ?? b?.expRank ?? null)}
                   {base?.expRank != null && exp !== null && <Delta value={exp} base={base.expRank} unit="places" better="down" digits={1} short className="flex justify-end" />}
                 </Td>

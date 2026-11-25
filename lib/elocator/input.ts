@@ -34,6 +34,16 @@ export interface Position {
 
 export const sideToMove = (fen: string): 'w' | 'b' => (fen.split(/\s+/)[1] === 'b' ? 'b' : 'w');
 
+/** How the game ended on this position, if it did. */
+export function endOf(fen: string): 'Checkmate' | 'Stalemate' | null {
+  try {
+    const game = new Chess(fen);
+    return game.isCheckmate() ? 'Checkmate' : game.isStalemate() ? 'Stalemate' : null;
+  } catch {
+    return null;
+  }
+}
+
 export const positionOf = (fen: string, complexity: number | null = null): Position => ({ ply: 0, san: null, from: null, to: null, fen, toMove: sideToMove(fen), complexity });
 
 /** Every position of a game, or none when the PGN cannot be replayed. */

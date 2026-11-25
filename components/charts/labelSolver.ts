@@ -41,6 +41,8 @@ export interface InlineLabel {
   alts?: { x: number; y: number }[];
   /** The line it names. With this the label is left out unless it can stand beside that line and nearer to it than to any other. */
   own?: Segment[];
+  /** It may not run past this x: into the column of end labels. */
+  right?: number;
 }
 export interface Placed { x: number; y: number; anchor: 'start' | 'middle' | 'end' }
 
@@ -77,12 +79,33 @@ function distance(s: Segment, b: Box): number {
 
 /** An optional label further than this from its own line would seem to name another. */
 const NEAR = 12;
+/** It has to be this much nearer to its own line than to any other, and more so than to the strong one, which draws the eye. */
+const NEARER = { other: 6, strong: 10 };
+/** Where a line runs this close to the strong one it cannot be told from it. */
+const HIDDEN = 5;
+
+/** Ground between two such labels that stand one over the other. */
+const APART = 8;
+
+/** The parts of a line that can be seen beside the strong one. */
+function visible(own: Segment[], strong: Segment[]): Segment[] {
+  if (strong.length === 0) return own;
+  return own.flatMap(s => {
+    const n = Math.max(1, Math.ceil(Math.hypot(s.x2 - s.x1, s.y2 - s.y1) / 8));
+    const at = (t: number) => ({ x: s.x1 + (s.x2 - s.x1) * t, y: s.y1 + (s.y2 - s.y1) * t });
+    return Array.from({ length: n }, (_, k): Segment => ({ x1: at(k / n).x, y1: at(k / n).y, x2: at((k + 1) / n).x, y2: at((k + 1) / n).y }))
+      .filter(p => { const b = { x: (p.x1 + p.x2) / 2, y: (p.y1 + p.y2) / 2, w: 0, h: 0 }; return strong.every(q => distance(q, b) > HIDDEN); });
+  });
+}
+
+const grow = (b: Box, by: number): Box => ({ x: b.x - by, y: b.y - by, w: b.w + 2 * by, h: b.h + 2 * by });
+const within = (b: Box, bounds: Box) => b.x >= bounds.x && b.x + b.w <= bounds.x + bounds.w && b.y >= bounds.y && b.y + b.h <= bounds.y + bounds.h;
 
 /**
  * Labels inside the plot: each takes the nearest spot that touches no line, marker or other label. A required label with
  * no such spot takes the least bad one; an optional one (`own`) is left to the tooltip and the table. Returns baselines.
  */
-export function placeInline(labels: InlineLabel[], lines: Segment[], taken: Box[], bounds: Box): Map<string, Placed> {
+export function placeInline(labels: InlineLabel[], lines: Segment[], taken: Box[], bounds: Box, strong: Segment[] = []): Map<string, Placed> {
   const boxes = [...taken];
   const out = new Map<string, Placed>();
   for (const l of labels) {
@@ -103,24 +126,145 @@ export function placeInline(labels: InlineLabel[], lines: Segment[], taken: Box[
       }
     });
     const box = (p: Placed): Box => ({ x: p.anchor === 'middle' ? p.x - l.width / 2 : p.anchor === 'end' ? p.x - l.width : p.x, y: p.y - HEIGHT + 3, w: l.width, h: HEIGHT });
-    const outside = (b: Box) => b.x < bounds.x || b.x + b.w > bounds.x + bounds.w || b.y < bounds.y || b.y + b.h > bounds.y + bounds.h;
+    const own = l.own ?? [];
+    const seen = l.own && visible(l.own, strong);
     const clear = (b: Box) => {
-      if (outside(b) || boxes.some(x => overlap(x, b)) || lines.some(x => crosses(x, b))) return false;
-      const own = l.own;
-      if (!own) return true;
-      const mine = Math.min(...own.map(x => distance(x, b)));
-      return mine <= NEAR && !lines.some(x => !own.includes(x) && distance(x, b) < mine);
+      if (!within(b, bounds) || b.x + b.w > (l.right ?? Infinity) || boxes.some(x => overlap(x, b)) || lines.some(x => crosses(x, b))) return false;
+      if (!seen) return true;
+      const mine = Math.min(...seen.map(x => distance(x, b)));
+      return mine <= NEAR && !lines.some(x => !own.includes(x) && distance(x, b) < mine + (strong.includes(x) ? NEARER.strong : NEARER.other));
     };
     spots.sort((a, b) => a.cost - b.cost);
     const score = (s: { at: Placed; cost: number }) => {
       const b = box(s.at);
-      return s.cost + (outside(b) ? 600 : 0) + lines.filter(x => crosses(x, b)).length * 60 + boxes.filter(x => overlap(x, b)).length * 120;
+      return s.cost + (within(b, bounds) ? 0 : 600) + lines.filter(x => crosses(x, b)).length * 60 + boxes.filter(x => overlap(x, b)).length * 120;
     };
     const best = spots.find(s => clear(box(s.at))) ?? (l.own ? undefined : spots.reduce((a, b) => (score(b) < score(a) ? b : a)));
     if (best) {
       out.set(l.id, best.at);
-      boxes.push(box(best.at));
+      // Two names one right over the other would read as one label.
+      const b = box(best.at);
+      boxes.push(l.own ? { ...b, y: b.y - APART, h: b.h + 2 * APART } : b);
     }
   }
+  return out;
+}
+
+/** A label on a level reference line: just over or under it, as near to one of its ends as it can stand clear. */
+export function placeOnLine(width: number, y: number, lines: Segment[], taken: Box[], bounds: Box): { x: number; y: number; box: Box } {
+  const room = Math.max(0, bounds.w - width);
+  const spots = Array.from({ length: Math.floor(room / 8) + 1 }, (_, k) => k * 8).flatMap(dx => [
+    { dx, top: y - HEIGHT - 2, cost: Math.min(dx, room - dx) },
+    { dx, top: y + 4, cost: Math.min(dx, room - dx) + 12 },
+  ]).sort((a, b) => a.cost - b.cost);
+  const boxOf = (s: { dx: number; top: number }): Box => ({ x: bounds.x + s.dx, y: s.top, w: width, h: HEIGHT });
+  const free = (s: { dx: number; top: number }) => { const b = boxOf(s); return within(b, bounds) && !lines.some(l => crosses(l, grow(b, 3))); };
+  const best = spots.find(s => free(s) && !taken.some(t => overlap(t, boxOf(s)))) ?? spots.find(free) ?? spots[0];
+  const b = boxOf(best);
+  return { x: b.x, y: b.y + HEIGHT - 3, box: b };
+}
+
+export interface PointLabel {
+  id: number;
+  x: number;
+  y: number;
+  width: number;
+  /** A second line; left out when only the first fits. */
+  note?: boolean;
+  /** The line turns up here, so the free ground is under it. */
+  valley?: boolean;
+}
+export interface PlacedPoint { id: number; /** Center. */ x: number; /** Baseline of the first line. */ y: number; note: boolean }
+
+/** A line of type-micro. */
+const MICRO = 14;
+
+/** A value beside its point, where it touches no line, point or other label. One with no such spot is left out. Most wanted first. */
+export function placePoints(labels: PointLabel[], lines: Segment[], taken: Box[], bounds: Box): { placed: PlacedPoint[]; boxes: Box[] } {
+  const boxes = [...taken];
+  const placed: PlacedPoint[] = [];
+  const dot = (l: PointLabel): Box => ({ x: l.x - 6, y: l.y - 6, w: 12, h: 12 });
+  for (const l of labels) {
+    for (const rows of l.note ? [2, 1] : [1]) {
+      const h = rows * MICRO;
+      const [over, under] = [l.y - 8 - h, l.y + 8];
+      const [first, second] = l.valley ? [under, over] : [over, under];
+      const side = l.width / 2 + 2;
+      const spots: [x: number, top: number][] = [
+        [0, first], [-side / 2, first], [side / 2, first], [0, second], [-side, first], [side, first], [-side / 2, second], [side / 2, second], [-side, second], [side, second],
+        [side + 8, l.y - h / 2], [-side - 8, l.y - h / 2],
+      ];
+      const hit = spots.map(([dx, top]): Box => ({ x: l.x + dx - l.width / 2, y: top, w: l.width, h })).find(b =>
+        within(b, bounds) && !lines.some(s => crosses(s, grow(b, 2))) && !boxes.some(t => overlap(t, grow(b, 1))) && !labels.some(o => o !== l && overlap(dot(o), b)));
+      if (!hit) continue;
+      boxes.push(hit);
+      placed.push({ id: l.id, x: hit.x + l.width / 2, y: hit.y + 11, note: rows === 2 });
+      break;
+    }
+  }
+  return { placed, boxes: boxes.slice(taken.length) };
+}
+
+/** Half of the gap where the strong line (3px) crosses another: 2px of ground on both sides of it. */
+const GAP = 3.5;
+/** Flatter than this two lines run together: a gap would only cut the lower one to pieces. */
+const FLAT = Math.sin((22 * Math.PI) / 180);
+/** Nor may a gap leave a crumb this short. */
+const CRUMB = 24;
+
+/** A line through these points, broken for a moment where one of the lines `over` it crosses. */
+export function cutPath(pts: { x: number; y: number }[], over: Segment[]): string {
+  const whole = () => pts.map((p, k) => `${k ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join('');
+  if (over.length === 0 || pts.length < 2) return whole();
+  const lengths = pts.slice(1).map((p, k) => Math.hypot(p.x - pts[k].x, p.y - pts[k].y));
+  const starts = lengths.reduce<number[]>((out, d) => [...out, out[out.length - 1] + d], [0]);
+  const total = starts[starts.length - 1];
+  const gaps: [number, number][] = [];
+  lengths.forEach((len, k) => {
+    if (len === 0) return;
+    const [a, b] = [pts[k], pts[k + 1]];
+    const [dx, dy] = [b.x - a.x, b.y - a.y];
+    for (const s of over) {
+      const [ex, ey] = [s.x2 - s.x1, s.y2 - s.y1];
+      const cross = dx * ey - dy * ex;
+      const sin = Math.abs(cross) / (len * Math.hypot(ex, ey) || 1);
+      if (sin < FLAT) continue;
+      const t = ((s.x1 - a.x) * ey - (s.y1 - a.y) * ex) / cross;
+      const u = ((s.x1 - a.x) * dy - (s.y1 - a.y) * dx) / cross;
+      if (t < 0 || t > 1 || u < 0 || u > 1) continue;
+      const at = starts[k] + t * len;
+      gaps.push([at - GAP / sin, at + GAP / sin]);
+    }
+  });
+  gaps.sort((p, q) => p[0] - q[0]);
+  const kept: [number, number][] = [];
+  for (const g of gaps) {
+    const last = kept[kept.length - 1];
+    if (last && g[0] <= last[1]) last[1] = Math.max(last[1], g[1]);
+    else if (g[0] - (last ? last[1] : 0) >= CRUMB && total - g[1] >= CRUMB) kept.push([...g]);
+  }
+  if (kept.length === 0) return whole();
+  const point = (at: number) => {
+    const k = Math.max(0, Math.min(lengths.length - 1, starts.findIndex(v => v > at) - 1));
+    const t = lengths[k] ? (at - starts[k]) / lengths[k] : 0;
+    return { x: pts[k].x + (pts[k + 1].x - pts[k].x) * t, y: pts[k].y + (pts[k + 1].y - pts[k].y) * t };
+  };
+  const runs = [...kept, [total, total] as const].map(([end], i): [number, number] => [i ? kept[i - 1][1] : 0, end]);
+  return runs.map(([from, to]) => {
+    const inner = pts.filter((_, k) => starts[k] > from && starts[k] < to);
+    return [from > 0 ? point(from) : pts[0], ...inner, to < total ? point(to) : pts[pts.length - 1]].map((p, k) => `${k ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join('');
+  }).join('');
+}
+
+/** Sideways shifts that keep markers from lying on one another: the smallest that clears, else the one that clears most. */
+export function dodge(marks: { x: number; y: number }[], clear: number): number[] {
+  const left = Math.min(...marks.map(m => m.x));
+  const out: number[] = [];
+  marks.forEach((m, i) => {
+    const gapAt = (dx: number) => Math.min(Infinity, ...out.map((d, k) => Math.hypot(marks[k].x + d - m.x - dx, marks[k].y - m.y)));
+    // Those on the first x go toward the axis, away from the next ones.
+    const tries = m.x === left ? [0, -4, 4, -7, 7, -9, 9] : [0, 4, -4, 7, -7, 9, -9];
+    out[i] = tries.find(dx => gapAt(dx) >= clear) ?? tries.reduce((a, b) => (gapAt(b) > gapAt(a) ? b : a));
+  });
   return out;
 }

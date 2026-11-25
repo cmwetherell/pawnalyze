@@ -23,7 +23,7 @@ export function EmptyState({ title, body, action, busy = false, level = 2, class
         <Heading level={level} style="h3">{title}</Heading>
       </div>
       {body && <div className="max-w-reading type-body text-ink-2">{body}</div>}
-      {action && <div className="mt-2 flex flex-wrap gap-3">{action}</div>}
+      {action && <div className="mt-2 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap">{action}</div>}
     </div>
   );
 }

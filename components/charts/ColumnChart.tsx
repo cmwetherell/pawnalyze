@@ -85,13 +85,20 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
   const totals = columns.map(c => c.parts.reduce((s, p) => s + p.value, 0));
   const max = Math.max(...totals, 1e-9);
   const top = totals.indexOf(Math.max(...totals));
-  const big = (i: number) => peak && values !== false && i === top && totals[i] > 0;
+  const peaks = peak && values !== false && totals[top] > 0;
   const marked = (i: number) => columns[i].key === selected || (peak && i === top && totals[i] > 0);
 
-  const valueWidth = (i: number) => textWidth(fmt(totals[i]), big(i) ? 26 : 14, !big(i) && columns[i].key === selected) + 4;
-  const roomy = Math.max(...columns.map((_, i) => (big(i) ? 0 : valueWidth(i)))) <= step;
+  // Numbers that do not fit their columns in the 14px size are set in 12px.
+  const size14 = columns.every((_, i) => (peaks && i === top) || textWidth(fmt(totals[i]), 14) + 4 <= step);
+  const numberSize = size14 ? 14 : 12;
+  const plainWidth = (i: number) => textWidth(fmt(totals[i]), numberSize, i === top || columns[i].key === selected) + 4;
+  /** The display face is for a peak that stands clear of the numbers beside it. */
+  const beside = [top - 1, top + 1].filter(i => columns[i] && totals[i] > 0 && (typeof values !== 'number' || totals[i] >= values));
+  const grand = peaks && beside.every(i => totals[top] > 0 && (plainWidth(i) > step || (textWidth(fmt(totals[top]), 26) + plainWidth(i)) / 2 + 8 <= step || (totals[top] - totals[i]) / max * (plot - HEAD.peak) > 24));
+  const big = (i: number) => grand && i === top;
+  const valueWidth = (i: number) => (big(i) ? textWidth(fmt(totals[i]), 26) + 4 : plainWidth(i));
   const wanted = (i: number) => (columns[i].key === selected && (n <= 20 || i === top) ? true : typeof values === 'number' ? totals[i] >= values : values);
-  const printed = columns.flatMap((_, i) => (wanted(i) && (roomy || marked(i)) ? [i] : []));
+  const printed = columns.flatMap((_, i) => (wanted(i) && (valueWidth(i) <= step || marked(i)) ? [i] : []));
   const head = printed.length === 0 ? HEAD.none : printed.some(big) ? HEAD.peak : HEAD.value;
   const tall = (v: number) => (plot - head) * (v / max);
   /** Top of a column: its parts and the gaps between them. */
@@ -173,7 +180,7 @@ function Plot({ columns, format, peak = true, values = true, onHover, onSelect, 
         {numbers.map(i => (
           <span
             key={columns[i].key}
-            className={cn('absolute flex justify-center whitespace-nowrap transition-[bottom] duration-data', big(i) ? 'type-stat-sm text-ink' : cn('pb-0.5 type-small tnum', marked(i) || i === at ? 'font-medium text-ink' : totals[i] > 0 ? 'text-ink-2' : 'text-ink-3'))}
+            className={cn('absolute flex justify-center whitespace-nowrap transition-[bottom] duration-data', big(i) ? 'type-stat-sm text-ink' : cn('pb-0.5 tnum', size14 ? 'type-small' : 'type-micro', i === top && peaks && 'font-semibold', marked(i) || i === at ? 'font-medium text-ink' : totals[i] > 0 ? 'text-ink-2' : 'text-ink-3'))}
             style={{ ...place(i, valueWidth(i)), bottom: plot - crown(i) }}
           >
             {fmt(totals[i])}

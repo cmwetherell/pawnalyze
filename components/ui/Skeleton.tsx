@@ -69,8 +69,3 @@ export function Skeleton({ kind, rows, height, label, className }: SkeletonProps
     </div>
   );
 }
-
-// Names used by pages not yet migrated. Delete with them.
-export const SkeletonBars = ({ rows }: { rows?: number }) => <Skeleton kind="bars" rows={rows} />;
-export const SkeletonHistogram = ({ bars }: { bars?: number }) => <Skeleton kind="histogram" rows={bars} />;
-export const SkeletonRounds = ({ rows }: { rows?: number }) => <Skeleton kind="rounds" rows={rows} />;

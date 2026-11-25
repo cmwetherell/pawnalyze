@@ -1,4 +1,5 @@
 import { Pips, type PipItem } from '@/components/ui/Pips';
+import type { LegendItem } from '@/components/ui/Swatch';
 import type { FormEntryLite } from '@/lib/olympiad/types';
 
 interface FormPipsProps {
@@ -7,6 +8,8 @@ interface FormPipsProps {
   lastRound: number;
   /** md: lettered, read game by game. sm: for tables, read as one line. */
   size?: 'sm' | 'md';
+  /** One image, read as one line: in a table (always so at sm). */
+  asImage?: boolean;
   className?: string;
 }
 
@@ -20,8 +23,13 @@ export const resultOf = (score: 0 | 0.5 | 1) => RESULT[score];
 
 const against = (f: FormEntryLite) => `${RESULT[f.score].word} vs ${f.oppFedCode ?? 'opponent'} ${f.oppRating || 'unrated'}`;
 
+/** What the small pips stand for, where there is no room for their letters. */
+export const FORM_LEGEND: LegendItem[] = [
+  { tone: 'win', label: 'Win' }, { tone: 'draw', label: 'Draw' }, { tone: 'loss', label: 'Loss' }, { tone: 'context', shape: 'line', label: 'Rested' },
+];
+
 /** One pip per round. */
-export function FormPips({ form, lastRound, size = 'sm', className }: FormPipsProps) {
+export function FormPips({ form, lastRound, size = 'sm', asImage = size === 'sm', className }: FormPipsProps) {
   const byRound = new Map(form.map(f => [f.round, f]));
   const items = Array.from({ length: Math.max(lastRound, 1) }, (_, i): PipItem => {
     const f = byRound.get(i + 1);
@@ -30,5 +38,5 @@ export function FormPips({ form, lastRound, size = 'sm', className }: FormPipsPr
       : { label: `R${i + 1}: sat out`, tone: 'rest' };
   });
   const summary = form.map(f => `R${f.round} ${against(f)}`).join(', ') || 'No games yet';
-  return <Pips kind="form" size={size === 'md' ? 20 : 12} asImage={size === 'sm'} ariaLabel={summary} items={items} className={className} />;
+  return <Pips kind="form" size={size === 'md' ? 20 : 12} asImage={asImage} ariaLabel={summary} items={items} className={className} />;
 }

@@ -31,6 +31,7 @@ export function ScenarioBuilder({ rounds, picks, onPick, onReset, onSimulate, lo
     <ScenarioPanel
       title="Scenario Builder"
       collapsible
+      scroll={over ? 'none' : 'lg'}
       summary={over ? 'Every round has been played, so there are no games left to pick.' : 'Select game outcomes to simulate custom scenarios'}
       rounds={open.map(r => ({ key: String(r.round), label: `R${r.round}`, dot: picks.some(g => g.round === r.round) ? 'pick' : null }))}
       round={active ? String(active.round) : ''}

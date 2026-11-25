@@ -7,7 +7,7 @@ import { Container } from './Container';
 import { Logo } from './Logo';
 import { FOOTER_GROUPS, SOCIAL_LINKS, type NavLink } from './nav';
 
-const linkClass = 'inline-flex min-h-tap items-center gap-2 underline-offset-4 transition-colors duration-in hover:text-ink hover:underline hover:decoration-brand-mark hover:decoration-1';
+const linkClass = 'inline-flex min-h-tap items-center gap-2 py-2.5 underline-offset-4 transition-colors duration-in hover:text-ink hover:underline hover:decoration-brand-mark hover:decoration-1';
 
 function Group({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   return (

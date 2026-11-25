@@ -29,8 +29,11 @@ interface PipsProps {
 const BOX = { 12: 'h-3 w-3', 20: 'h-5 w-5 type-micro', 32: 'h-8 w-8 type-small' } as const;
 
 export function Pips({ kind, items, size = 20, ariaLabel, asImage = false, fill = false, className }: PipsProps) {
+  // An image has no list inside it.
+  const Root = asImage ? 'span' : 'ul';
+  const Item = asImage ? 'span' : 'li';
   return (
-    <ul role={asImage ? 'img' : undefined} aria-label={ariaLabel} data-kind={kind} className={cn('flex flex-wrap', size === 32 ? 'gap-x-1 gap-y-2' : 'gap-1', items.some(i => i.href) && '-mx-1 gap-0', fill && 'grid grid-cols-7 sm:auto-cols-fr sm:grid-flow-col sm:grid-cols-none', className)}>
+    <Root role={asImage ? 'img' : undefined} aria-label={ariaLabel} data-kind={kind} className={cn('flex flex-wrap', size === 32 ? 'gap-x-1 gap-y-2' : 'gap-1', items.some(i => i.href) && '-mx-1 gap-0', fill && 'grid grid-cols-7 sm:auto-cols-fr sm:grid-flow-col sm:grid-cols-none', className)}>
       {items.map((p, i) => {
         const pip = (
           <span className={cn('grid shrink-0 place-items-center rounded-sm leading-none', BOX[size], fill && 'h-11 w-full', 'font-semibold', p.tone === 'rest' ? 'text-ink-3' : p.tone === 'none' ? 'border border-control text-ink-3' : cn(fillClass[p.tone], onClass[p.tone]))}>
@@ -40,14 +43,14 @@ export function Pips({ kind, items, size = 20, ariaLabel, asImage = false, fill 
           </span>
         );
         return (
-          <li key={i} title={p.label} className="relative flex flex-col items-center gap-1">
+          <Item key={i} title={p.label} className="relative flex flex-col items-center gap-1">
             {p.href
               ? <a href={p.href} className="grid h-tap place-items-center rounded-sm px-1 transition-colors duration-in hover:bg-sunken">{pip}</a>
               : pip}
             {p.caption && size === 32 && <span aria-hidden className="type-micro text-ink-3">{p.caption}</span>}
-          </li>
+          </Item>
         );
       })}
-    </ul>
+    </Root>
   );
 }

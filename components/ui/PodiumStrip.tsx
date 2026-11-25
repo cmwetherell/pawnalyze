@@ -31,7 +31,7 @@ export function PodiumStrip({ label, columns, selected, onSelect, className }: P
             aria-pressed={on}
             onClick={() => onSelect(c.key)}
             className={cn(
-              'group/strip relative w-72 shrink-0 border-b border-t-2 border-line px-4 py-4 text-left transition-colors duration-in focus-visible:-outline-offset-2 lg:px-3 xl:px-4',
+              'group/strip relative flex w-72 shrink-0 flex-col justify-start border-b border-t-2 border-line px-4 py-4 text-left transition-colors duration-in focus-visible:-outline-offset-2 lg:px-3 xl:px-4',
               'border-l first:border-l-0',
               on ? cn('border-t-rule', selectedGround) : cn('border-t-line', hoverGround),
             )}
@@ -44,13 +44,13 @@ export function PodiumStrip({ label, columns, selected, onSelect, className }: P
               {([1, 2, 3] as const).map(rank => {
                 const p = c.places[rank - 1];
                 return (
-                  // Two lines, so a narrow column still has room for the name.
-                  <span key={rank} title={p?.title} className={cn('grid min-h-11 min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-2 type-data', rank === 1 ? 'font-medium text-ink' : 'text-ink-2')}>
+                  // The flag goes with the figure, so a narrow column still has room for the name: two lines of it under 1280, where every place keeps that room.
+                  <span key={rank} title={p?.title} className={cn('grid min-h-11 min-w-0 grid-cols-[auto_minmax(0,1fr)] content-start gap-x-2 lg:max-xl:min-h-16 type-data', rank === 1 ? 'font-medium text-ink' : 'text-ink-2')}>
                     <Medal rank={rank} className="row-span-2" />
                     {p ? (
                       <>
-                        <span className="flex min-w-0 items-center gap-2"><Flag code={p.flag} size="xs" decorative /><span className="truncate">{p.name}</span></span>
-                        <span className="flex min-w-0 items-baseline gap-2">{p.value}{p.delta}</span>
+                        <span className="line-clamp-2 min-w-0 break-words xl:line-clamp-1">{p.name}</span>
+                        <span className="col-start-2 flex min-w-0 items-center gap-2"><Flag code={p.flag} size="xs" decorative />{p.value}{p.delta}</span>
                       </>
                     ) : <span className="text-ink-3">Open</span>}
                   </span>

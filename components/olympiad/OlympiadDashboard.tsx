@@ -34,7 +34,7 @@ import { SpotlightHint } from './SpotlightHint';
 import { TeamSpotlight } from './TeamSpotlight';
 import { TeamTable } from './TeamTable';
 import { podiumRows } from './podium';
-import { shortTeamName } from './teams';
+import { nameInSentence, shortTeamName } from './teams';
 
 interface OlympiadDashboardProps {
   event: OlympiadEvent;
@@ -89,6 +89,8 @@ export function OlympiadDashboard({
   /** No room for the table and the builder side by side: the builder is in the bottom bar and its sheet. */
   const narrow = useMediaQuery('(max-width: 1279.98px)');
   const spotlightRef = useRef<HTMLDivElement>(null);
+  /** The page was opened by a link to a team and has not gone to it yet. */
+  const landing = useRef(false);
   const triggerRef = useRef<HTMLElement | null>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const cache = useRef<Map<string, ScenarioResult>>(new Map());
@@ -174,7 +176,11 @@ export function OlympiadDashboard({
     const qs = new URLSearchParams(window.location.search);
     const teamParam = Number(qs.get('team'));
     const teamOk = participantIds.has(teamParam);
-    if (teamOk) setSelectedTeamId(teamParam);
+    if (teamOk) {
+      setSelectedTeamId(teamParam);
+      // A shared team link lands on the team, unless the link names another place on the page.
+      landing.current = ['', '#team'].includes(window.location.hash);
+    }
     const s = qs.get('s');
     if (!s) return;
     const { picks: valid, dropped } = parseFiltersLenient(s, { roundsCompleted: run.roundsCompleted, nTeams: run.nTeams, participantIds });
@@ -193,6 +199,12 @@ export function OlympiadDashboard({
     void runSimulation(encodePicks(Array.from(map.values())), teamOk ? teamParam : null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!landing.current || selectedTeamId === null) return;
+    landing.current = false;
+    spotlightRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [selectedTeamId]);
 
   // Live days: pick up new results/runs without a manual reload (server cache is busted by the pipeline).
   useEffect(() => {
@@ -298,7 +310,7 @@ export function OlympiadDashboard({
   // "With X beating Y in R2, India's gold odds go 22.4% → 29.2%."
   const sentence = useMemo(() => {
     if (!isScenario || !scenario || scenario.matched === 0) return null;
-    const name = (id: number) => teamsById.get(id)?.name ?? `Team ${id}`;
+    const name = (id: number) => nameInSentence(teamsById.get(id)?.name ?? `Team ${id}`);
     const pickList = Array.from(picks.values()).slice(0, 2).map(p => describePick(p, matches, name));
     const more = picks.size > 2 ? ` and ${picks.size - 2} more` : '';
     const changes = Array.from(odds.values())
@@ -402,7 +414,7 @@ export function OlympiadDashboard({
         )}
       >
         {selectedTeam && (
-          <div ref={spotlightRef} id="team" className="mt-8">
+          <div ref={spotlightRef} id="team" className="mt-8 scroll-mt-bar">
             <TeamSpotlight
               key={selectedTeam.teamId}
               event={event} run={run} team={selectedTeam} players={players.filter(p => p.teamId === selectedTeam.teamId)} matches={matches} teamsById={teamsById}

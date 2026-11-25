@@ -37,7 +37,7 @@ export function CopyButton({ kind, text, href, label, variant = 'quiet', classNa
   };
 
   const icon = state === 'copied' ? 'check' : state === 'failed' ? 'error' : kind === 'link' ? 'link' : 'copy';
-  const done = kind === 'link' ? 'Link copied' : 'Copied';
+  const done = 'Copied';
   const said = state === 'copied' ? done : state === 'failed' ? 'Copy failed' : '';
   return (
     <span className={cn('relative inline-flex max-w-full', className)}>
@@ -46,7 +46,7 @@ export function CopyButton({ kind, text, href, label, variant = 'quiet', classNa
       ) : (
         <Button variant={variant} size="sm" icon={icon} onClick={copy} className="flex-1">
           {/* Both words share one cell, so the button keeps its width when it answers. */}
-          <span className="grid justify-items-start text-left">
+          <span className="grid justify-items-center">
             <span className={cn('col-start-1 row-start-1', said && 'invisible')}>{label}</span>
             <span className={cn('col-start-1 row-start-1', !said && 'invisible')}>{said || done}</span>
           </span>

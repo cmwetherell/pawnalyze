@@ -23,6 +23,7 @@ import { BOARD_LABELS, N_PRIZE_BOARDS, N_ROUNDS, boardLabel, playerHref } from '
 import { contenders, medalPlaces } from '@/lib/olympiad/medals';
 import { MIN_GAMES_FOR_PRIZE, displayName, formatScore } from '@/lib/olympiad/tpr';
 import type { BoardRaceRowLite, BoardRaceSummary, BoardRows, OlympiadEvent, PlayerIndexEntry, Team } from '@/lib/olympiad/types';
+import { sentenceName } from '../teams';
 import { BoardLeaderboard } from './BoardLeaderboard';
 
 interface BoardRaceDashboardProps {
@@ -62,8 +63,10 @@ function topTeam(podium: BoardRaceRowLite[][]): { name: string; n: number; of: n
 
 export function BoardRaceDashboard({ event, finished, rule, summary, newLeaders, initialRows, teams }: BoardRaceDashboardProps) {
   const router = useRouter();
-  const [minGames, setMinGames] = useState(0);
-  const [onlyReachable, setOnlyReachable] = useState(summary.lastFinalRound >= 4);
+  const over = summary.lastRound >= N_ROUNDS;
+  // Once the last round is in, "can still reach eight" and "has played eight" are the same list.
+  const [minGames, setMinGames] = useState(over ? MIN_GAMES_FOR_PRIZE : 0);
+  const [onlyReachable, setOnlyReachable] = useState(!over && summary.lastFinalRound >= 4);
   // Fetched boards, keyed by board number; board 1 arrives with the page.
   const [loaded, setLoaded] = useState<Record<number, BoardRows>>({ [initialRows.board]: initialRows });
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +156,7 @@ export function BoardRaceDashboard({ event, finished, rule, summary, newLeaders,
     <>
       <Section
         id="podiums"
-        title={best ? `${best.name} ${finished ? 'won' : 'holds'} ${best.n} of the ${best.of} ${finished ? 'board medals' : 'medal places'}` : finished ? 'Board medals' : 'Board leaders'}
+        title={best ? `${sentenceName(best.name)} ${finished ? 'won' : 'holds'} ${best.n} of the ${best.of} ${finished ? 'board medals' : 'medal places'}` : finished ? 'Board medals' : 'Board leaders'}
         layout="wide"
         rule={false}
         note={rule}
@@ -194,7 +197,7 @@ export function BoardRaceDashboard({ event, finished, rule, summary, newLeaders,
           <>
             {verdict}{' '}
             {finished
-              ? `Ranked by performance rating over ${N_ROUNDS} rounds, with a ${MIN_GAMES_FOR_PRIZE}-game minimum.`
+              ? `Ranked by performance rating over ${N_ROUNDS} rounds, with a minimum of ${MIN_GAMES_FOR_PRIZE} games.`
               : `Ranked by performance rating through round ${summary.lastRound}; ${MIN_GAMES_FOR_PRIZE} games needed.`}{' '}
             Select a player for games and replays.
           </>
@@ -223,11 +226,7 @@ export function BoardRaceDashboard({ event, finished, rule, summary, newLeaders,
             {team && (
               <Chip icon={<Flag code={team.fedCode} size="xs" decorative />} onClear={() => selectTeam(null)} clearLabel="Clear team filter">{team.name}</Chip>
             )}
-            <Checkbox
-              checked={onlyReachable}
-              onChange={e => setOnlyReachable(e.target.checked)}
-              label={summary.lastRound >= N_ROUNDS ? `Played ${MIN_GAMES_FOR_PRIZE}+ games` : `Can still reach ${MIN_GAMES_FOR_PRIZE} games`}
-            />
+            {!over && <Checkbox checked={onlyReachable} onChange={e => setOnlyReachable(e.target.checked)} label={`Can still reach ${MIN_GAMES_FOR_PRIZE} games`} />}
             <Segmented
               ariaLabel="Minimum games"
               size="sm"

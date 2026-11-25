@@ -74,20 +74,6 @@ export function getPlayerFederation(name: string): string | null {
   return PLAYER_DATA[name]?.federation ?? null;
 }
 
-/** Get player initials from PLAYER_DATA, with auto-generation fallback */
-export function getPlayerInitials(name: string): string {
-  if (PLAYER_DATA[name]?.initials) return PLAYER_DATA[name].initials;
-  // Auto-generate: "Last, First" → "FL" or "First Last" → "FL"
-  const parts = name.includes(',')
-    ? name.split(',').map(s => s.trim()).reverse()
-    : name.split(' ');
-  return parts
-    .filter(Boolean)
-    .map(p => p[0]?.toUpperCase())
-    .slice(0, 2)
-    .join('');
-}
-
 /** Get the photo path for a player, or null if not in PLAYER_DATA */
 export function getPlayerPhoto(name: string): string | null {
   const filename = PLAYER_DATA[name]?.photo;

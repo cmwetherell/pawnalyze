@@ -10,7 +10,7 @@ import { Section } from '@/components/layout/Section';
 import { Legend } from '@/components/ui/Swatch';
 import { formatPct } from '@/lib/format';
 import { CLASSICAL_SCHEDULE, LADDER, STAGE_ORDER, TIEBREAK_START } from '@/lib/wcc/config';
-import type { Players } from '@/lib/wcc/display';
+import { genevaDay, type Players } from '@/lib/wcc/display';
 import { fmtScore } from '@/lib/wcc/status';
 import type { MatchOdds } from '@/lib/wcc/types';
 
@@ -18,9 +18,6 @@ interface Props { odds: MatchOdds; players: Players; finished: boolean }
 
 /** Chances under this have no height in the chart; the table has them. */
 const SMALLEST = 0.001;
-
-const date = (iso: string) =>
-  new Date(iso).toLocaleDateString('en-US', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' });
 
 /** When the match is decided, with what score, and at which stage. */
 export const MatchEnding = memo(function MatchEnding(props: Props) {
@@ -39,7 +36,7 @@ function WhenDecided({ odds, players, finished }: Props) {
   const cols = odds.endGame.map(e => {
     const tb = e.g === 'tb';
     const iso = tb ? TIEBREAK_START : CLASSICAL_SCHEDULE[(e.g as number) - 1].startsAt;
-    return { key: String(e.g), label: tb ? 'TB' : `G${e.g}`, name: tb ? 'Tiebreaks' : `Game ${e.g}`, date: date(iso), p1: e.p1, p2: e.p2, total: e.p1 + e.p2 };
+    return { key: String(e.g), label: tb ? 'TB' : `G${e.g}`, name: tb ? 'Tiebreaks' : `Game ${e.g}`, date: genevaDay(iso), p1: e.p1, p2: e.p2, total: e.p1 + e.p2 };
   });
   const mode = cols.reduce((a, c) => (c.total > a.total ? c : a), cols[0]);
   const byG14 = cols.filter(c => c.key !== 'tb').reduce((a, c) => a + c.total, 0);
@@ -115,7 +112,7 @@ function Scores({ odds, players, finished }: Props) {
     >
       <ButterflyChart
         rows={rows.map(r => ({ key: r.key, label: r.label, sub: r.sub, left: r.p1, right: r.p2, divider: r.key === 'tb' }))}
-        leftTone="p1" rightTone="p2" names={[p1, p2]} format="pct"
+        tall leftTone="p1" rightTone="p2" names={[p1, p2]} format="pct"
         ariaLabel={`Final score probabilities. Most likely: ${best.label} ${best.sub}.`}
         table={{ columns: ['Score', 'Finish', `${p1} wins`, `${p2} wins`], rows: rows.map(r => [r.label, r.sub, formatPct(r.p1), formatPct(r.p2)]) }}
       />

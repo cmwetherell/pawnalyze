@@ -31,10 +31,18 @@ export function codeLabel(team: Team): string {
   return squad ? `${team.fedCode} ${squad}` : team.fedCode;
 }
 
+const ARTICLE = /^(United|Netherlands|Philippines|Bahamas|Maldives|Gambia|Seychelles)|Republic|Islands|^Refugee Team/;
+
 /** The name at the start of a sentence: "The United States". */
 export function sentenceName(name: string): string {
   const short = shortTeamName(name);
-  return /^(United|Netherlands|Philippines|Bahamas|Maldives|Gambia|Seychelles)|Republic|Islands/.test(short) ? `The ${short}` : short;
+  return ARTICLE.test(short) ? `The ${short}` : short;
+}
+
+/** The name inside a sentence: "level with the United States". */
+export function nameInSentence(name: string): string {
+  const short = shortTeamName(name);
+  return ARTICLE.test(short) ? `the ${short}` : short;
 }
 
 /** Win, draw and loss as shares of 1, from the first team's side. */

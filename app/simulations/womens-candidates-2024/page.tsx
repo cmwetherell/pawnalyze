@@ -6,7 +6,7 @@ export default function Sims() {
       eventTable="womens_candidates_2024"
       name="2024 Women’s Candidates Tournament"
       website="https://candidates.fide.com/"
-      description="The Women’s Candidates Tournament determines the challenger for the Women’s World Chess Championship, who will face Ju Wenjun."
+      description="The Women’s Candidates Tournament determined the challenger to face Ju Wenjun for the Women’s World Chess Championship."
       format="8-player double round-robin"
       winner="Tan, Zhongyi"
     />

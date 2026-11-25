@@ -13,8 +13,12 @@ export interface EndLabel {
   strong: boolean;
   /** Ink instead of the quiet ink-3 (a normal, not a context, series). */
   plain?: boolean;
-  /** Color of the leader. */
+  /** Color of the leader and the swatch. */
   color: string;
+  /** A stroke of the line's color before the name, when several lines matter equally. */
+  swatch?: boolean;
+  /** The line ends in a dot, which the leader starts clear of. */
+  dot?: boolean;
   ariaLabel?: string;
   onSelect?: () => void;
 }
@@ -35,6 +39,9 @@ interface EndLabelsProps {
   onPromote?: (id: string | null) => void;
 }
 
+/** Room the swatch takes before the name. */
+export const SWATCH = 18;
+
 /** Direct labels right of the lines, pushed apart; a leader when a label moved more than 8px. */
 export function EndLabels({ labels, x, right, top, bottom, gap = 20, inset = 14, ground = 'auto', promoted = null, onPromote }: EndLabelsProps) {
   const at = solveLabels(labels, top, bottom, gap);
@@ -44,6 +51,9 @@ export function EndLabels({ labels, x, right, top, bottom, gap = 20, inset = 14,
         const y = at.get(l.id) ?? l.y;
         const on = l.strong || promoted === l.id;
         const button = l.onSelect !== undefined;
+        const tx = x + inset + (l.swatch ? SWATCH : 0);
+        // A two-line label that had to move up by no more than its second line still stands beside its mark.
+        const moved = l.extra && y < l.y ? Math.max(0, l.y - y - l.extra) : Math.abs(y - l.y);
         return (
           <g
             key={l.id}
@@ -59,15 +69,16 @@ export function EndLabels({ labels, x, right, top, bottom, gap = 20, inset = 14,
             onClick={l.onSelect}
             onKeyDown={button ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); l.onSelect?.(); } } : undefined}
           >
-            {Math.abs(y - l.y) > 8 && <path d={`M${x + 4} ${l.y}L${x + inset - 2} ${y}`} fill="none" stroke={l.color} strokeWidth={1} />}
+            {moved > 8 && !l.swatch && <path d={`M${x + (l.dot ? 7 : 3)} ${l.y}L${x + inset - 3} ${y}`} fill="none" stroke={l.color} strokeWidth={1} />}
             <rect x={x + inset - 4} y={y - gap / 2} width={Math.max(0, right - x - inset + 3)} height={gap + (l.extra ?? 0)} rx={2} fill="transparent" strokeWidth={2} />
+            {l.swatch && <path d={`M${x + inset} ${y}h12`} stroke={l.color} strokeWidth={3} />}
             <text
-              x={x + inset} y={y + 5} paintOrder="stroke" strokeWidth={5} strokeLinejoin="round"
+              x={tx} y={y + 5} paintOrder="stroke" strokeWidth={5} strokeLinejoin="round"
               className={cn(l.strong ? 'type-data font-semibold' : 'type-small tnum', on ? 'fill-ink' : l.plain ? 'fill-ink-2' : 'fill-ink-3', groundStroke[ground])}
             >
               {l.text}
               {l.value && (l.extra
-                ? <tspan x={x + inset} dy={l.extra} className={cn('type-small tnum', on ? 'fill-ink' : undefined)}>{l.value}</tspan>
+                ? <tspan x={tx} dy={l.extra} className={cn('type-small tnum', on ? 'fill-ink' : undefined)}>{l.value}</tspan>
                 : <tspan dx={6} className={on ? 'fill-ink' : undefined}>{l.value}</tspan>)}
             </text>
           </g>

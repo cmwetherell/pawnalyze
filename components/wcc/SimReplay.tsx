@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
@@ -71,6 +71,13 @@ export const SimReplay = memo(function SimReplay({ wdl, fixed, g1White, tb, play
     }, STEP_MS);
   };
 
+  /** The button goes away when pressed; focus stays beside it. */
+  const skip = (e: MouseEvent<HTMLElement>) => {
+    stop();
+    setShown(Infinity);
+    (e.currentTarget.previousElementSibling as HTMLElement | null)?.focus({ preventScroll: true });
+  };
+
   const played = sim.classical.filter(v => v !== null);
   const total = played.length + sim.tb.length;
   const shownClassical = Math.min(shown, played.length);
@@ -94,8 +101,8 @@ export const SimReplay = memo(function SimReplay({ wdl, fixed, g1White, tb, play
         : 'Each game is drawn from the model’s odds. Deal one and watch it play out game by game. The odds are made of matches like these.'}
       actions={
         <>
-          <Button variant="primary" icon="play" onClick={deal}>{index !== null ? 'Deal another' : 'Deal a match'}</Button>
-          {!finished && <Button variant="quiet" onClick={() => { stop(); setShown(Infinity); }}>Skip to the end</Button>}
+          <Button variant="primary" icon="play" onClick={deal} className="lg:min-w-44">{index !== null ? 'Deal another' : 'Deal a match'}</Button>
+          {!finished && <Button onClick={skip} className="lg:min-w-44">Skip to the end</Button>}
         </>
       }
     >
@@ -113,7 +120,7 @@ export const SimReplay = memo(function SimReplay({ wdl, fixed, g1White, tb, play
         </div>
         <Pips
           kind="result" size={32} fill ariaLabel="Classical games"
-          items={sim.classical.map((v, i) => pip(v, v !== null && i >= shownClassical, `Game ${i + 1}`, `G${i + 1}`, players))}
+          items={sim.classical.map((v, i) => pip(v, i >= shownClassical && (v !== null || shownClassical < played.length), `Game ${i + 1}`, `G${i + 1}`, players))}
         />
         {sim.tb.length > 0 && (
           <div>

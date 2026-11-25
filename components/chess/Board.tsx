@@ -50,14 +50,14 @@ export function Board({ fen, from, to, flipped = false, label, coords = true, cl
         })}
         {piecesFromFen(fen).map(p => {
           const { x, y } = at(p.file, p.rank);
-          return <image key={`${p.file}${p.rank}`} href={`/img/chesspieces/${p.piece}.svg`} x={x + 0.5} y={y + 0.5} width={9} height={9} />;
+          return <image key={`${p.file}${p.rank}`} href={`/img/chesspieces/${p.piece}.svg`} x={x + 0.6} y={y + 0.6} width={8.8} height={8.8} />;
         })}
       </svg>
       {coords && (
         // Outside the SVG, so the letters stay 12px however small the board is drawn.
-        <div aria-hidden className="pointer-events-none absolute inset-0 hidden text-board-ink type-micro [@container_(min-width:420px)]:block">
-          <div className="absolute inset-x-0 bottom-0 grid grid-cols-8">{files.map(f => <span key={f} className="pr-1 text-right">{f}</span>)}</div>
-          <div className="absolute inset-y-0 left-0 grid grid-rows-8">{ranks.map(r => <span key={r} className="pl-1">{r}</span>)}</div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden text-board-ink type-micro leading-none [@container_(min-width:420px)]:block">
+          <div className="absolute inset-x-0 bottom-0 grid grid-cols-8">{files.map(f => <span key={f} className="pb-0.5 pr-0.5 text-right">{f}</span>)}</div>
+          <div className="absolute inset-y-0 left-0 grid grid-rows-8">{ranks.map(r => <span key={r} className="pl-0.5 pt-0.5">{r}</span>)}</div>
         </div>
       )}
     </div>

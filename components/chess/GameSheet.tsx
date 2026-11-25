@@ -114,7 +114,8 @@ export function GameCell({ game: g, players, locked, onPick, onPreview, classNam
       )}
 
       <div className="flex min-w-0 flex-col justify-center lg:gap-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-x-2">
+        {/* From 1024 to 1279 a cell has no room for the number and the date on one line. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 lg:flex-col lg:items-start xl:flex-row xl:items-center">
           <Link
             href={g.href}
             aria-label={`Game ${g.gameNo}, watch or replay`}

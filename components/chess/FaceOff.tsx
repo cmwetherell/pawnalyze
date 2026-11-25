@@ -123,7 +123,7 @@ export function FaceOff({ variant, sides, p1, base, preview, score, scoreLabel, 
           {foot && <div className="flex flex-col gap-3 lg:col-span-5 lg:border-l lg:border-line lg:pl-6">{foot}</div>}
         </div>
       ) : foot && (
-        <div className="mt-6 flex flex-col gap-x-6 gap-y-3 md:flex-row md:items-center md:justify-between">{foot}</div>
+        <div className="mt-6 flex flex-col gap-3">{foot}</div>
       )}
       {credit && <div className="mt-6 type-micro text-ink-3">{credit}</div>}
     </div>

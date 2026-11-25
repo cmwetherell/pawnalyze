@@ -1,6 +1,6 @@
 import { OgFigure, OgFlag, OgFrame, OgMedal, OgPips, OgRow, OgTitle, clip, ogColor, ogDisplay, ogImage, ogMedalColor, ogPct } from '@/lib/og/kit';
 import { BOARD_LABELS, N_ROUNDS, OLYMPIAD_EVENTS, boardLabel } from './config';
-import { contenders, medalPlaces } from './medals';
+import { MEDAL_WORD, contenders, medalPlaces } from './medals';
 import { ordinal } from './odds';
 import { getOlympiadBoardRace, getOlympiadOfficialStandings, getOlympiadRun, getOlympiadStatus, getOlympiadSummary, getOlympiadSummaryHistory, getOlympiadTeams } from './queries';
 import { teamsInRun } from './standings';
@@ -9,16 +9,10 @@ import type { OlympiadEvent, Team } from './types';
 
 export { OG_SIZE } from '../og/kit';
 
-const titleOf = (event: OlympiadEvent) => OLYMPIAD_EVENTS[event].shortTitle.replace("'", '’');
+const titleOf = (event: OlympiadEvent) => OLYMPIAD_EVENTS[event].shortTitle;
 
-const MEDAL_WORD = { 1: 'Gold', 2: 'Silver', 3: 'Bronze' } as const;
-
-/** A narrow column: "Nodirbek Abdusattorov" becomes "N. Abdusattorov". */
-function cardName(raw: string, max: number): string {
-  const full = displayName(raw);
-  const [last, first] = raw.split(',').map(s => s.trim());
-  return full.length <= max || !first ? clip(full, max) : clip(`${first[0]}. ${last}`, max);
-}
+/** A narrow column: the surname, which is what stands before the comma in the pairings. */
+const surname = (raw: string, max: number) => clip(raw.split(',')[0].trim(), max);
 
 const stageOf = (round: number, before: string) => (round >= N_ROUNDS ? 'Final' : round > 0 ? `After round ${round} of ${N_ROUNDS}` : before);
 
@@ -96,33 +90,32 @@ async function renderBoardRaceOg(event: OlympiadEvent) {
 
   return (
     <OgFrame stage={stageOf(race.lastRound, 'Before round 1')} footer={`Individual board medals: highest performance rating with at least ${MIN_GAMES_FOR_PRIZE} games`}>
-      <OgTitle size={46}>{`${titleOf(event)}: board ${finished ? 'prizes' : 'prize race'}`}</OgTitle>
-      <div style={{ display: 'flex', marginTop: 28, borderTop: `2px solid ${ogColor.rule}`, borderBottom: `1px solid ${ogColor.line}` }}>
+      <OgTitle size={54}>{`${titleOf(event)}: board ${finished ? 'prizes' : 'prize race'}`}</OgTitle>
+      <div style={{ display: 'flex', marginTop: 26, borderTop: `2px solid ${ogColor.rule}`, borderBottom: `1px solid ${ogColor.line}` }}>
         {race.boards.map((rows, i) => {
           const podium = contenders(rows).slice(0, 3);
           return (
             <div
               key={i}
               style={{
-                display: 'flex', flexDirection: 'column', width: 1088 / 5, padding: i === 0 ? '16px 12px 12px 0' : '16px 12px 12px 16px',
+                display: 'flex', flexDirection: 'column', width: 1088 / 5, padding: i === 0 ? '14px 8px 0 0' : '14px 8px 0 18px',
                 borderLeft: i === 0 ? `0px solid ${ogColor.line}` : `1px solid ${ogColor.line}`,
               }}
             >
-              <div style={{ display: 'flex', marginBottom: 14, ...ogDisplay(26) }}>{BOARD_LABELS[i]}</div>
+              <div style={{ display: 'flex', marginBottom: 12, ...ogDisplay(26) }}>{BOARD_LABELS[i]}</div>
               {([1, 2, 3] as const).map(rank => {
                 const r = podium[rank - 1];
                 const first = rank === 1;
                 return (
-                  <div key={rank} style={{ display: 'flex', height: first ? 108 : 78 }}>
-                    <div style={{ display: 'flex', width: 34, paddingTop: first ? 6 : 1 }}><OgMedal rank={rank} size={24} /></div>
+                  <div key={rank} style={{ display: 'flex', height: first ? 92 : 72 }}>
+                    <div style={{ display: 'flex', width: 36, paddingTop: first ? 7 : 1 }}><OgMedal rank={rank} size={26} /></div>
                     {r ? (
                       <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <OgFlag code={r.fedCode} height={first ? 24 : 18} />
-                          {first ? <span style={ogDisplay(38)}>{r.tpr}</span> : <span style={{ fontSize: 22, fontWeight: 600 }}>{r.tpr}</span>}
+                          <OgFlag code={r.fedCode} height={first ? 26 : 20} />
+                          {first ? <span style={ogDisplay(38)}>{r.tpr}</span> : <span style={{ fontSize: 24, fontWeight: 600, lineHeight: 1.1 }}>{r.tpr}</span>}
                         </div>
-                        <div style={{ display: 'flex', marginTop: 4, fontSize: first ? 19 : 18, fontWeight: first ? 600 : 400, color: first ? ogColor.ink : ogColor['ink-2'], whiteSpace: 'nowrap' }}>{cardName(r.name, 16)}</div>
-                        {first && <div style={{ display: 'flex', marginTop: 2, fontSize: 16, color: ogColor['ink-3'] }}>{`${r.fedCode} ${formatScore(r.score, r.games)}`}</div>}
+                        <div style={{ display: 'flex', marginTop: 3, fontSize: 21, lineHeight: 1.25, fontWeight: first ? 600 : 400, color: first ? ogColor.ink : ogColor['ink-2'], whiteSpace: 'nowrap' }}>{surname(r.name, 15)}</div>
                       </div>
                     ) : <span style={{ fontSize: 20, color: ogColor['ink-3'] }}>Open</span>}
                   </div>
@@ -150,6 +143,10 @@ async function renderPlayerOg(event: OlympiadEvent, fideId: number) {
   const rankText = p.rank !== null ? `${ordinal(p.rank)} of ${race.ranked[p.board - 1]}` : 'Not yet ranked';
   const eligible = p.eligible ? 'Eligible for a medal' : p.canReach ? `Needs ${p.needed} more of ${MIN_GAMES_FOR_PRIZE} games` : `Cannot reach ${MIN_GAMES_FOR_PRIZE} games`;
   const medal = medalPlaces(race.boards[p.board - 1]).get(fideId);
+  // Once it is over a medal is won; before that it is a place among those who can still win one.
+  const verdict = !medal ? eligible
+    : race.lastFinalRound >= N_ROUNDS ? `Won the ${board.toLowerCase()} ${MEDAL_WORD[medal]} medal`
+    : medal !== p.rank ? `In ${MEDAL_WORD[medal]} among players who can reach ${MIN_GAMES_FOR_PRIZE} games` : eligible;
   const results = Array.from({ length: N_ROUNDS }, (_, i) => p.form.find(f => f.round === i + 1)?.score ?? null);
 
   return (
@@ -171,7 +168,7 @@ async function renderPlayerOg(event: OlympiadEvent, fideId: number) {
               {medal && <OgMedal rank={medal} size={40} />}
               <span style={ogDisplay(40)}>{`${rankText} on ${board.toLowerCase()}`}</span>
             </div>
-            <div style={{ display: 'flex', margin: '18px 0', fontSize: 24, color: ogColor['ink-2'] }}>{`${formatScore(p.score, p.games)}. ${medal && medal !== p.rank ? `${MEDAL_WORD[medal]} among players with ${MIN_GAMES_FOR_PRIZE} games` : eligible}`}</div>
+            <div style={{ display: 'flex', margin: '18px 0', fontSize: 24, color: ogColor['ink-2'] }}>{`${formatScore(p.score, p.games)}. ${verdict}`}</div>
             <OgPips results={results} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>

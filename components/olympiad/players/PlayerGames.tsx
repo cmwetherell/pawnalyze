@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { GameViewer } from '@/components/chess/GameViewer';
 import { PieceDot } from '@/components/chess/PieceDot';
 import { resultOf } from '@/components/olympiad/boards/FormPips';
@@ -55,13 +57,14 @@ export function PlayerGames({ event, player, games, lastRound, knownFideIds }: P
               onToggle: () => setOpen(isOpen ? null : r),
               disabled: !game?.moves,
             }}
-            lead={<><Round n={r} />{form.oppFedCode && <Flag code={form.oppFedCode} size="sm" decorative />}</>}
-            title={href ? <TextLink quiet href={href}>{opponent}</TextLink> : opponent}
+            lead={<><Round n={r} /><TeamFlag code={form.oppFedCode} href={form.oppTeamId !== null ? `${eventHref(event)}?team=${form.oppTeamId}` : null} /></>}
+            // 44px tall, over the line of facts under it, which is not a control.
+            title={href ? <TextLink quiet href={href} className="relative -mb-4 -mt-2 inline-block pb-4 pt-2">{opponent}</TextLink> : opponent}
             meta={
               <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="inline-flex items-center gap-1.5"><PieceDot side={color} />{color === 'white' ? 'White' : 'Black'}</span>
                 <span className="tnum">{form.oppRating || 'unrated'}</span>
-                {form.oppTeamId !== null && form.oppFedCode && <TextLink quiet href={`${eventHref(event)}?team=${form.oppTeamId}`}>{form.oppFedCode}</TextLink>}
+                {form.oppFedCode && <span>{form.oppFedCode}</span>}
               </span>
             }
             value={
@@ -86,6 +89,15 @@ export function PlayerGames({ event, player, games, lastRound, knownFideIds }: P
         );
       })}
     </Rows>
+  );
+}
+
+/** The opponent's flag is the link to the team: 44px square around a 24px flag. */
+function TeamFlag({ code, href }: { code: string | null; href: string | null }) {
+  if (!code) return null;
+  const flag = <Flag code={code} size="sm" decorative />;
+  return href === null ? flag : (
+    <Link href={href} aria-label={`${code}, team details`} title={`${code}, team details`} className="-mx-2.5 -my-1 flex h-tap w-tap items-center justify-center rounded-sm">{flag}</Link>
   );
 }
 

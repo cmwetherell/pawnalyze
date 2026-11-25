@@ -6,7 +6,7 @@ import { Split } from '@/components/layout/Split';
 import { Part } from '@/components/layout/Part';
 import { Button } from '@/components/ui/Button';
 import { FlagStack } from '@/components/ui/FlagStack';
-import { Legend } from '@/components/ui/Legend';
+import { Legend } from '@/components/ui/Swatch';
 import { Tag } from '@/components/ui/Tag';
 import { TextLink } from '@/components/ui/TextLink';
 
@@ -30,7 +30,7 @@ export function LayoutSpecimens() {
       />
       <PageHead
         title="Page with a lead and actions"
-        lead="The lead sits to the right of the title, on its last line, and stacks under it on a phone."
+        lead="The lead starts beside the title, so titles stand at one height, and stacks under it on a phone."
         actions={<><Button variant="primary" href="/simulations">See every simulation</Button><Button href="/elocator">Analyze a position</Button></>}
       />
       <Container className="pb-section"><Breadcrumb items={[{ label: 'Simulations', href: '/simulations' }, { label: 'Chess Olympiad 2026', href: '/simulations/chess-olympiad-2026' }, { label: 'Boards' }]} /></Container>

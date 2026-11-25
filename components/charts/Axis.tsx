@@ -17,6 +17,7 @@ interface YAxisProps {
 export function YAxis({ ticks, labels, y, left, right, baseline = 0 }: YAxisProps) {
   return (
     <g aria-hidden>
+      {!ticks.includes(baseline) && <line x1={left} x2={right} y1={y(baseline)} y2={y(baseline)} strokeWidth={1} shapeRendering="crispEdges" className="stroke-axis" />}
       {ticks.map((t, i) => (
         <g key={t}>
           <line x1={left} x2={right} y1={y(t)} y2={y(t)} strokeWidth={1} shapeRendering="crispEdges" className={t === baseline ? 'stroke-axis' : 'stroke-grid'} />

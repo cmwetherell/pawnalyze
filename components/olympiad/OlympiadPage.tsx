@@ -4,7 +4,6 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FlagStack } from '@/components/ui/FlagStack';
 import { RelativeTime } from '@/components/ui/RelativeTime';
-import { Tag } from '@/components/ui/Tag';
 import { TextLink } from '@/components/ui/TextLink';
 import { N_ROUNDS, OLYMPIAD_EVENTS, eventHref } from '@/lib/olympiad/config';
 import {
@@ -22,9 +21,10 @@ import {
   getOlympiadTeams,
 } from '@/lib/olympiad/queries';
 import { teamsInRun } from '@/lib/olympiad/standings';
-import { isFinished, statusPillFor } from '@/lib/olympiad/status';
+import { isFinished } from '@/lib/olympiad/status';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 import { olympiadSubnav } from './boards/BoardRacePage';
+import { EventStatus } from './EventStatus';
 import { OlympiadDashboard } from './OlympiadDashboard';
 import { OlympiadMethod } from './OlympiadMethod';
 import { podiumRows } from './podium';
@@ -75,7 +75,6 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
   const teamById = new Map(teams.map(t => [t.teamId, t]));
   // Champions lead the flags once the event is over; seeds order them before that.
   const flags = (medalists.length ? medalists.flatMap(r => teamById.get(r.teamId) ?? []) : teams.slice(0, 8)).map(t => ({ code: t.fedCode, name: t.name }));
-  const status_ = statusPillFor(status, cfg.startDate);
 
   const meta = finished && run
     ? [
@@ -97,8 +96,8 @@ export default async function OlympiadPage({ event }: { event: OlympiadEvent }) 
       <PageHead
         crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: cfg.shortTitle }]}
         switcher={(['open', 'women'] as const).map(e => ({ label: e === 'open' ? 'Open' : 'Women', href: eventHref(e), active: e === event }))}
-        media={<FlagStack items={flags} size={medalists.length ? 'lg' : 'md'} label={medalists.length ? 'Medalists' : 'Top seeds'} />}
-        status={<Tag tone={status_.live ? 'live' : 'neutral'} icon={finished ? 'check' : undefined}>{status_.text}</Tag>}
+        media={<FlagStack className="hidden md:flex" items={flags} size={medalists.length ? 'lg' : 'md'} label={medalists.length ? 'Medalists' : 'Top seeds'} />}
+        status={<EventStatus status={status} startDate={cfg.startDate} />}
         title={cfg.shortTitle}
         facts={[cfg.format, ...meta, <TextLink key="cr" href={cfg.chessResultsUrl}>chess-results</TextLink>]}
         tabs={olympiadSubnav(event, 'odds')}

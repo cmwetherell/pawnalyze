@@ -7,7 +7,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Delta } from '@/components/ui/Delta';
 import { Flag } from '@/components/ui/Flag';
-import { Legend } from '@/components/ui/Legend';
 import { Medal } from '@/components/ui/Medal';
 import { Meter } from '@/components/ui/Meter';
 import { Panel } from '@/components/ui/Panel';
@@ -18,7 +17,7 @@ import { Row, Rows } from '@/components/ui/Rows';
 import { SplitBar } from '@/components/ui/SplitBar';
 import { Stat } from '@/components/ui/Stat';
 import { StatStrip } from '@/components/ui/StatStrip';
-import { Swatch } from '@/components/ui/Swatch';
+import { Legend, Swatch } from '@/components/ui/Swatch';
 import { Table, TBody, Td, Th, THead, Tr, type SortDir } from '@/components/ui/Table';
 import { TableFallback } from '@/components/ui/TableFallback';
 import { formatPct } from '@/lib/format';
@@ -54,6 +53,10 @@ export function StatSpecimens() {
         <StatStrip columns={6} items={[
           { label: 'Classical', value: '2710 / 2782' }, { label: 'Rapid', value: '2686 / 2755' }, { label: 'Blitz', value: '2659 / 2725' },
           { label: 'Goes to tiebreaks', value: '13.6%' }, { label: 'Last game', value: 'Draw, ½–½' }, { label: 'Draw rate', value: '67%' },
+        ]} />
+        <StatStrip columns={4} className="mt-6" items={[
+          { label: 'Winner', lead: <Flag code="UZB" size="sm" decorative />, value: 'Sindarov', sub: '10 of 14 points' }, { label: 'Chance before round 1', value: '8%', sub: 'Behind four others' },
+          { label: 'Favorite before round 1', lead: <Flag code="USA" size="sm" decorative />, value: 'Nakamura', sub: '32%' }, { label: 'Ahead for good', value: 'After round 5' },
         ]} />
       </Specimen>
       <Specimen name="Meter" from="ui/Meter" note="At zero there is no bar and no track.">
@@ -106,9 +109,9 @@ export function ListSpecimens() {
           <THead><tr><Th width={48} priority={2}>Pos</Th><Th>Team</Th><Th align="right" priority={4}>Before round 1</Th><Th sort={sort} onSort={() => setSort(s => (s === 'desc' ? 'asc' : 'desc'))}>Gold</Th><Th priority={2}>Podium</Th></tr></THead>
           <TBody>
             {rows.map(([name, code, g, s, b, pre, seed], i) => (
-              <Tr key={code} label={name} onSelect={() => setSel(code)} selected={sel === code} tint={code === 'UZB' ? 'brand' : undefined}>
+              <Tr key={code} onSelect={() => setSel(code)} selected={sel === code} tint={code === 'UZB' ? 'brand' : undefined}>
                 <Td priority={2} muted>{i < 3 && sort === 'desc' ? <Medal rank={(i + 1) as 1 | 2 | 3} /> : i + 1}</Td>
-                <Td header lead={<Flag code={code} decorative />} meta={`#${seed}`}><span className="font-medium">{name}</span></Td>
+                <Td header press={{ onPress: () => setSel(code), label: name, expanded: sel === code }} lead={<Flag code={code} decorative />} meta={`#${seed}`}><span className="font-medium">{name}</span></Td>
                 <Td align="right" priority={4}>{formatPct(pre)}</Td>
                 <Td><Meter value={g} tone="gold" label="right" /></Td>
                 <Td priority={2}><Meter value={g + s + b} label="right" /></Td>

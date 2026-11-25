@@ -28,8 +28,8 @@ export default function WccMethodology({ run, summary, rawSummary, players }: Pr
             Olympiad forecasts. It takes both ratings and who has White.
           </p>
           <p>
-            Ratings are the ones in force when the match started: {p1.shortName} {p1.ratings.classical || '–'}, {p2.shortName} {p2.ratings.classical || '–'} classical
-            {run?.params.rating_source ? <> (source: {run.params.rating_source})</> : null}. They stay fixed for the whole match.
+            Ratings are the ones in force when the match started: {p1.shortName} {p1.ratings.classical || '–'}, {p2.shortName} {p2.ratings.classical || '–'} classical.{' '}
+            {run?.params.rating_source ? <>Source: {run.params.rating_source}. </> : null}They stay fixed for the whole match.
             {run?.rebasedFrom ? <> The last simulation run used {p1.shortName} {run.rebasedFrom['1'].c}, {p2.shortName} {run.rebasedFrom['2'].c}; its odds are moved onto these ratings with the model’s rating grid until a new run is stored.</> : null}
           </p>
         </>
@@ -44,7 +44,7 @@ export default function WccMethodology({ run, summary, rawSummary, players }: Pr
             {drawRaw !== null ? <> expects about {formatPct(drawRaw, 0)} draws here</> : null}; recent title matches drew far more often.
           </p>
           <p>
-            We scale the odds of a draw by a single factor θ{theta !== null ? <> = {theta.toFixed(2)}</> : null}, fitted by maximum likelihood on the 84 classical
+            We scale the odds of a draw by a single factor θ{theta !== null ? <>{'\u00a0'}={'\u00a0'}{theta.toFixed(2)}</> : null}, fitted by maximum likelihood on the 84 classical
             games of the 2013–2024 World Championship matches, which gives {drawCal !== null ? <>about {formatPct(drawCal, 0)}</> : 'roughly two-thirds'} draws.
             Extra draws come out of both players’ wins, which shrinks the favorite’s edge in each game and makes a 7–7 tiebreak more likely, so
             calibration helps the underdog

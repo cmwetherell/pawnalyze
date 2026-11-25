@@ -14,7 +14,7 @@ import { Sparkline } from '@/components/charts/Sparkline';
 import { SplitRows } from '@/components/charts/SplitRows';
 import { Section } from '@/components/layout/Section';
 import { Delta } from '@/components/ui/Delta';
-import { Legend } from '@/components/ui/Legend';
+import { Legend } from '@/components/ui/Swatch';
 import goc from '@/lib/elocator/game-of-the-century.json';
 import { formatPct } from '@/lib/format';
 import { complexityTone, seriesTone } from '@/lib/theme/tones';

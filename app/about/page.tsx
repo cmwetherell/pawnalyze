@@ -1,5 +1,6 @@
 import { Page } from '@/components/layout/Page';
 import { PageHead } from '@/components/layout/PageHead';
+import { Part } from '@/components/layout/Part';
 import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Photo } from '@/components/ui/Photo';
@@ -13,7 +14,10 @@ export default function AboutPage() {
       <PageHead title="About Pawnalyze" enter className="pb-6" />
 
       <Section layout="split" ratio="5/7" label="About">
-        <Photo photo={{ src: '/img/selfie.jpeg', alt: 'Caleb Wetherell' }} ratio="1/1" sizes="(min-width: 1024px) 520px, 100vw" priority />
+        {/* Stays beside the text, which is the taller column. */}
+        <div>
+          <Photo className="lg:sticky lg:top-24" photo={{ src: '/img/selfie.jpeg', alt: 'Caleb Wetherell' }} ratio="1/1" sizes="(min-width: 1024px) 520px, 100vw" priority />
+        </div>
         <div className="flex flex-col gap-12">
           <Prose>
             <p>
@@ -28,7 +32,7 @@ export default function AboutPage() {
               <TextLink href="https://www.github.com/cmwetherell/cmwetherell.github.io">available on GitHub</TextLink>.
             </p>
           </Prose>
-          <Section nested title="Elocator">
+          <Part rule="always" title="Elocator">
             <Prose>
               <p>
                 In my continuous exploration of chess through data, I’ve launched Elocator. This open-source tool is designed to predict the complexity
@@ -41,7 +45,7 @@ export default function AboutPage() {
                 understanding of chess strategy.
               </p>
             </Prose>
-          </Section>
+          </Part>
         </div>
       </Section>
 

@@ -7,13 +7,6 @@ export function formatPct(value: number, digits = 1): string {
   return `${pct.toFixed(digits)}%`;
 }
 
-/** Signed change in percentage points ("+3.2"), or null when it rounds to nothing. */
-export function formatDelta(value: number, baseline: number): string | null {
-  const d = (value - baseline) * 100;
-  if (Math.abs(d) < 0.05) return null;
-  return `${d > 0 ? '+' : '−'}${Math.abs(d).toFixed(1)}`;
-}
-
 export function fmtUsd(v: number, compact = true): string {
   if (compact) {
     if (Math.abs(v) >= 1_000_000) return `$${(v / 1_000_000).toFixed(2).replace(/0$/, '')}M`;

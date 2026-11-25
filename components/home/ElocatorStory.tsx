@@ -27,9 +27,9 @@ export function ElocatorStory() {
         <Board fen={HARDEST.fen} from={HARDEST.from} to={HARDEST.to} label={`Byrne against Fischer, 1956, after ${at}`} />
         <div className="flex flex-col justify-between gap-8">
           <div>
-            <div className="flex flex-wrap items-end gap-x-6 gap-y-2">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 md:items-end">
               <p className="type-mega text-ink">{HARDEST.c}</p>
-              <div className="pb-2">
+              <div className="md:pb-2">
                 <p className="type-h3 text-ink">{complexityWord(HARDEST.c)}, out of 100</p>
                 <p className="type-small text-ink-2">Byrne against Fischer, 1956, after {at}</p>
               </div>

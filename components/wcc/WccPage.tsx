@@ -11,6 +11,7 @@ import { exact } from '@/lib/wcc/match';
 import {
   getWccGames, getWccHistory, getWccMarket, getWccPlayers, getWccRun, getWccRunAtGame, getWccSummary,
 } from '@/lib/wcc/queries';
+import { TB_SLOT, latestQuote, quoteSlot } from '@/lib/wcc/quotes';
 import { withMatchRatings } from '@/lib/wcc/rebase';
 import { currentOdds, matchState } from '@/lib/wcc/status';
 import type { WccRun, WccSummary } from '@/lib/wcc/types';
@@ -87,10 +88,12 @@ export default async function WccPage() {
   const methodology = <WccMethodology run={oddsRun} summary={summary} rawSummary={rawSummary} players={players} />;
   const h2h = <HeadToHead players={players} />;
 
-  const defender = players[players[2].isChampion ? 2 : 1];
-  const challenger = players[defender.id === 1 ? 2 : 1];
-  // The stored price nearest to now; the live quote is in the markets section.
-  const kalshi = market.filter(m => m.source === 'kalshi').sort((a, b) => b.asOf.localeCompare(a.asOf))[0]?.pWin1 ?? null;
+  // The last stored price, with the moment it is from: the live quote is in the markets section.
+  const quote = latestQuote(market, 'kalshi');
+  const slot = quote && quoteSlot(quote, [...storedHistory].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
+  const kalshi = quote && slot !== null
+    ? { p: quote.pWin1, when: slot === 0 ? 'before the match' : slot === TB_SLOT ? 'during the tiebreaks' : `after game ${slot}` }
+    : null;
 
   return (
     <Page kind="dashboard">
@@ -103,7 +106,6 @@ export default async function WccPage() {
           'FIDE World Championship 2026',
           `Nov 22 to Dec 13, ${EVENT.venue}, ${EVENT.venueArea}`,
           '14 classical games, first to 7½, $2.5M prize fund',
-          `${defender.name} (${defender.country}) defends against Candidates winner ${challenger.name} (${challenger.country})`,
         ]}
       />
       {run && oddsRun && summary ? (

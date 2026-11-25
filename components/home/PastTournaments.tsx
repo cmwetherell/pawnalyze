@@ -10,7 +10,7 @@ import { getOlympiadResult } from '@/lib/olympiad/result';
 import type { OlympiadEvent } from '@/lib/olympiad/types';
 import { TOURNAMENT_YEARS, type Tournament } from '@/lib/tournaments';
 
-const Meta = ({ description, facts }: { description: string; facts: string }) => <>{description}<br /><span className="text-ink-3">{facts}</span></>;
+const Meta = ({ description, facts }: { description: string; facts: string }) => <>{facts}<br /><span className="text-ink-3">{description}</span></>;
 
 const Winner = ({ name }: { name: string }) => (
   <span className="inline-flex items-center gap-2"><Medal rank={1} decorative /><span className="sr-only">Winner: </span>{name}</span>
@@ -27,11 +27,11 @@ async function OlympiadRow({ event }: { event: OlympiadEvent }) {
       href={eventHref(event)}
       lead={r.leader && <Flag code={r.leader.fedCode} size="xl" decorative />}
       title={cfg.shortTitle}
-      meta={<Meta description={cfg.description} facts={`${cfg.format.replaceAll(' · ', ', ')}, ${stage}`} />}
+      meta={<Meta description={cfg.description} facts={`${cfg.format}, ${stage}`} />}
       aside={
         <>
           {r.state === 'final' ? r.leader && <Winner name={r.leader.name} /> : <Tag tone={r.state === 'live' ? 'live' : 'neutral'}>{r.state === 'live' ? 'Live' : 'Upcoming'}</Tag>}
-          {r.teams.length > 0 && <FlagStack size="sm" items={r.teams.map(t => ({ code: t.fedCode, name: t.name }))} more={Math.max(0, r.nTeams - r.teams.length)} label={r.state === 'final' ? 'Medallists' : 'Top seeds'} />}
+          {r.teams.length > 0 && <FlagStack size="sm" items={r.teams.map(t => ({ code: t.fedCode, name: t.name }))} more={Math.max(0, r.nTeams - r.teams.length)} label={r.state === 'final' ? 'Medalists' : 'Top seeds'} />}
         </>
       }
     />

@@ -122,11 +122,13 @@ interface TdProps extends Omit<ComponentPropsWithoutRef<'td'>, 'align'> {
   meta?: ReactNode;
   /** With `header`: a quiet second line under the name. */
   sub?: ReactNode;
+  /** With `header`: the name is the button of a row with `onSelect` (which stays a pointer shortcut to it). */
+  press?: { onPress: () => void; label: string; expanded?: boolean };
 }
 
 const ROW_H = 'h-[52px] group-data-[density=compact]/table:h-11 md:group-data-[density=compact]/table:h-10';
 
-export function Td({ align = 'left', priority = 1, muted = false, header = false, grow = false, lead, meta, sub, className, children, ...rest }: TdProps) {
+export function Td({ align = 'left', priority = 1, muted = false, header = false, grow = false, lead, meta, sub, press, className, children, ...rest }: TdProps) {
   const cls = cn('border-b border-line py-1 align-middle font-normal', ROW_H, CELL, ALIGN[align], PRIORITY[priority], align === 'right' && 'whitespace-nowrap', muted && 'text-ink-3');
   const data = priority > 1 ? priority : undefined;
   if (!header) return <td data-p={data} className={cn(cls, className)} {...rest}>{children}</td>;
@@ -148,7 +150,7 @@ export function Td({ align = 'left', priority = 1, muted = false, header = false
             'md:group-data-[density=compact]/table:[&>a]:py-2 [&>button]:block [&>button]:w-full [&>button]:truncate [&>button]:py-3 [&>button]:text-left md:group-data-[density=compact]/table:[&>button]:py-2',
           )}
         >
-          {children}
+          {press ? <button type="button" onClick={press.onPress} aria-label={press.label} aria-expanded={press.expanded}>{children}</button> : children}
           {sub && <span className="block truncate pb-2 type-label text-ink-3">{sub}</span>}
         </div>
         {meta && <span className="shrink-0 type-label text-ink-3">{meta}</span>}

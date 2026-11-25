@@ -28,6 +28,8 @@ interface MedalHistoryChartProps {
   extraTeamId?: number | null;
   /** Final places 1 to 3: those teams take their medal's tone and the champion leads. */
   medalists?: number[];
+  /** Beside the podium: as tall as that column. */
+  fill?: boolean;
   onSelect: (teamId: number) => void;
 }
 
@@ -36,7 +38,7 @@ export const hasTrend = (history: HistoryPoint[]) => new Set(history.map(h => h.
 const short = (r: number) => (r === 0 ? 'Pre' : `R${r}`);
 
 /** Every team's odds after every round. The leader is strong; the rest are context until pointed at. */
-export function MedalHistoryChart({ history, teamsById, extraTeamId = null, medalists, onSelect }: MedalHistoryChartProps) {
+export function MedalHistoryChart({ history, teamsById, extraTeamId = null, medalists, fill, onSelect }: MedalHistoryChartProps) {
   const [metric, setMetric] = useState<Metric>('pGold');
 
   const model = useMemo(() => {
@@ -90,6 +92,7 @@ export function MedalHistoryChart({ history, teamsById, extraTeamId = null, meda
       x={{ labels: rounds.map(short), titles: rounds.map(r => (r === 0 ? 'Before round 1' : `After round ${r}`)) }}
       y={{ min: 0, format: 'pct' }}
       height={{ desktop: 380, phone: 300 }}
+      fill={fill}
       caption={`${caption}${extra ? ', with the selected team' : ''}`}
       tools={<Segmented role="tablist" size="sm" ariaLabel="Metric" items={METRICS} value={metric} onChange={setMetric} />}
       ariaLabel={`${caption}, ${series.length} teams. ${lead.label} ${medalists ? 'ends' : 'leads'} at ${formatPct(end)}.`}

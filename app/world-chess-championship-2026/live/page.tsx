@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { LiveGame, type GameResults } from '@/components/live/LiveGame';
 import { Page } from '@/components/layout/Page';
 import { PageHead } from '@/components/layout/PageHead';
-import { Button } from '@/components/ui/Button';
+import { TextLink } from '@/components/ui/TextLink';
 import { WCC_HREF } from '@/lib/wcc/config';
 import { getWccGames } from '@/lib/wcc/queries';
 import { matchState } from '@/lib/wcc/status';
@@ -36,8 +36,10 @@ export default async function LivePage() {
       <PageHead
         title="Gukesh vs Sindarov, live"
         crumbs={[{ label: 'World Championship 2026', href: WCC_HREF }, { label: 'Live' }]}
-        lead={<>Every move as it is played, with the engine&rsquo;s verdict and how hard the position is to play.</>}
-        crumbActions={<Button size="sm" href={WCC_HREF}>See the match odds</Button>}
+        // On a phone the board comes first; the words would push it off the screen.
+        lead={<span className="max-sm:hidden">Every move as it is played, with the engine&rsquo;s verdict and how hard the position is to play.</span>}
+        crumbActions={<TextLink standalone href={WCC_HREF}><span className="max-sm:hidden">See the match odds</span><span className="sm:hidden">Match odds</span></TextLink>}
+        className="md:pb-6 md:pt-2"
       />
       <LiveGame results={results} />
     </Page>

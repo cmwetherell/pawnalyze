@@ -16,6 +16,8 @@ export interface TooltipRow {
   marker?: MarkerShape;
   /** The promoted or strong series. */
   strong?: boolean;
+  /** A hairline above: what follows is another quantity. */
+  rule?: boolean;
 }
 
 interface ChartTooltipProps {
@@ -30,6 +32,8 @@ interface ChartTooltipProps {
   /** A label the tooltip may not cover, in pixels of the plot box, and how far down the plot goes. */
   avoid?: Box;
   within?: number;
+  /** A block of labels inside the plot, and from where right of it the ground is empty. */
+  past?: { from: number; to: number };
 }
 
 const MAX_W = 220;
@@ -39,13 +43,15 @@ const PAD = 18;
 const MAX_ROWS = 6;
 const MIN_ROWS = 3;
 
-/** The one tooltip: six rows at most, flips side past the middle, never takes the pointer. */
-export function ChartTooltip({ x, width, title, rows, top = 8, gap = 14, avoid, within = Infinity }: ChartTooltipProps) {
+/** The one tooltip: six rows at most, flips side past the middle, never takes the pointer. Under the section bar and the header. */
+export function ChartTooltip({ x, width, title, rows, top = 8, gap = 14, avoid, within = Infinity, past: beyond }: ChartTooltipProps) {
   const keyed = rows.some(r => r.tone || r.marker);
   const wide = clamp(Math.max(textWidth(title, 14, true), ...rows.map(r => textWidth(r.label, 14, r.strong) + textWidth(r.value, 14) + (keyed ? 32 : 8))) + 26, MIN_W, MAX_W);
   const past = x > width / 2;
+  // Over a block of labels it goes to the empty ground right of them, or as far right as it can when it would still cover less than half of them.
+  const clears = beyond !== undefined && !past && x + gap + wide > beyond.from && width - wide > (beyond.from + beyond.to) / 2;
   // The same place along the whole side it could cover the label from, so it does not jump as the pointer moves.
-  const reaches = avoid !== undefined && !past && width / 2 + gap + wide > avoid.x;
+  const reaches = avoid !== undefined && !clears && !past && width / 2 + gap + wide > avoid.x;
   // Over the label, or under it: where there is more height, with fewer rows if it has to be.
   const above = reaches ? avoid.y - 4 : 0;
   const below = reaches ? within - avoid.y - avoid.h - 4 : 0;
@@ -64,12 +70,12 @@ export function ChartTooltip({ x, width, title, rows, top = 8, gap = 14, avoid, 
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute z-tooltip min-w-32 rounded-md border border-line bg-raised px-3 py-2 type-small text-ink shadow-pop"
-      style={{ top: at ?? top, maxWidth, ...(flip ? { right: width - x + gap } : { left: x + gap }) }}
+      className="pointer-events-none absolute z-10 min-w-32 rounded-md border border-line bg-raised px-3 py-2 type-small text-ink shadow-pop"
+      style={{ top: at ?? top, maxWidth, ...(flip ? { right: width - x + gap } : { left: clears ? Math.min(beyond.to, width - wide) : x + gap }) }}
     >
       <div className="font-medium">{title}</div>
       {shown.map(r => (
-        <div key={r.key} className="flex items-center gap-2 whitespace-nowrap">
+        <div key={r.key} className={cn('flex items-center gap-2 whitespace-nowrap', r.rule && 'mt-1 border-t border-line pt-1')}>
           {keyed && <span className="inline-flex w-4 shrink-0 items-center">{r.marker ? <MarkerKey shape={r.marker} /> : r.tone ? <Swatch tone={r.tone} shape={r.shape ?? 'line'} /> : null}</span>}
           <span className={cn('min-w-0 flex-1 truncate', r.strong ? 'font-medium text-ink' : 'text-ink-2')}>{r.label}</span>
           <span className="tnum">{r.value}</span>

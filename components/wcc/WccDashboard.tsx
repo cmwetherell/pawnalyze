@@ -24,15 +24,15 @@ import { StatStrip } from '@/components/ui/StatStrip';
 import { Swatch } from '@/components/ui/Swatch';
 import { formatPct, inHundred } from '@/lib/format';
 import { LIVE_REFRESH_MS, N_CLASSICAL, WCC_HREF } from '@/lib/wcc/config';
-import type { Players } from '@/lib/wcc/display';
+import { genevaDay, type Players } from '@/lib/wcc/display';
 import { exact, gameOdds, whiteInGame } from '@/lib/wcc/match';
 import { ZERO_OFFSETS, adjustedWdl, drawRate, type RatingOffsets } from '@/lib/wcc/model';
 import { PICK_HP, parseColor, parseOffsets, parsePicks, parseTheta, writeScenario, type PickOutcome } from '@/lib/wcc/scenario';
-import { currentOdds, fmtScore, isLagging, matchState } from '@/lib/wcc/status';
+import { currentOdds, isLagging, matchState, wonLine } from '@/lib/wcc/status';
 import type { HalfPoints, HistoryPoint, MarketRow, MatchOdds, ModelGrid, PlayerId, WccGame, WccRun, WccSummary } from '@/lib/wcc/types';
 import { MatchEnding } from './MatchEnding';
 import { MatchScore, NextGame, scoreLabel } from './MatchNow';
-import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, faceOffSides, oddsSides } from './players';
+import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, PAWN_NOTE, faceOffSides, oddsSides } from './players';
 import { PrizeCard } from './PrizeCard';
 import { Schedule, liveHref } from './Schedule';
 import { SimReplay } from './SimReplay';
@@ -47,8 +47,8 @@ interface Props {
   summary: WccSummary;
   history: HistoryPoint[];
   markets: MarketRow[];
-  /** Last stored Kalshi price for Gukesh, 0..1. */
-  kalshi: number | null;
+  /** Last stored Kalshi price for Gukesh, 0..1, and when it was taken ("after game 1"). */
+  kalshi: { p: number; when: string } | null;
   /** The match is decided; odds are frozen as they stood before the decisive game. */
   finished: boolean;
   slots: { markets: ReactNode; h2h: ReactNode; methodology: ReactNode };
@@ -77,9 +77,6 @@ const navFor = (finished: boolean): SectionBarProps['groups'] => [
     ],
   },
 ];
-
-const genevaDate = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleDateString('en-US', { timeZone: 'Europe/Zurich', weekday: 'short', day: 'numeric', month: 'short' }) : '';
 
 export default function WccDashboard({ players, games, run, summary, history, markets, kalshi, finished, slots }: Props) {
   const router = useRouter();
@@ -217,7 +214,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
       const pPlayed = odds.gamePlayed[game.gameNo - 1] ?? 1;
       return {
         gameNo: game.gameNo,
-        dateLabel: genevaDate(game.startsAt),
+        dateLabel: genevaDay(game.startsAt),
         whiteName: white === null ? null : players[white].shortName,
         whiteAssumed: game.whitePlayerId === null && !colorKnown && white !== null,
         odds: gameOdds(wdl, game.gameNo, effG1),
@@ -298,7 +295,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
   const last = state.lastFinal > 0 ? state.fixed.get(state.lastFinal) : undefined;
   const lastGame = last === undefined
     ? { value: 'None yet', sub: 'Game 1 is on Nov 24' }
-    : { value: last === 1 ? 'Draw ½–½' : `${players[last === 2 ? 1 : 2].shortName} won`, sub: `Game ${state.lastFinal}, ${genevaDate(state.classical[state.lastFinal - 1].startsAt)}` };
+    : { value: last === 1 ? 'Draw ½–½' : `${players[last === 2 ? 1 : 2].shortName} won`, sub: `Game ${state.lastFinal}, ${genevaDay(state.classical[state.lastFinal - 1].startsAt)}` };
   const rating = (tc: 'classical' | 'rapid' | 'blitz', label: string) => ({
     key: tc,
     label: `${label} rating`,
@@ -316,11 +313,6 @@ export default function WccDashboard({ players, games, run, summary, history, ma
 
   const groups = useMemo(() => navFor(finished), [finished]);
   const sides = oddsSides(players, odds.pWin1);
-  const won = champion && (
-    state.decidedStage === 'classical'
-      ? `Won ${fmtScore(Math.max(state.score1, state.score2), Math.min(state.score1, state.score2))} after game ${state.decidedAt}.`
-      : 'Won in the tiebreaks after a 7–7 classical match.'
-  );
 
   return (
     <>
@@ -336,19 +328,19 @@ export default function WccDashboard({ players, games, run, summary, history, ma
                 preview={preview}
                 score={<MatchScore state={state} players={players} />}
                 scoreLabel={scoreLabel(state)}
-                champion={champion && won ? { name: champion.name, line: won } : null}
+                champion={champion ? { name: champion.name, line: wonLine(state) } : null}
                 verdict={
                   champion ? (
-                    <>Before the decisive game our odds were {p1.shortName} {formatPct(odds.pWin1)}, {p2.shortName} {formatPct(odds.pWin2)}. <span className="text-ink-3">Every number below is frozen as it stood then.</span></>
+                    <>Before the decisive game our odds were {p1.shortName} {formatPct(odds.pWin1)}, {p2.shortName} {formatPct(odds.pWin2)}. <span className="block text-ink-3">Every number below is frozen as it stood then.</span></>
                   ) : (
                     <>
                       {scenarioLabel && <>{scenarioLabel} </>}
                       {fav.shortName} wins {inHundred(Math.max(odds.pWin1, odds.pWin2))} matches. {odds.pTb > 1 - 1e-6 ? 'The tiebreaks decide it.' : `${formatPct(odds.pTb)} go to tiebreaks.`}
-                      {!scenarioLabel && kalshi !== null && <> <span className="text-ink-3">Kalshi traders give {p1.shortName} {formatPct(kalshi)}.</span></>}
+                      {!scenarioLabel && kalshi && <span className="block text-ink-3">Kalshi traders gave {p1.shortName} {formatPct(kalshi.p)} {kalshi.when}.</span>}
                     </>
                   )
                 }
-                notes={[champion ? 'Chance before the decisive game. Each pawn is 1 in 100.' : 'Chance to win the match. Each pawn is 1 in 100.', source]}
+                notes={[champion ? 'Chance before the decisive game. Each pawn is 1\u00a0in\u00a0100.' : PAWN_NOTE, source]}
                 next={champion ? undefined : <><span className="block font-medium text-ink"><NextGame state={state} /></span>Live board, evaluation and complexity</>}
                 actions={
                   champion ? (
@@ -389,7 +381,8 @@ export default function WccDashboard({ players, games, run, summary, history, ma
         heroId={HERO}
         eventLabel="World Championship"
         live={<OddsChip sides={sides} preview={preview} />}
-        actions={!finished && <>{scenarioActive && <Button size="sm" variant="quiet" icon="reset" onClick={resetAll}>Reset</Button>}<CopyButton kind="link" label="Share scenario" /></>}
+        // Icons: the same two buttons, with their words, head the section below. Reset keeps its place, so a first pick moves no link.
+        actions={!finished && <><IconButton icon="reset" label="Reset" onClick={resetAll} className={scenarioActive ? undefined : 'invisible'} /><CopyButton kind="link" label="Share scenario" variant="icon" /></>}
       />
 
       <Container>
@@ -404,7 +397,7 @@ export default function WccDashboard({ players, games, run, summary, history, ma
           layout="wide"
           title={finished ? 'Game by game' : 'Pick the results'}
           finding={finished ? 'Every classical game of the match. A game number opens its board and moves.' : 'Choose a result for any game and every number on this page updates at once. A game number opens its live board.'}
-          actions={!finished && <>{scenarioActive && <Button size="sm" icon="reset" onClick={resetAll}>Reset</Button>}<CopyButton kind="link" label="Share scenario" variant="secondary" /></>}
+          actions={!finished && <>{scenarioActive && <Button size="sm" icon="reset" onClick={resetAll} className="max-lg:order-last lg:max-[1439px]:hidden">Reset</Button>}<CopyButton kind="link" label="Share scenario" variant="secondary" /></>}
           legend={!finished && (
             <ul className="flex flex-wrap gap-x-6 gap-y-2 type-small text-ink-2">
               <li className="inline-flex items-center gap-2"><PieceDot side="white" />Has White{!colorKnown && color !== null ? ' (assumed until the Nov 22 draw)' : ''}</li>

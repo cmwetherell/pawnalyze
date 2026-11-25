@@ -25,8 +25,8 @@ export function BoardControls({ ply, last, onGo, onFlip, live, className }: Boar
         {onFlip && <IconButton icon="flip" label="Flip board" title="Flip board (f)" onClick={onFlip} />}
       </div>
       <div className="ml-auto flex items-center gap-3">
-        {last > 0 && <span className="type-data text-ink-3"><span className="sr-only">Position </span>{ply}/{last}</span>}
-        {live?.behind && <Button size="sm" live onClick={live.onLive}>Back to live</Button>}
+        {last > 0 && <span className={cn('type-data text-ink-3', live?.behind && 'max-sm:hidden')}><span className="sr-only">Position </span>{ply}/{last}</span>}
+        {live?.behind && <Button size="sm" live aria-label="Back to live" onClick={live.onLive}><span className="max-sm:hidden">Back to live</span><span className="sm:hidden">Live</span></Button>}
       </div>
     </div>
   );

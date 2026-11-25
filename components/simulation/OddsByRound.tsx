@@ -42,6 +42,8 @@ interface OddsByRoundProps {
   readout?: boolean;
   /** The round the bars open on: the first for an event that is over, to step through it. */
   start?: 'first' | 'last';
+  /** Of the line chart. */
+  height?: { desktop: number; phone: number };
   /** Results being recalculated. */
   busy?: boolean;
 }
@@ -52,7 +54,7 @@ const NAMED_FROM = 0.1;
 const peak = (values: number[]) => values.reduce((best, v, i) => (v > values[best] ? i : best), 0);
 
 /** Chances after every round as lines, and one round at a time as bars. */
-export function OddsByRound({ entries, rounds, caption, ariaLabel, noun, y, note, readout = true, start = 'last', busy = false }: OddsByRoundProps) {
+export function OddsByRound({ entries, rounds, caption, ariaLabel, noun, y, note, readout = true, start = 'last', height, busy = false }: OddsByRoundProps) {
   const last = rounds.length - 1;
   const [picked, setPicked] = useState<number | null>(null);
   const at = picked === null || picked > last ? (start === 'first' ? 0 : last) : picked;
@@ -83,7 +85,8 @@ export function OddsByRound({ entries, rounds, caption, ariaLabel, noun, y, note
             series={series}
             x={{ labels: rounds.map(r => r.label), titles: rounds.map(r => r.title) }}
             y={{ min: 0, max: y?.max, format: 'pct' }}
-            selected={readout ? at : undefined}
+            height={height}
+            selected={readout && picked !== null ? at : undefined}
             onSelect={readout ? setPicked : undefined}
             caption={caption}
             ariaLabel={ariaLabel}

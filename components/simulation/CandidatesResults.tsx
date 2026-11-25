@@ -12,12 +12,13 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { StatStrip } from '@/components/ui/StatStrip';
 import { formatPct } from '@/lib/format';
 import { buildPlayerToneMap, getPlayerFederation, getPlayerName, getPlayerShortName } from '@/lib/playerData';
-import { raceHistory, tookTheLead, type RaceHistory } from '@/lib/raceHistory';
+import { bestOfTheRest, leadersAt, playersAbove, playersBeside, raceHistory, tookTheLead, type RaceHistory } from '@/lib/raceHistory';
 import type { EventTable, SimulationRow } from '@/lib/simulations';
+import { cn } from '@/lib/utils';
 import type { Game } from '@/types';
 import { OddsByRound, type OddsEntry, type OddsRound } from './OddsByRound';
 import { ScenarioBuilder } from './ScenarioBuilder';
-import { isPlayed, pickedWords, withPick, type GameRound } from './rounds';
+import { isPlayed, pickedWords, pointsWord, scoreOf, withPick, type GameRound } from './rounds';
 import { useSimulations } from './useSimulations';
 
 const HERO = 'odds';
@@ -39,22 +40,25 @@ const top = (entries: [string, number][]) => entries.reduce((a, b) => (b[1] > a[
 /** Who won (or leads), from where, and since when. The winner is known; everything else is read off the simulations. */
 function story(history: RaceHistory, winner: string | undefined) {
   const last = history.rounds.length - 1;
-  const ahead = top([...history.odds].map(([name, v]) => [name, v[last]]));
-  const leader = winner !== undefined && history.odds.has(winner) ? winner : ahead[0];
+  const ahead = leadersAt(history, last);
+  const leader = winner !== undefined && history.odds.has(winner) ? winner : ahead[0][0];
   const odds = history.odds.get(leader) ?? [];
-  const start = [...history.odds].map(([name, v]): [string, number] => [name, v[0]]).sort((a, b) => b[1] - a[1]);
   return {
     leader, ahead,
     now: odds[last], from: odds[0],
-    seed: start.findIndex(e => e[0] === leader) + 1,
-    field: start.length,
-    favorite: start[0],
+    favorites: leadersAt(history, 0),
+    above: playersAbove(history, leader, 0),
+    beside: playersBeside(history, leader, 0),
     lead: tookTheLead(history, leader),
+    rest: bestOfTheRest(history, leader),
   };
 }
 
-const ORDINAL = ['', 'First', 'Second', 'Third', 'Fourth', 'Fifth', 'Sixth', 'Seventh', 'Eighth'];
-const standing = (seed: number, field: number) => (seed === 1 ? 'Favorite' : seed === field ? `Lowest of ${field} players` : `${ORDINAL[seed] ?? `Number ${seed}`} favorite`);
+const COUNT = ['', 'one other', 'two others', 'three others', 'four others', 'five others', 'six others', 'seven others'];
+const and = new Intl.ListFormat('en-US', { type: 'conjunction' });
+const after = (round: string) => (round === 'Pre' ? 'before round 1' : `after round ${round}`);
+/** A sampled chance, in words: never to a tenth. */
+const about = (p: number) => formatPct(p, 0);
 
 /** The odds of a Candidates tournament: what happened, round by round, and the scenario builder. */
 export function CandidatesResults({ eventTable, rounds, initialData, winner, intro }: CandidatesResultsProps) {
@@ -71,14 +75,14 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
   const tones = buildPlayerToneMap(told ? [told.leader, ...names.filter(n => n !== told.leader)] : names);
 
   let entries: OddsEntry[] = [];
-  let points: OddsRound[] = [];
+  let marks: OddsRound[] = [];
   if (history && told) {
     const played = history.rounds.length > 1;
     const sims = total(scenario);
     const scenarioOdds = (name: string) => Number(scenario.find(r => r.winner === name)?.win_count ?? 0) / (sims || 1);
     // With nothing but odds from before round 1, a scenario takes their place.
     const showBase = played || scenario.length === 0;
-    points = [
+    marks = [
       ...(showBase ? history.rounds.map(r => (r === 'Pre' ? { label: 'Pre', title: 'Before round 1' } : { label: r, title: `After round ${r}` })) : []),
       ...(scenario.length > 0 ? [{ label: 'Sim', title: 'Your scenario' }] : []),
     ];
@@ -87,7 +91,7 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
       emphasis: name === told.leader ? 'strong' as const : 'context' as const,
       values: [...(showBase ? history.odds.get(name) ?? history.rounds.map(() => 0) : []), ...(scenario.length > 0 ? [scenarioOdds(name)] : [])],
     }));
-    const at = points.length - 1;
+    const at = marks.length - 1;
     // Level at the end: whoever once stood higher.
     entries.sort((a, b) => b.values[at] - a.values[at] || Math.max(...b.values) - Math.max(...a.values));
   }
@@ -99,44 +103,57 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
   const loading = status === 'loading';
   const picked = pickedWords(picks);
 
-  const behind = told && told.ahead[0] !== told.leader;
-  const since = !told ? '' : behind ? `${getPlayerName(told.ahead[0])} was still ahead after round ${lastRound}.` : told.lead ? `${getPlayerName(told.lead.from)} was ahead until round ${told.lead.round}.` : 'No one else was ever ahead.';
-  const end = points.length - 1;
+  const behind = told !== null && !told.ahead.some(e => e[0] === told.leader);
+  const end = marks.length - 1;
   const inScenario = scenario.length > 0 ? entries[0] : undefined;
+  // The strip over the results says who won, from where and since when, so the finding says who came closest.
+  const closest = told?.rest ? `No one else rose above ${getPlayerName(told.rest.name)}’s ${about(told.rest.chance)}${told.rest.round === null ? '' : ` ${after(told.rest.round)}`}.` : '';
+  const left = history && lastRound !== undefined ? rounds.length - Number(lastRound === 'Pre' ? 0 : lastRound) : 0;
+  const stopped = told && left > 0 && told.now < 1 ? ` The simulations stop after round ${lastRound}, ${left === 1 ? 'one round' : `${left} rounds`} before the end.` : '';
   const finding = told && (inScenario
-    ? <>In your scenario {inScenario.name} has a {formatPct(inScenario.values[end])} chance to win, against {formatPct(history?.odds.get(inScenario.id)?.at(-1) ?? 0)} as it stood.</>
+    ? <>In your scenario {inScenario.name} has a {about(inScenario.values[end])} chance to win, against {about(history?.odds.get(inScenario.id)?.at(-1) ?? 0)} as it stood.</>
     : winner !== undefined
-    ? <>{getPlayerName(told.leader)} won from a starting chance of {formatPct(told.from)}. {since}</>
-    : <>{getPlayerName(told.leader)} leads with a {formatPct(told.now)} chance to win.</>);
+    ? `${closest}${stopped}`.trim() || undefined
+    : told.ahead.length === 1
+    ? <>{getPlayerName(told.leader)} leads with a {about(told.now)} chance to win.</>
+    : <>{and.format(told.ahead.map(e => getPlayerName(e[0])))} are too close to call, at about {about(told.now)} each.</>);
+  const perRound = history !== null && scenario.length === 0 && history.sims.length > 1 && history.sims.every(n => n === simulations);
 
   return (
     <>
-      {/* The figures come first on a phone; from 1024 the words are on the left. */}
-      <Section label="Summary" layout={intro ? 'split' : 'plain'} ratio="5/7" rule={false}>
-        <div id={HERO} className="lg:order-last">
-          {told ? (
-            <StatStrip
-              columns={intro ? 2 : 4}
-              items={[
-                { key: 'leader', label: winner !== undefined ? 'Winner' : 'Leader', value: <Named name={told.leader} /> },
-                { key: 'from', label: 'Chance before round 1', value: formatPct(told.from), sub: standing(told.seed, told.field) },
-                told.seed === 1
-                  ? { key: 'now', label: `Chance after round ${lastRound}`, value: formatPct(told.now) }
-                  : { key: 'favorite', label: 'Favorite before round 1', value: <Named name={told.favorite[0]} />, sub: formatPct(told.favorite[1]) },
-                behind
-                  ? { key: 'lead', label: `Ahead after round ${lastRound}`, value: <Named name={told.ahead[0]} />, sub: formatPct(told.ahead[1]) }
-                  : told.lead ? { key: 'lead', label: 'Ahead for good', value: `After round ${told.lead.round}`, sub: `Passed ${getPlayerName(told.lead.from)}` }
-                  : { key: 'lead', label: 'Ahead for good', value: 'From the start' },
-              ]}
-            />
-          ) : loading && <Skeleton kind="cells" rows={4} label="Loading the simulations" />}
+      {/* The figures come first on a phone; from 1024 the words are over them. */}
+      <Section label="Summary" layout="plain" rule={false}>
+        <div className="grid grid-cols-1 gap-y-8 lg:grid-cols-12">
+          <div id={HERO} className={cn('min-w-0 lg:col-span-12', intro && 'lg:order-last')}>
+            {told ? (
+              <StatStrip
+                columns={4}
+                items={[
+                  { key: 'leader', label: winner !== undefined ? 'Winner' : 'Leader', ...player(told.leader), sub: over ? `${pointsWord(scoreOf(rounds, told.leader))} of ${rounds.length} points` : undefined },
+                  {
+                    key: 'from', label: 'Chance before round 1', value: about(told.from),
+                    sub: told.above > 0 ? `${told.beside > 0 ? 'Clearly behind' : 'Behind'} ${COUNT[told.above] ?? `${told.above} others`}` : told.favorites.length === 1 ? 'Favorite' : 'Among the favorites',
+                  },
+                  told.favorites.length === 1 && told.favorites[0][0] === told.leader
+                    ? { key: 'now', label: `Chance after round ${lastRound}`, value: about(told.now) }
+                    : told.favorites.length === 1
+                    ? { key: 'favorite', label: 'Favorite before round 1', ...player(told.favorites[0][0]), sub: about(told.favorites[0][1]) }
+                    : { key: 'favorite', label: 'Favorites before round 1', value: and.format(told.favorites.map(e => getPlayerShortName(e[0]))), sub: `About ${about(told.favorites[0][1])} each` },
+                  behind
+                    ? { key: 'lead', label: `Ahead after round ${lastRound}`, ...player(told.ahead[0][0]), sub: `${about(told.ahead[0][1])}, ${getPlayerShortName(told.leader)} ${about(told.now)}` }
+                    : told.lead ? { key: 'lead', label: 'Ahead for good', value: `After round ${told.lead.round}`, sub: `${told.lead.level ? 'About level with' : 'Behind'} ${getPlayerShortName(told.lead.from)} ${after(told.lead.before)}` }
+                    : { key: 'lead', label: 'Ahead for good', value: 'From the start' },
+                ]}
+              />
+            ) : loading && <Skeleton kind="cells" rows={4} label="Loading the simulations" className="lg:min-h-28" />}
+          </div>
+          {intro && <div className="min-w-0 type-standfirst text-ink lg:col-span-8">{intro}</div>}
         </div>
-        {intro && <div className="max-w-reading type-standfirst text-ink">{intro}</div>}
       </Section>
 
       <Section id="results" title="Simulation results" layout="wide" finding={finding}>
         <Split
-          stickyAside
+          stickyAside={!over}
           main={
             <div className="flex flex-col gap-6">
               {scenario.length > 0 && <Callout icon="check" role="status">Predictions updated to reflect your scenario selections</Callout>}
@@ -145,12 +162,12 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
               {entries.length > 0 ? (
                 <OddsByRound
                   entries={entries}
-                  rounds={points}
+                  rounds={marks}
                   noun="Player"
                   y={{ max: 1 }}
                   caption="Chance to win the tournament after each round"
                   ariaLabel={`Chance to win after each round. ${told ? `${getPlayerName(told.leader)}: ${formatPct(told.from)} before round 1, ${formatPct(told.now)} after round ${lastRound}.` : ''}`}
-                  note={simulations > 0 ? `Based on ${simulations.toLocaleString('en-US')} simulations` : undefined}
+                  note={simulations > 0 ? `Based on ${simulations.toLocaleString('en-US')} simulations${perRound ? ' after each round' : ''}` : undefined}
                   start={over && scenario.length === 0 ? 'first' : 'last'}
                   busy={loading}
                 />
@@ -172,7 +189,11 @@ export function CandidatesResults({ eventTable, rounds, initialData, winner, int
   );
 }
 
-function Named({ name }: { name: string }) {
+/** The short name where four cells leave no room for the full one. */
+function player(name: string) {
   const flag = getPlayerFederation(name);
-  return <span className="inline-flex items-center gap-2">{flag && <Flag code={flag} size="sm" decorative />}{getPlayerName(name)}</span>;
+  return {
+    lead: flag ? <Flag code={flag} size="sm" decorative /> : undefined,
+    value: <><span className="xl:hidden">{getPlayerShortName(name)}</span><span className="max-xl:hidden">{getPlayerName(name)}</span></>,
+  };
 }

@@ -6,12 +6,13 @@ import { Section } from '@/components/layout/Section';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Tabs } from '@/components/ui/Tabs';
 import { formatPct } from '@/lib/format';
+import { formatMatchScore } from '@/lib/olympiad/standings';
 import type { DerivedStanding, HistoryPoint, Match, RoundOdds, Run, Team, TeamOdds } from '@/lib/olympiad/types';
 import { byGold, GoldRace } from './GoldRace';
 import { hasTrend, MedalHistoryChart } from './MedalHistoryChart';
 import { MoversStrip } from './MoversStrip';
 import { RoundResults, type ApplyResults } from './RoundResults';
-import { sentenceName, shortTeamName } from './teams';
+import { nameInSentence, sentenceName } from './teams';
 
 type Tab = 'race' | 'results' | 'trend';
 
@@ -78,6 +79,15 @@ export function RaceSection({
   const prev = rounds[rounds.length - 2];
 
   const raceTitle = finished ? `Going into round ${oddsRound + 1}` : first && first.pGold > 0 ? `${sentenceName(name(first.teamId))} ${isScenario ? 'would lead' : 'leads'} the gold race` : 'Gold medal race';
+  // What the teams on top of the table did in the round on show.
+  const topResults = [...standings.values()].sort((a, b) => a.rank - b.rank).slice(0, 2).flatMap(s => {
+    const m = matches.find(x => x.round === resultsRound && x.status === 'final' && x.team2Id !== null && (x.team1Id === s.teamId || x.team2Id === s.teamId));
+    if (!m || m.team1Score === null || m.team2Score === null) return [];
+    const home = m.team1Id === s.teamId;
+    const [own, opp] = home ? [m.team1Score, m.team2Score] : [m.team2Score, m.team1Score];
+    const verb = own > opp ? 'beat' : own < opp ? 'lost to' : 'drew with';
+    return [`${sentenceName(name(s.teamId))} ${verb} ${nameInSentence(name((home ? m.team2Id : m.team1Id) ?? -1))} ${formatMatchScore(own, opp)}.`];
+  }).join(' ');
   const title = tab === 'race' ? raceTitle : tab === 'trend' ? 'Odds over time' : resultsRound !== null ? `Round ${resultsRound} results` : `Round ${nextRound} preview`;
   const finding = tab === 'race'
     ? (
@@ -86,11 +96,11 @@ export function RaceSection({
           ? 'Chance of winning gold under your scenario.'
           : finished ? `Chance of winning gold as it stood after round ${oddsRound}, with one round left to play.` : 'Chance of winning gold.'}
         {' '}Each bar shows the full podium out of 100%.
-        {!finished && first && second && first.pGold > 0 && ` ${sentenceName(name(first.teamId))} has ${formatPct(first.pGold)}, ${shortTeamName(name(second.teamId))} ${formatPct(second.pGold)}.`}
+        {first && second && first.pGold > 0 && ` ${sentenceName(name(first.teamId))} ${finished ? 'had' : 'has'} ${formatPct(first.pGold)}, ${nameInSentence(name(second.teamId))} ${formatPct(second.pGold)}.`}
       </>
     )
     : tab === 'trend' ? 'Point at a line to bring it forward; select one to open that team.'
-    : 'Select a team to open its profile.';
+    : <>{topResults} Select a team to open its profile.</>;
 
   const tabs: { key: Tab; label: string; live?: boolean }[] = [
     { key: 'race', label: finished ? 'Final-round odds' : 'Gold race' },

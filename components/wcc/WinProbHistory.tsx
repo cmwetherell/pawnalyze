@@ -6,38 +6,27 @@ import { LineChart, type LineMarker } from '@/components/charts/LineChart';
 import { Section } from '@/components/layout/Section';
 import { formatPct } from '@/lib/format';
 import type { Players } from '@/lib/wcc/display';
+import { quoteSlot, slotOf } from '@/lib/wcc/quotes';
 import type { HistoryPoint, MarketRow } from '@/lib/wcc/types';
 
 const SLOTS = ['Pre', ...Array.from({ length: 14 }, (_, i) => `G${i + 1}`), 'TB'];
 const TITLES = ['Before the match', ...Array.from({ length: 14 }, (_, i) => `After game ${i + 1}`), 'During the tiebreaks'];
-const slotOf = (h: { afterGame: number; tbGames: number }) => (h.tbGames > 0 ? 15 : h.afterGame);
 const SOURCES: Record<string, { label: string; shape: LineMarker['shape'] }> = {
   kalshi: { label: 'Kalshi', shape: 'circle' },
   polymarket: { label: 'Polymarket', shape: 'square' },
   bet365: { label: 'bet365', shape: 'triangle' },
 };
 
-/** raw.after_game written by the market snapshot cron, if any. */
-function taggedSlot(raw: unknown): number | null {
-  const v = raw && typeof raw === 'object' ? (raw as { after_game?: unknown }).after_game : undefined;
-  return typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= 14 ? v : null;
-}
-
 function build(history: HistoryPoint[], markets: MarketRow[]) {
   const runs = [...history].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   const bySlot = new Map<number, HistoryPoint>();
   for (const h of runs) bySlot.set(slotOf(h), h);
-  // Each market snapshot belongs to the match state in force when it was taken: the game it was
-  // tagged with by the snapshot cron, else the latest run before it. The latest snapshot per slot wins.
+  // Each market snapshot belongs to the match state in force when it was taken. The latest snapshot per slot wins.
   const dots = new Map<string, { slot: number; source: string; p: number }>();
   for (const m of [...markets].sort((a, b) => a.asOf.localeCompare(b.asOf))) {
     if (!SOURCES[m.source]) continue;
-    let slot = taggedSlot(m.raw);
-    if (slot === null) {
-      const before = runs.filter(r => r.createdAt <= m.asOf).pop() ?? runs[0];
-      if (!before) continue;
-      slot = slotOf(before);
-    }
+    const slot = quoteSlot(m, runs);
+    if (slot === null) continue;
     dots.set(`${m.source}-${slot}`, { slot, source: m.source, p: m.pWin1 });
   }
   const points = [...bySlot.entries()].sort((a, b) => a[0] - b[0]);

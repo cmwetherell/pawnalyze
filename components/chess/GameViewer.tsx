@@ -4,6 +4,7 @@ import { Chess } from 'chess.js';
 import { useMemo, useState } from 'react';
 
 import { TextLink } from '@/components/ui/TextLink';
+import { positionLabel } from '@/lib/chess/moves';
 import { START_FEN } from '@/lib/live/pgn';
 import { BoardControls } from './BoardControls';
 import { BoardPane } from './BoardPane';
@@ -69,7 +70,7 @@ export function GameViewer({ moves, white, black, result, orientation = 'w', sta
       board={(
         <BoardPane
           fen={last?.fen ?? START_FEN} from={last?.from} to={last?.to} flipped={flipped}
-          label={`Position after ${ply} ${ply === 1 ? 'ply' : 'plies'}`}
+          label={positionLabel({ ply, san: last?.san ?? null })}
           top={name(flipped ? 'white' : 'black')} bottom={name(flipped ? 'black' : 'white')}
           controls={<BoardControls ply={ply} last={plies.length} onGo={go} onFlip={flip} />}
         />
@@ -78,7 +79,7 @@ export function GameViewer({ moves, white, black, result, orientation = 'w', sta
         <div>
           <MoveList moves={plies} ply={ply} onGo={go} maxHeight="clamp(280px, 60vh, 440px)" />
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-3 type-small">
-            <span className="whitespace-nowrap font-medium text-ink tnum">{result.replace('1/2-1/2', '½–½')}</span>
+            <span className="whitespace-nowrap font-medium text-ink tnum">{result.replace('1/2-1/2', '½–½').replace('-', '–')}</span>
             <TextLink standalone href={lichessAnalysisHref(moves)}>Analyze on Lichess</TextLink>
           </div>
         </div>

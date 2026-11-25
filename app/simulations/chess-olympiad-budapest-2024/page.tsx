@@ -1,4 +1,3 @@
-import { Container } from '@/components/layout/Container';
 import { Page } from '@/components/layout/Page';
 import { PageHead } from '@/components/layout/PageHead';
 import { Section } from '@/components/layout/Section';
@@ -14,14 +13,12 @@ export default function Sims() {
     <Page kind="dashboard">
       <PageHead
         title={NAME}
-        crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: NAME }]}
+        crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: 'Olympiad 2024' }]}
         lead="Countries battle it out 4v4 to find the best chess nation."
+        foldLead
         facts={['11 rounds of 4v4 team battles', <TextLink key="fide" href="https://chessolympiad2024.fide.com/" external>FIDE</TextLink>]}
       />
-      <Container className="pb-12">
-        <Callout tone="brand" icon="medal">Congrats to India for winning gold in both the Open and Women’s event!</Callout>
-      </Container>
-      <Budapest2024Results />
+      <Budapest2024Results notice={<Callout tone="brand" icon="medal">Congrats to India for winning gold in both the Open and Women’s event!</Callout>} />
       <Section id="method" title="How it works">
         <Prose>
           <p>

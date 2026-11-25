@@ -60,6 +60,8 @@ export function SectionBar({ groups, heroId, live, eventLabel, actions }: Sectio
 
   const onBar = items.slice(0, MAX_LINKS);
   const { ref: strip, fit } = useFit(onBar.length);
+  // One list, all of it on the bar: nothing more to show.
+  const whole = groups.length === 1 && fit >= items.length;
   const currentOff = items.findIndex(i => i.id === current) >= fit;
 
   const close = useCallback(() => setOpen(false), []);
@@ -93,7 +95,7 @@ export function SectionBar({ groups, heroId, live, eventLabel, actions }: Sectio
     <nav ref={root} data-section-bar="" aria-label={`${eventLabel} sections`} className="sticky -top-px z-bar mb-section border-y border-line bg-canvas">
       <Container>
         <div className="flex h-bar items-center gap-2 lg:gap-4">
-          <Link href="/" aria-label="Pawnalyze home" title="Pawnalyze home" className="-ml-3 grid h-tap w-tap shrink-0 place-items-center rounded-sm transition-colors duration-in hover:bg-sunken">
+          <Link href="/" aria-label="Pawnalyze home" title="Pawnalyze home" className="-ml-2 grid h-tap w-tap shrink-0 place-items-center rounded-sm transition-colors duration-in hover:bg-sunken">
             <Logo kind="pawn" />
           </Link>
 
@@ -148,6 +150,7 @@ export function SectionBar({ groups, heroId, live, eventLabel, actions }: Sectio
               className={cn(
                 'grid h-full shrink-0 justify-items-start pl-2 type-ui transition-colors duration-in hover:text-ink focus-visible:-outline-offset-2 xl:pl-3',
                 currentOff ? 'text-ink' : 'text-ink-2',
+                whole && 'hidden',
               )}
             >
               {items.map(item => <span key={item.id} aria-hidden className="invisible col-start-1 row-start-1 h-0 whitespace-nowrap pr-5">{item.label}</span>)}
@@ -178,7 +181,7 @@ export function SectionBar({ groups, heroId, live, eventLabel, actions }: Sectio
               {groups.map(g => (
                 <div key={g.label}>
                   <p className="type-label text-ink-3">{g.label}</p>
-                  <ul className="grid grid-cols-2 gap-x-6">
+                  <ul className={cn('grid grid-cols-2 gap-x-6', groups.length > 1 && 'lg:grid-cols-1')}>
                     {g.items.map(item => {
                       const on = item.id === current;
                       return (

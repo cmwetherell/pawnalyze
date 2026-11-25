@@ -38,7 +38,8 @@ function FormRow({ games, player }: { games: PlayerGame[]; player: DisplayPlayer
       value={played.length > 0 && `${String(score).replace('.5', '½')}/${played.length}`}
       meta={avgOpp ? `Average opponent ${avgOpp}` : 'No Olympiad games found.'}
     >
-      <div className="flex flex-wrap items-center justify-between gap-x-4">
+      {/* The same shape for both, whatever the number of games: on one line only where ten or more fit beside the link. */}
+      <div className="flex flex-col items-start justify-between gap-x-4 pb-1 md:-mt-2 md:flex-row md:items-center lg:mt-0 lg:flex-col lg:items-start xl:-mt-2 xl:flex-row xl:items-center">
         {played.length > 0 && (
           <Pips
             kind="form"
@@ -57,12 +58,14 @@ function FormRow({ games, player }: { games: PlayerGame[]; player: DisplayPlayer
 
 export default async function HeadToHead({ players }: { players: Players }) {
   const ids: PlayerId[] = [1, 2];
+  const defender = players[players[2].isChampion ? 2 : 1];
+  const challenger = players[defender.id === 1 ? 2 : 1];
   const games = await Promise.all(ids.map(id => getOlympiadPlayerGames(OLYMPIAD_FORM_EVENT, players[id].fideId).catch(() => [] as PlayerGame[])));
   return (
     <Part
       id="head-to-head"
       title="Head to head"
-      finding="Their previous meetings by time control, and how each played at the Samarkand Olympiad in September."
+      finding={`${defender.name} (${defender.country}) defends against Candidates winner ${challenger.name} (${challenger.country}). Their previous meetings by time control, and how each played at the Samarkand Olympiad in September.`}
     >
       <Rows label="Previous meetings by time control">
         {HEAD_TO_HEAD.map(r => (

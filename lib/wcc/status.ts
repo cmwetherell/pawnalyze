@@ -1,4 +1,4 @@
-import { CLASSICAL_SCHEDULE, CLINCH_HP, G1_WHITE, KNOWN_RESULTS, N_CLASSICAL, TB_STAGE_GAMES, TIEBREAK_START } from './config';
+import { CLASSICAL_SCHEDULE, CLINCH_HP, G1_WHITE, KNOWN_RESULTS, LADDER, N_CLASSICAL, TB_STAGE_GAMES, TIEBREAK_START } from './config';
 import { exact, resultToHp, whiteInGame, type FixedTbGame } from './match';
 import type { HalfPoints, MatchOdds, PlayerId, Stage, TbStage, WccGame, WccRun, WccSummary } from './types';
 
@@ -161,6 +161,14 @@ export function fmtPoints(hp: number): string {
 
 export function fmtScore(h1: number, h2: number): string {
   return `${fmtPoints(h1)}–${fmtPoints(h2)}`;
+}
+
+/** How a decided match was won, in one sentence. */
+export function wonLine(state: MatchState): string {
+  const score = fmtScore(Math.max(state.score1, state.score2), Math.min(state.score1, state.score2));
+  return state.decidedStage && state.decidedStage !== 'classical'
+    ? `Won the tiebreaks (${LADDER[state.decidedStage].label}) after ${score} in the classical games.`
+    : `Won ${score} after game ${state.decidedAt ?? state.lastFinal}.`;
 }
 
 /** What the score in the face-off is a score of. Here, not beside the component, so server components can call it. */

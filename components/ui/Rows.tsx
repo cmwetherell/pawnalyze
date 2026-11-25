@@ -51,7 +51,7 @@ export function Row({ href, onClick, onPrefetch, lead, title, meta, value, figur
   const md = size === 'md';
   const inner = (
     <>
-      {lead && <span className={cn('flex shrink-0 items-center', md ? 'min-w-11' : 'min-w-6')}>{lead}</span>}
+      {lead && <span className={cn('flex shrink-0 items-center', md ? 'min-w-11' : 'min-w-6', (figure || aside) && 'max-md:mt-0.5 max-md:self-start')}>{lead}</span>}
       <span className={cn('flex min-w-0 flex-1 flex-col gap-1', aside && 'md:flex-row md:items-center md:gap-6')}>
         <span className="flex min-w-0 flex-1 flex-col gap-1">
           <span className={cn('text-ink', md ? 'type-h3' : 'type-data font-medium', interactive && cn(goldLine, 'group-hover/row:underline'))}>{title}</span>
@@ -62,7 +62,7 @@ export function Row({ href, onClick, onPrefetch, lead, title, meta, value, figur
       {/* On phones the value and its figure take the line below the words. */}
       {figure && <span aria-hidden className="order-last h-0 basis-full md:hidden" />}
       {value !== undefined && value !== null && (
-        <span className={cn('shrink-0 text-right text-ink tnum', md ? 'type-stat-sm' : 'type-data font-medium', figure && 'max-md:order-last md:w-24')}>{value}</span>
+        <span className={cn('shrink-0 text-right text-ink tnum', md ? 'type-stat-sm' : 'type-data font-medium', figure && 'w-20 max-md:order-last max-md:text-left md:w-24')}>{value}</span>
       )}
       {figure && <span className="min-w-0 max-md:order-last max-md:flex-1 md:w-48 md:shrink-0 xl:w-64">{figure}</span>}
       {action && !interactive && <span className="shrink-0">{action}</span>}

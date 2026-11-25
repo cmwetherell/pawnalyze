@@ -4,6 +4,7 @@ import { LineChart } from '@/components/charts/LineChart';
 import { Container } from '@/components/layout/Container';
 import { Page } from '@/components/layout/Page';
 import { PageHead } from '@/components/layout/PageHead';
+import { Part } from '@/components/layout/Part';
 import { Section } from '@/components/layout/Section';
 import { EligibilityPips, eligibilityLabel } from '@/components/olympiad/boards/EligibilityPips';
 import { FormPips } from '@/components/olympiad/boards/FormPips';
@@ -17,7 +18,7 @@ import { StatStrip } from '@/components/ui/StatStrip';
 import { Tag } from '@/components/ui/Tag';
 import { TextLink } from '@/components/ui/TextLink';
 import { N_ROUNDS, OLYMPIAD_EVENTS, boardLabel, boardsHref, eventHref, playerHref } from '@/lib/olympiad/config';
-import { medalPlaces, type MedalPlace } from '@/lib/olympiad/medals';
+import { MEDAL_WORD, medalPlaces, type MedalPlace } from '@/lib/olympiad/medals';
 import { ordinal } from '@/lib/olympiad/odds';
 import { getOlympiadBoardRace, getOlympiadPlayerGames } from '@/lib/olympiad/queries';
 import { MIN_GAMES_FOR_PRIZE, displayName, formatScore } from '@/lib/olympiad/tpr';
@@ -36,10 +37,9 @@ export function playerSummary(p: PlayerRaceRow, race: BoardRace): string {
   const label = boardLabel(p.board).toLowerCase();
   if (p.tpr === null) return `${displayName(p.name)} has not played yet on ${label}.`;
   const rank = p.rank !== null ? `${ordinal(p.rank)} of ${race.ranked[p.board - 1]} on ${label}` : label;
-  return `TPR ${p.tpr} after ${p.games} ${p.games === 1 ? 'game' : 'games'} (${formatScore(p.score, p.games)}), ${rank}. ${eligibilityLabel(p.games, p.needed, p.canReach)} for the ${MIN_GAMES_FOR_PRIZE}-game minimum.`;
+  return `TPR ${p.tpr} after ${p.games} ${p.games === 1 ? 'game' : 'games'} (${formatScore(p.score, p.games)}), ${rank}. ${p.eligible ? 'Eligible for a board medal' : `${eligibilityLabel(p.needed, p.canReach)} for the ${MIN_GAMES_FOR_PRIZE}-game minimum`}.`;
 }
 
-const MEDAL_WORD = { 1: 'gold', 2: 'silver', 3: 'bronze' } as const;
 const plural = (n: number, one: string, many: string) => `${n === 0 ? 'no' : n} ${n === 1 ? one : many}`;
 
 export default async function PlayerPage({ event, fideId }: { event: OlympiadEvent; fideId: number }) {
@@ -88,15 +88,13 @@ export default async function PlayerPage({ event, fideId }: { event: OlympiadEve
           { label: name },
         ]}
         media={<Flag code={player.fedCode} size="hero" title={player.teamName} decorative />}
-        status={
-          <span className="flex flex-col">
-            <span className="flex items-center gap-3">
-              {player.title && <Tag tone="brand">{player.title}</Tag>}
-              <TextLink standalone href={`${eventHref(event)}?team=${player.teamId}`}>{player.teamName}</TextLink>
-            </span>
-            <span className="type-small text-ink-2">{board}, {player.rating ? `rating ${player.rating}` : 'unrated'}</span>
-          </span>
-        }
+        status={player.title && <Tag tone="brand">{player.title}</Tag>}
+        facts={[
+          <div key="team" className="flex flex-wrap items-center gap-x-3 lg:flex-col lg:items-start">
+            <TextLink standalone href={`${eventHref(event)}?team=${player.teamId}`}>{player.teamName}</TextLink>
+            <span className="font-normal text-ink-2">{board}, {player.rating ? `rating ${player.rating}` : 'unrated'}</span>
+          </div>,
+        ]}
         crumbActions={
           <span className="-mr-3 flex items-center">
             <CopyButton kind="link" label="Copy link" variant="icon" />
@@ -129,10 +127,13 @@ export default async function PlayerPage({ event, fideId }: { event: OlympiadEve
               sub: `${wins}W ${draws}D ${losses}L${player.avgOpp ? `, average opponent ${player.avgOpp}` : ''}`,
             },
             {
-              key: 'elig', label: 'Eligibility', hint: `${MIN_GAMES_FOR_PRIZE} games needed for a board medal`, size: 'md',
-              value: player.eligible ? 'Eligible' : eligibilityLabel(player.games, player.needed, player.canReach),
-              visual: <EligibilityPips games={player.games} needed={player.needed} canReach={player.canReach} roundsLeft={race.roundsLeft} className="flex-nowrap" />,
-              sub: `${player.games} ${player.games === 1 ? 'game' : 'games'}, ${race.roundsLeft} ${race.roundsLeft === 1 ? 'round' : 'rounds'} left`,
+              key: 'games', label: 'Games', hint: `${MIN_GAMES_FOR_PRIZE} games needed for a board medal`, size: 'lg', value: player.games,
+              sub: (
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <EligibilityPips games={player.games} needed={player.needed} canReach={player.canReach} roundsLeft={race.roundsLeft} className="flex-nowrap" />
+                  <span>{player.eligible ? `Eligible, ${MIN_GAMES_FOR_PRIZE} needed` : eligibilityLabel(player.needed, player.canReach)}{!finished && `, ${race.roundsLeft} ${race.roundsLeft === 1 ? 'round' : 'rounds'} left`}</span>
+                </span>
+              ),
             },
           ]}
         />
@@ -145,25 +146,25 @@ export default async function PlayerPage({ event, fideId }: { event: OlympiadEve
         rule={false}
         note={`Performance rating = average opponent rating + FIDE’s bonus for the percentage score. Board medals go to the highest TPR with at least ${MIN_GAMES_FOR_PRIZE} games; ties go to the player with more games. Ratings and results from the official broadcast.`}
       >
-        <Section
-          nested
+        <Part
+          rule="always"
           id="games"
           title="Games"
           finding={player.games > 0 && `${tally.charAt(0).toUpperCase()}${tally.slice(1)}${player.avgOpp ? ` against an average of ${player.avgOpp}` : ''}.`}
           actions={<FormPips form={player.form} lastRound={race.lastRound} size="md" />}
         >
           <PlayerGames event={event} player={player} games={games} lastRound={race.lastRound} knownFideIds={race.boards.flat().map(r => r.fideId)} />
-        </Section>
+        </Part>
 
         <div className="flex flex-col gap-12">
-          <Section nested id="trend" title="Round by round" finding={trend}>
+          <Part rule="always" id="trend" title="Round by round" finding={trend}>
             {trend ? (
               <LineChart
                 caption={`Performance rating after each round and rank on ${boardWord}`}
                 ariaLabel={`Performance rating by round: ${points.map(p => `after round ${p.round} ${p.tpr}${p.rank ? `, ${ordinal(p.rank)} on the board` : ''}`).join('; ')}`}
                 series={[{ id: 'tpr', label: name, values: player.tprByRound, notes: player.rankByRound.map(r => (r === null ? null : ordinal(r))), tone: 'series-1', emphasis: 'strong', labelAt: 'none' }]}
                 x={{ labels: rounds.map(r => `R${r}`), titles: rounds.map(r => `After round ${r}`) }}
-                y={{ format: 'plain' }}
+                y={{ format: 'plain', ...ratingDomain([...points.map(p => p.tpr), ...(player.rating > 0 ? [player.rating] : [])]) }}
                 refs={player.rating > 0 ? [{ y: player.rating, label: `rating ${player.rating}` }] : undefined}
                 points="all"
                 height={{ desktop: 320, phone: 280 }}
@@ -172,9 +173,9 @@ export default async function PlayerPage({ event, fideId }: { event: OlympiadEve
             ) : (
               <p className="type-body text-ink-2">No games yet.</p>
             )}
-          </Section>
+          </Part>
 
-          <Section nested id="board" title={`${board} top 5`}>
+          <Part rule="always" id="board" title={`${board} top 5`}>
             <Rows label={`${board} top 5`}>
               {boardRows.slice(0, 5).map(r => (
                 <Row
@@ -185,11 +186,19 @@ export default async function PlayerPage({ event, fideId }: { event: OlympiadEve
               {idx >= 5 && <Row size="sm" selected lead={<Standing rank={player.rank} medal={medals.get(fideId)} code={player.fedCode} />} title={name} value={player.tpr ?? '–'} />}
             </Rows>
             <TextLink standalone href={boardHref} className="mt-2">Full {boardWord} race</TextLink>
-          </Section>
+          </Part>
         </div>
       </Section>
     </Page>
   );
+}
+
+/** Whole hundreds (two hundreds for a wide range) around the ratings: the line uses the height, and the ticks stay few. */
+function ratingDomain(values: number[]): { min: number; max: number; ticks: number[] } {
+  const step = Math.max(...values) - Math.min(...values) > 480 ? 200 : 100;
+  const min = Math.floor((Math.min(...values) - step * 0.4) / step) * step;
+  const max = Math.ceil((Math.max(...values) + step * 0.2) / step) * step;
+  return { min, max, ticks: Array.from({ length: (max - min) / step + 1 }, (_, i) => min + i * step) };
 }
 
 function Standing({ rank, medal, code }: { rank: number | null; medal?: MedalPlace; code: string }) {

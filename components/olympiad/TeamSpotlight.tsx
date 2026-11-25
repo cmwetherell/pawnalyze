@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { ColumnChart } from '@/components/charts/ColumnChart';
+import { LineChart } from '@/components/charts/LineChart';
 import { Sparkline } from '@/components/charts/Sparkline';
 import { CopyButton } from '@/components/ui/CopyButton';
 import { Delta } from '@/components/ui/Delta';
@@ -63,6 +64,9 @@ interface TeamSpotlightProps {
 }
 
 const RANK_BUCKETS = 15;
+/** Under 360px the roster leaves the points out, and the performance is its last column. */
+const WIDE = 'max-[359.98px]:hidden';
+const LAST_NARROW = 'max-[359.98px]:!pr-0';
 const WDL: Record<Outcome, { letter: string; word: string; tone: 'win' | 'draw' | 'loss' }> = {
   w: { letter: 'W', word: 'win', tone: 'win' },
   d: { letter: 'D', word: 'draw', tone: 'draw' },
@@ -101,6 +105,7 @@ export function TeamSpotlight({
   const wide = useMediaQuery('(min-width: 768px)');
 
   useEffect(() => {
+    if (finished) return;   // the last run knows the result: nothing is left to distribute
     let canceled = false;
     const params = new URLSearchParams({ event, run: String(run.runId), teamId: String(team.teamId) });
     if (filtersKey) params.set('filters', filtersKey);
@@ -112,7 +117,7 @@ export function TeamSpotlight({
         setResult({ key: requestKey, error: e.message });
       });
     return () => { canceled = true; };
-  }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale]);
+  }, [event, run.runId, team.teamId, filtersKey, requestKey, onStale, finished]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -135,10 +140,13 @@ export function TeamSpotlight({
   // The round the simulations treat as "next" may already be played; feed its real result to the opponent odds.
   const playedNext = roundHistory.find(h => h.round === run.roundsCompleted + 1 && h.status === 'final') ?? null;
   const nextOpp = nextMatch?.opponentId != null ? teamsById.get(nextMatch.opponentId) ?? null : null;
-  const trend = useMemo(
-    () => history.filter(h => h.teamId === team.teamId).sort((a, b) => a.roundsCompleted - b.roundsCompleted).map(h => h.pGold),
+  const points = useMemo(
+    () => history.filter(h => h.teamId === team.teamId).sort((a, b) => a.roundsCompleted - b.roundsCompleted),
     [history, team.teamId],
   );
+  const trend = points.map(h => h.pGold);
+  // A team that never had a real chance of a medal has no path to draw.
+  const charted = finished && points.length >= 2 && points.some(h => h.pMedal >= 0.01);
 
   const delta = (cur: number | null | undefined, base: number | null | undefined) =>
     (isScenario && cur != null && base != null ? <Delta value={cur} base={base} short /> : undefined);
@@ -149,6 +157,12 @@ export function TeamSpotlight({
   const top4 = players.slice(0, 4);
   const rosterAvg = top4.length ? Math.round(top4.reduce((a, p) => a + p.rating, 0) / top4.length) : null;
   const medals = medalSegments(odds ?? { pGold: 0, pSilver: 0, pBronze: 0 });
+
+  const roster = (
+    <Block title="Roster" note={rosterAvg ? `top four average ${rosterAvg}` : undefined} defaultOpen wide={wide} className={finished ? undefined : 'md:col-span-2 lg:col-span-1'}>
+      <Roster event={event} team={team} players={players} anyRace={anyRace} />
+    </Block>
+  );
 
   return (
     <Panel as="section" aria-labelledby="spotlight-heading">
@@ -184,7 +198,7 @@ export function TeamSpotlight({
           </div>
           <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-2 lg:w-auto">
             {isScenario && <Tag>Scenario odds</Tag>}
-            {trend.length >= 2 && (
+            {trend.length >= 2 && !finished && (
               <div className="hidden items-center gap-3 md:flex" title="Gold odds after each completed round">
                 <span className="type-label text-ink-2">Gold trend</span>
                 <Sparkline values={trend} label={`Gold odds by round, from ${formatPct(trend[0])} to ${formatPct(trend[trend.length - 1])}`} />
@@ -208,46 +222,53 @@ export function TeamSpotlight({
             {
               key: 'podium', label: 'Podium', value: formatPct(odds?.pMedal ?? 0), delta: delta(odds?.pMedal, baseline?.pMedal),
               hint: medals.map(m => m.label).join(', '),
-              visual: <SplitBar height={8} segments={medals} ariaLabel={medals.map(m => m.label).join(', ')} />,
-              sub: `Silver ${formatPct(odds?.pSilver ?? 0)}, bronze ${formatPct(odds?.pBronze ?? 0)}`,
+              // Zero has no bar and no track.
+              visual: (odds?.pMedal ?? 0) > 0 && <SplitBar height={8} segments={medals} ariaLabel={medals.map(m => m.label).join(', ')} />,
+              sub: (odds?.pMedal ?? 0) > 0 ? `${asOf ? `${asOf}: silver` : 'Silver'} ${formatPct(odds?.pSilver ?? 0)}, bronze ${formatPct(odds?.pBronze ?? 0)}` : asOf,
             },
             { key: 'top10', label: 'Top 10', value: formatPct(odds?.pTop10 ?? 0), delta: delta(odds?.pTop10, baseline?.pTop10), sub: asOf },
             {
               key: 'finish', label: expIsBaseline ? 'Expected finish (baseline)' : 'Expected finish', value: formatRank(exp ?? baseline?.expRank ?? null),
-              sub: `${formatMp(odds?.expMp ?? baseline?.expMp ?? null)} match points`,
+              sub: `${asOf ? `${asOf}: ` : ''}${formatMp(odds?.expMp ?? baseline?.expMp ?? null)} match points`,
               hint: expIsBaseline ? 'Expected finish is recomputed only for teams in your picks; this is the baseline value' : undefined,
             },
           ]}
         />
 
-        <div className={finished ? 'grid gap-x-8 md:grid-cols-2 md:gap-y-8 xl:grid-cols-3' : 'grid gap-x-8 md:grid-cols-2 md:gap-y-8 xl:grid-cols-[1.35fr_1.1fr_1fr_1fr]'}>
-          <Block title="Roster" note={rosterAvg ? `top four average ${rosterAvg}` : undefined} defaultOpen wide={wide} className="md:col-span-2 lg:col-span-1">
-            <Roster event={event} team={team} players={players} anyRace={anyRace} />
-          </Block>
+        {finished ? (
+          <div className="grid gap-x-12 md:grid-cols-2">
+            <div className="flex min-w-0 flex-col md:gap-8">
+              {roster}
+              <FinalBlock team={team} standing={standing} participants={participants} points={points} charted={charted} wide={wide} />
+            </div>
+            <Block title="Results" wide={wide}>
+              <Results played={played} teamsById={teamsById} tall={charted} />
+            </Block>
+          </div>
+        ) : (
+          <div className="grid gap-x-8 md:grid-cols-2 md:gap-y-8 xl:grid-cols-[1.35fr_1.1fr_1fr_1fr]">
+            {roster}
 
-          <Block title={finished ? 'Results' : 'Results and opponents'} wide={wide}>
-            <div className="flex flex-col gap-6">
-              <Results played={played} teamsById={teamsById} />
-              {!finished && (
+            <Block title="Results and opponents" wide={wide}>
+              <div className="flex flex-col gap-6">
+                <Results played={played} teamsById={teamsById} />
                 <div className="flex flex-col gap-3">
                   <p className="type-ui text-ink">Likely opponents{isScenario ? ', scenario' : ''}</p>
                   <LikelyOpponents event={event} run={run} team={team} teamsById={teamsById} filtersKey={filtersKey} onStale={onStale} playedNextResult={playedNext?.outcome ?? null} />
                 </div>
-              )}
-            </div>
-          </Block>
+              </div>
+            </Block>
 
-          <FinishBlock data={data} error={error} isScenario={isScenario} wide={wide} />
+            <FinishBlock data={data} error={error} isScenario={isScenario} wide={wide} />
 
-          {!finished && (
             <Block title="Remaining rounds" defaultOpen wide={wide}>
               {error ? <p role="alert" className="type-small text-negative">{error}</p>
                 : !data ? <Skeleton kind="rounds" rows={Math.max(1, N_ROUNDS - run.roundsCompleted)} label="Loading the remaining rounds" />
                 : data.roundOdds.length === 0 ? <Quiet>Tournament complete.</Quiet>
                 : <RemainingRounds data={data} roundHistory={roundHistory} teamsById={teamsById} />}
             </Block>
-          )}
-        </div>
+          </div>
+        )}
       </Panel.Body>
     </Panel>
   );
@@ -263,8 +284,8 @@ function Roster({ event, team, players, anyRace }: { event: OlympiadEvent; team:
             <Th title="Board" width={24}><span aria-hidden>Bd</span><span className="sr-only">Board</span></Th>
             <Th>Player</Th>
             <Th align="right">Rating</Th>
-            {anyRace && <Th align="right" title="Performance rating in the board-prize race">TPR</Th>}
-            {anyRace && <Th align="right">Points</Th>}
+            {anyRace && <Th align="right" title="Performance rating in the board-prize race" className={LAST_NARROW}>TPR</Th>}
+            {anyRace && <Th align="right" className={WIDE}>Points</Th>}
           </tr>
         </THead>
         <TBody>
@@ -278,11 +299,11 @@ function Roster({ event, team, players, anyRace }: { event: OlympiadEvent; team:
               </Td>
               <Td align="right">{p.rating || '—'}</Td>
               {anyRace && (
-                <Td align="right" title={p.race?.rank ? `${ordinal(p.race.rank)} on board ${p.board}` : undefined} className={p.race?.rank === 1 ? 'font-semibold' : undefined}>
+                <Td align="right" title={p.race?.rank ? `${ordinal(p.race.rank)} on board ${p.board}` : undefined} className={cn(LAST_NARROW, p.race?.rank === 1 && 'font-semibold')}>
                   {p.race?.tpr ?? '—'}
                 </Td>
               )}
-              {anyRace && <Td align="right" muted>{p.race?.games ? formatScore(p.race.score, p.race.games) : '—'}</Td>}
+              {anyRace && <Td align="right" muted className={WIDE}>{p.race?.games ? formatScore(p.race.score, p.race.games) : '—'}</Td>}
             </Tr>
           ))}
         </TBody>
@@ -292,10 +313,11 @@ function Roster({ event, team, players, anyRace }: { event: OlympiadEvent; team:
   );
 }
 
-function Results({ played, teamsById }: { played: TeamRoundEntry[]; teamsById: Map<number, Team> }) {
+/** `tall`: beside a roster with a chart under it, so both columns end together. */
+function Results({ played, teamsById, tall = false }: { played: TeamRoundEntry[]; teamsById: Map<number, Team>; tall?: boolean }) {
   if (played.length === 0) return <Quiet>No matches played yet.</Quiet>;
   return (
-    <Table label="Results" density="compact">
+    <Table label="Results" density={tall ? 'row' : 'compact'}>
       <THead><tr><Th width={56}>Round</Th><Th>Opponent</Th><Th align="right">Result</Th></tr></THead>
       <TBody>
         {played.map(h => {
@@ -321,6 +343,38 @@ function Results({ played, teamsById }: { played: TeamRoundEntry[]; teamsById: M
   );
 }
 
+/** Once the event is over: the place, and how the chance of a medal got there. */
+function FinalBlock({ team, standing, participants, points, charted, wide }: { team: Team; standing?: DerivedStanding; participants: number; points: HistoryPoint[]; charted: boolean; wide: boolean }) {
+  const best = points.reduce<HistoryPoint | null>((a, h) => (a && a.pMedal >= h.pMedal ? a : h), null);
+  const when = (h: HistoryPoint) => (h.roundsCompleted === 0 ? 'before round 1' : `after round ${h.roundsCompleted}`);
+  // On the way to a medal the last value says nothing new; the top of a chance that came to nothing does.
+  const story = charted && best && points[0].roundsCompleted === 0
+    ? `${formatPct(points[0].pMedal)} to win a medal before round 1${standing && standing.rank > 3 && best !== points[0] ? `, ${formatPct(best.pMedal)} at best (${when(best)})` : ''}.`
+    : null;
+  return (
+    <Block title="Finish" defaultOpen wide={wide}>
+      <p className="type-body text-ink-2">
+        {standing && <strong className="text-ink">Finished {ordinal(standing.rank)} of {participants}, seeded {ordinal(team.teamId)}.</strong>} {story}
+      </p>
+      {charted && (
+        <LineChart
+          className="mt-4"
+          caption="Chance after each round"
+          ariaLabel={`Chance of a medal and of gold after each round. Medal: from ${formatPct(points[0].pMedal)} to ${formatPct(points[points.length - 1].pMedal)}.`}
+          series={[
+            { id: 'medal', label: 'Any medal', short: 'Medal', values: points.map(h => h.pMedal), tone: 'ink', emphasis: 'strong' },
+            { id: 'gold', label: 'Gold', values: points.map(h => h.pGold), tone: 'gold', emphasis: 'normal' },
+          ]}
+          x={{ labels: points.map(h => (h.roundsCompleted === 0 ? 'Pre' : `R${h.roundsCompleted}`)), titles: points.map(h => (h.roundsCompleted === 0 ? 'Before round 1' : `After round ${h.roundsCompleted}`)) }}
+          y={{ min: 0, format: 'pct' }}
+          height={{ desktop: 168, phone: 180 }}
+          table={{ columns: ['Round', 'Any medal', 'Gold'], rows: points.map(h => [h.roundsCompleted === 0 ? 'Before round 1' : `After round ${h.roundsCompleted}`, formatPct(h.pMedal), formatPct(h.pGold)]) }}
+        />
+      )}
+    </Block>
+  );
+}
+
 function FinishBlock({ data, error, isScenario, wide }: { data: TeamDetail | null; error: string | null; isScenario: boolean; wide: boolean }) {
   const total = data?.total ?? 0;
   const dist = data?.rankDist ?? [];
@@ -333,12 +387,15 @@ function FinishBlock({ data, error, isScenario, wide }: { data: TeamDetail | nul
     let acc = 0;
     for (const d of [...dist].sort((a, b) => a.rank - b.rank)) { acc += d.n; if (acc >= total / 2) { median = d.rank; break; } }
   }
+  // One outcome and nothing else is a sentence, not a chart.
+  const sure = total > 0 ? buckets.find(b => b.n / total >= 0.9995) : undefined;
   const words = (rank: number) => (rank > RANK_BUCKETS ? `${RANK_BUCKETS + 1}th or worse` : ordinal(rank));
   return (
     <Block title="Finish distribution" note={median !== null ? `median ${ordinal(median)}` : undefined} wide={wide}>
       {error ? <p role="alert" className="type-small text-negative">{error}</p>
         : !data ? <Skeleton kind="histogram" height={200} label="Loading the finish distribution" />
         : total === 0 ? <Quiet>No matching simulations.</Quiet>
+        : sure ? <p className="type-body text-ink-2">{words(sure.rank)} in every simulation{isScenario ? ' that matches your scenario' : ''}.</p>
         : (
           <>
             <ColumnChart

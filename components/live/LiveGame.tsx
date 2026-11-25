@@ -24,7 +24,7 @@ import { Tag, type TagTone } from '@/components/ui/Tag';
 import { TextLink } from '@/components/ui/TextLink';
 import { useNow } from '@/hooks/useNow';
 import { setUrlParam, useUrlParam } from '@/hooks/useUrlParam';
-import { moveLabel } from '@/lib/chess/moves';
+import { moveLabel, positionLabel } from '@/lib/chess/moves';
 import { BroadcastFeed, RoundsStore, defaultRound, type FeedSnapshot, type RoundInfo } from '@/lib/live/feed';
 import { fenKey, fmtEval, parseLiveGame, type Color, type Evaluation, type LivePosition } from '@/lib/live/pgn';
 import { complexityInputs, createComplexityStore, createEvalStore, evalInputs } from '@/lib/live/scores';
@@ -65,7 +65,8 @@ export function LiveGame({ results }: { results: GameResults }) {
 
   return (
     <>
-      <Container className="pb-6 pt-2 md:pb-8 md:pt-0">
+      {/* On a phone the lead is not there, so its gap is taken back. */}
+      <Container className="-mt-3 pb-4 sm:mt-0 md:pb-6">
         <GamePicker
           rounds={shown} results={results} current={round?.gameNo ?? (shown.some(r => r.gameNo === wanted) ? wanted : null)} clock={now !== null}
           onPick={no => setUrlParam('game', no === auto?.gameNo ? null : String(no))}
@@ -234,49 +235,57 @@ function GameView({ round }: { round: RoundInfo }) {
 
   return (
     <>
-      <Section label="Game" layout="plain">
+      {/* No rule: the picker over it already draws the line, and the board starts higher. */}
+      <Section label="Game" layout="plain" rule={false}>
         <Replay
           size="lg"
           label="Game; use the arrow keys to step through the moves"
           ply={ply} last={last} onGo={go} onFlip={flip}
           head={(
-            <div className="flex flex-col gap-3">
-              <Heading level={2} style="h2">{isMatch ? `Game ${round.gameNo}: ` : ''}{names.w} – {names.b}</Heading>
+            <div className="flex flex-col gap-2 md:gap-3">
+              <Heading level={2} style="h2">{isMatch ? `Game ${round.gameNo}: ` : ''}{names.w}{'\u00a0'}– {names.b}</Heading>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <StatusTag feed={f} round={round} now={now} />
-                {opening && <span className="type-small text-ink-2">{opening}</span>}
+                {opening && <span className="type-small text-ink-2 max-md:hidden">{opening}</span>}
               </div>
             </div>
           )}
           board={(
             <BoardPane
-              fen={cur.pos.fen} from={cur.pos.from} to={cur.pos.to} flipped={flipped} label={`Position after ${moveLabel(cur.pos)}`}
+              fen={cur.pos.fen} from={cur.pos.from} to={cur.pos.to} flipped={flipped} label={positionLabel(cur.pos)}
               evaluation={prevEval} stale={stale}
               top={nameLine(flipped ? 'w' : 'b')} bottom={nameLine(flipped ? 'b' : 'w')}
-              controls={<BoardControls ply={ply} last={last} onGo={go} onFlip={flip} live={{ behind: pinned !== null && inPlay, onLive: () => setPinned(null) }} />}
             />
           )}
+          controls={<BoardControls ply={ply} last={last} onGo={go} onFlip={flip} live={{ behind: pinned !== null && inPlay, onLive: () => setPinned(null) }} />}
           aside={(
-            <>
-              <StatStrip
-                columns={2}
-                items={[
-                  evalStat({ evaluation: prevEval, stale, names, failing: evals.failures >= 3, over: cur.pos.over }),
-                  complexityStat({ value: loadingMoves ? null : cur.complexity, pos: cur.pos, mover: names[cur.pos.toMove], result: ply === last ? game.result : null, failing: complexities.failures > 0 }),
-                ]}
-              />
-              {last > 0 ? (
-                <MoveList moves={points.slice(1).map(p => ({ san: p.pos.san ?? '', meta: p.evaluation ? fmtEval(p.evaluation) : undefined }))} ply={ply} onGo={go} maxHeight={220} fill />
-              ) : loadingMoves ? (
-                <Skeleton kind="lines" rows={8} label="Loading the moves" />
-              ) : (
-                <p className="type-body text-ink-2">
-                  {round.startsAt && now !== null && round.startsAt > now && <>The game starts on <LocalTime iso={new Date(round.startsAt).toISOString()} />. </>}
-                  The moves appear here as they are played; keep this page open.
-                </p>
-              )}
-              {game.truncated && <p className="type-small text-ink-2">Part of the broadcast could not be read; later moves appear once Lichess corrects it.</p>}
-            </>
+            // Room for both: the moves beside the figures, as tall as the board.
+            <div className="flex min-w-0 grow flex-col [container-type:inline-size]">
+              <div className="flex min-h-0 grow flex-col gap-4 [@container_(min-width:560px)]:grid [@container_(min-width:560px)]:grid-cols-[minmax(0,1fr)_15rem] [@container_(min-width:560px)]:gap-6">
+                <StatStrip
+                  columns={2}
+                  className="[@container_(min-width:560px)]:order-last [@container_(min-width:560px)]:self-start [@container_(min-width:560px)]:[&>div]:grid-cols-1"
+                  items={[
+                    evalStat({ evaluation: prevEval, stale, names, failing: evals.failures >= 3, over: cur.pos.over }),
+                    complexityStat({ value: loadingMoves ? null : cur.complexity, pos: cur.pos, mover: names[cur.pos.toMove], result: ply === last ? game.result : null, failing: complexities.failures > 0 }),
+                  ]}
+                />
+                <div className="flex min-h-0 grow flex-col gap-2">
+                  {opening && <p className="type-small text-ink-2 md:hidden">{opening}</p>}
+                  {last > 0 ? (
+                    <MoveList moves={points.slice(1).map(p => ({ san: p.pos.san ?? '', meta: p.evaluation ? fmtEval(p.evaluation) : undefined }))} ply={ply} onGo={go} maxHeight={220} fill />
+                  ) : loadingMoves ? (
+                    <Skeleton kind="lines" rows={8} label="Loading the moves" />
+                  ) : (
+                    <p className="type-body text-ink-2">
+                      {round.startsAt && now !== null && round.startsAt > now && <>The game starts on <LocalTime iso={new Date(round.startsAt).toISOString()} />. </>}
+                      The moves appear here as they are played; keep this page open.
+                    </p>
+                  )}
+                  {game.truncated && <p className="type-small text-ink-2">Part of the broadcast could not be read; later moves appear once Lichess corrects it.</p>}
+                </div>
+              </div>
+            </div>
           )}
         />
       </Section>
@@ -286,12 +295,12 @@ function GameView({ round }: { round: RoundInfo }) {
         finding={(
           <>
             <Finding points={points} names={names} />
-            Complexity is <TextLink href="/elocator">Elocator</TextLink>&rsquo;s 1 to 100 rating of how hard the position is for the player to move: 70 means harder than 70% of positions from tournament games between players rated 2000+.{last > 0 && ' Tap or click the chart to see a position.'}
+            Complexity is <TextLink href="/elocator">Elocator</TextLink>&rsquo;s 1 to 100 rating of how hard the position is for the player to move: 70 means harder than 70% of positions from tournament games between players rated 2000+.{points.some(p => p.complexity !== null || p.evaluation !== null) && last > 0 && ' Tap or click a chart to see a position.'}
           </>
         )}
       >
         {last > 0
-          ? <LiveCharts points={points} selected={ply} onSelect={go} sides={sides} inPlay={inPlay} />
+          ? <LiveCharts points={points} selected={ply} onSelect={go} sides={sides} inPlay={inPlay} flipped={flipped} failing={{ complexity: complexities.failures > 0, evaluation: evals.failures >= 3 }} />
           : <EmptyState level={3} busy={loadingMoves} title={loadingMoves ? 'Loading the moves' : 'No moves yet'} body={loadingMoves ? undefined : 'Both charts begin with the first move.'} />}
         <p className="mt-8 type-small text-ink-2">
           Moves and clocks: <TextLink href={source}>Lichess broadcast</TextLink>. Evaluation: Stockfish, from Lichess&rsquo;s analysis and cloud evaluations.
@@ -347,5 +356,5 @@ function complexityStat({ value, pos, mover, result, failing }: ComplexityStatIn
   const note = pos.over ? 'No move to find'
     : value === null ? (failing ? 'Elocator is waking up, retrying' : 'Scoring this position')
       : result ? 'Final position' : `${mover} to move`;
-  return { label: 'Complexity', size: 'lg', value: value ?? '–', visual: value !== null ? <ComplexityScale score={value} /> : undefined, sub: note };
+  return { label: 'Complexity', size: 'lg', value: value ?? '–', visual: <ComplexityScale score={value} />, sub: note };
 }

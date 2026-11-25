@@ -8,6 +8,9 @@ export function moveLabel(p: { ply: number; san: string | null }): string {
   return `${no}${p.ply % 2 ? '.' : '…'} ${p.san}`;
 }
 
+/** Names a board for assistive tech. */
+export const positionLabel = (p: { ply: number; san: string | null }): string => (p.ply === 0 ? 'Start position' : `Position after ${moveLabel(p)}`);
+
 /** An x axis of `plies + 1` positions that names every 5th, 10th or 20th move. */
 export function moveAxis(plies: number): { labels: string[]; every: { desktop: number; phone: number } } {
   const step = plies > 120 ? 40 : plies > 60 ? 20 : 10;

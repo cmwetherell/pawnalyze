@@ -1,7 +1,10 @@
 'use client';
 
-import type { ChartTable } from '@/components/charts/ChartFrame';
+import type { CSSProperties } from 'react';
+
+import { ChartFrame, type ChartTable } from '@/components/charts/ChartFrame';
 import { LineChart } from '@/components/charts/LineChart';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { moveAxis, moveLabel } from '@/lib/chess/moves';
 import type { Tone } from '@/lib/theme/tones';
 
@@ -19,6 +22,17 @@ interface ComplexityChartProps {
   ariaLabel?: string;
   /** Leave out inside a ChartGroup whose last chart has the table of all of them. */
   table?: ChartTable;
+  /** What stands in the plot until there is a line to draw. */
+  pending?: string;
+}
+
+/** Words in the place of a plot, as tall as the plot, so nothing moves when it comes. */
+export function ChartPending({ title, height }: { title: string; height: { desktop: number; phone: number } }) {
+  return (
+    <div className="flex min-h-[var(--h-phone)] sm:min-h-[var(--h)]" style={{ '--h': `${height.desktop}px`, '--h-phone': `${height.phone}px` } as CSSProperties}>
+      <EmptyState level={3} busy title={title} className="w-full justify-center" />
+    </div>
+  );
 }
 
 /** Family name, for a phone: "Byrne" of "Donald Byrne" and of "Byrne, Donald". */
@@ -30,7 +44,7 @@ export const averageComplexity = (points: ComplexityPoint[], side: 'w' | 'b'): n
 };
 
 /** Elocator complexity after each move, one line per player to move; the averages stand beside the names. */
-export function ComplexityChart({ points, sides, selected, onSelect, atLeast = 0, height = { desktop: 300, phone: 240 }, caption = 'Complexity of the position, 0 to 100, for the player to move', ariaLabel, table }: ComplexityChartProps) {
+export function ComplexityChart({ points, sides, selected, onSelect, atLeast = 0, height = { desktop: 300, phone: 240 }, caption = 'Complexity of the position, 0 to 100, for the player to move', ariaLabel, table, pending = 'Scoring the positions' }: ComplexityChartProps) {
   const last = points.length - 1;
   const plies = Math.max(last, atLeast);
   const { labels, every } = moveAxis(plies);
@@ -43,6 +57,9 @@ export function ComplexityChart({ points, sides, selected, onSelect, atLeast = 0
     };
   });
   const said = series.flatMap(s => (s.endValue ? [`${s.label} ${s.endValue}`] : [])).join(', ');
+  if (points.filter(p => p.complexity !== null).length < 2) {
+    return <ChartFrame caption={caption} ariaLabel={pending} height={height} table={table} empty={<ChartPending title={pending} height={height} />}>{() => null}</ChartFrame>;
+  }
   return (
     <LineChart
       series={series}

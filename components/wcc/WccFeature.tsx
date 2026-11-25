@@ -4,22 +4,15 @@ import { Section } from '@/components/layout/Section';
 import { Button } from '@/components/ui/Button';
 import { Heading } from '@/components/ui/Heading';
 import { PhotoCreditLine } from '@/components/ui/PhotoCredit';
-import { EVENT, LADDER, WCC_HREF, WCC_TITLE } from '@/lib/wcc/config';
+import { EVENT, WCC_HREF, WCC_TITLE } from '@/lib/wcc/config';
 import { getWccGames, getWccPlayers, getWccRun, getWccSummary } from '@/lib/wcc/queries';
 import { withMatchRatings } from '@/lib/wcc/rebase';
-import { currentOdds, fmtScore, matchState, scoreLabel, type MatchState } from '@/lib/wcc/status';
+import { currentOdds, matchState, scoreLabel, wonLine, type MatchState } from '@/lib/wcc/status';
 import { MatchScore, NextGame } from './MatchNow';
-import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, faceOffSides, resolvePlayers } from './players';
+import { FACE_OFF_CHANGES, FACE_OFF_PHOTOS, PAWN_NOTE, faceOffSides, resolvePlayers } from './players';
 
 const LIVE_HREF = `${WCC_HREF}/live`;
 const liveName = (g: NonNullable<MatchState['live']>) => (g.stage === 'classical' ? `game ${g.gameNo}` : `tiebreak game ${g.stageGame}`);
-
-function wonLine(state: MatchState): string {
-  const [a, b] = state.winner === 1 ? [state.score1, state.score2] : [state.score2, state.score1];
-  return state.decidedStage && state.decidedStage !== 'classical'
-    ? `Won the tiebreaks (${LADDER[state.decidedStage].label}) after ${fmtScore(a, b)} in the classical games.`
-    : `Won ${fmtScore(a, b)} after game ${state.decidedAt ?? state.lastFinal}.`;
-}
 
 /** The match, on the home page (`hero`: no title of its own above it) and the simulations index (`section`). */
 export async function WccFeature({ as }: { as: 'hero' | 'section' }) {
@@ -33,6 +26,7 @@ export async function WccFeature({ as }: { as: 'hero' | 'section' }) {
   const over = state.winner !== null;
   const p1 = !over && shownRun && summary ? currentOdds(summary, shownRun, state).pWin1 : null;
   const hero = as === 'hero';
+  const next = over ? null : <NextGame state={state} />;
 
   const face = (
     <FaceOff
@@ -42,8 +36,8 @@ export async function WccFeature({ as }: { as: 'hero' | 'section' }) {
       score={<MatchScore state={state} players={players} />}
       scoreLabel={scoreLabel(state)}
       heading={hero ? <Heading level={2} style="h3">{WCC_TITLE}, {EVENT.city}</Heading> : undefined}
-      next={over ? undefined : <NextGame state={state} />}
-      notes={p1 !== null && run ? ['Chance to win the match. Each pawn is 1 in 100.', `Exact odds, confirmed by ${run.nSims.toLocaleString('en-US')} simulations.`] : undefined}
+      next={hero ? next : undefined}
+      notes={p1 !== null && run ? [PAWN_NOTE, `Exact odds, confirmed by ${run.nSims.toLocaleString('en-US')} simulations.`] : undefined}
       verdict={!over && p1 === null ? 'Exact match odds, tiebreak paths and a scenario builder, arriving soon.' : undefined}
       actions={
         over ? (
@@ -71,6 +65,6 @@ export async function WccFeature({ as }: { as: 'hero' | 'section' }) {
   return hero ? (
     <Section layout="plain" rule={false} label={WCC_TITLE}><HeroEnter>{face}</HeroEnter></Section>
   ) : (
-    <Section layout="plain" title={WCC_TITLE}>{face}</Section>
+    <Section layout="plain" title={WCC_TITLE} actions={next && <p className="type-small text-ink-2">{next}</p>}>{face}</Section>
   );
 }

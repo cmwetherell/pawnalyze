@@ -47,7 +47,7 @@ export function HeroSpecimen() {
   return (
     <FaceOff
       variant="hero" sides={SIDES} p1={P1} score="½–½" scoreLabel="after game 1"
-      verdict={<>Sindarov wins about 85 in 100 matches. 13.6% go to tiebreaks. <span className="text-ink-3">Kalshi traders give Gukesh 27.4%.</span></>}
+      verdict={<>Sindarov wins about 85 in 100 matches. 13.6% go to tiebreaks. <span className="block text-ink-3">Kalshi traders gave Gukesh 27.9% after game 1.</span></>}
       notes={['Chance to win the match. Each pawn is 1 in 100.', 'Exact odds, confirmed by 10,000 simulations.']}
       next="Game 2, Wed, Nov 25 at 3:00 PM CET"
       actions={<><Button variant="primary" href="/world-chess-championship-2026/live">Watch live</Button><Button href="#forms">Pick results</Button></>}
@@ -92,7 +92,7 @@ export function ChessSpecimens() {
       </Section>
 
       <Section id="board" title="Board" layout="rail" finding="One board, one set of controls, one move list. Arrow keys step through the moves.">
-        <Specimen name="Replay, BoardPane, EvalBar, PlayerClock, BoardControls, MoveList" from="chess/" note="Moves and complexity scores are real; the clocks and the evaluation are samples.">
+        <Specimen name="Replay, BoardPane, EvalBar, PlayerClock, BoardControls, MoveList" from="chess/" note="From 1024 the controls stand under the aside and the board takes their height. Moves and complexity scores are real; the clocks and the evaluation are samples.">
           <Replay
             size="lg" label="Game; use the arrow keys to step through the moves" ply={ply} last={LAST} onGo={setPly} onFlip={() => setFlipped(f => !f)}
             head={<Heading level={4} style="h3">Byrne – Fischer</Heading>}
@@ -101,9 +101,9 @@ export function ChessSpecimens() {
                 fen={at.fen} from={at.from} to={at.to} flipped={flipped} label={`Position after ply ${ply}`} evaluation={{ cp: -120, depth: 30, source: 'cloud' }}
                 top={<PlayerClock name={flipped ? 'Byrne' : 'Fischer'} tone={flipped ? 'p1' : 'p2'} clock="0:41:07" running={ply % 2 === 1} />}
                 bottom={<PlayerClock name={flipped ? 'Fischer' : 'Byrne'} tone={flipped ? 'p2' : 'p1'} clock="0:38:22" running={ply % 2 === 0} />}
-                controls={<BoardControls ply={ply} last={LAST} onGo={setPly} onFlip={() => setFlipped(f => !f)} live={{ behind: ply < LAST, onLive: () => setPly(LAST) }} />}
               />
             )}
+            controls={<BoardControls ply={ply} last={LAST} onGo={setPly} onFlip={() => setFlipped(f => !f)} live={{ behind: ply < LAST, onLive: () => setPly(LAST) }} />}
             aside={<MoveList moves={MOVES.slice(1).map(m => ({ san: m.san ?? '', meta: String(m.c) }))} ply={ply} onGo={setPly} maxHeight={220} fill />}
           />
         </Specimen>
@@ -115,7 +115,7 @@ export function ChessSpecimens() {
           />
         </Specimen>
         <Specimen name="ComplexityScale" from="chess/ComplexityScale">
-          <div className="grid gap-6">{[12, 40, 62, at.c].map((s, i) => <ComplexityScale key={i} score={s} size={i === 3 ? 'lg' : 'sm'} />)}<ComplexityScale score={at.c} size="lg" words={false} /></div>
+          <div className="grid gap-6">{[12, 40, 62, at.c].map((s, i) => <ComplexityScale key={i} score={s} size={i === 3 ? 'lg' : 'sm'} />)}<ComplexityScale score={at.c} size="lg" words={false} /><ComplexityScale score={null} /></div>
         </Specimen>
         <Specimen name="Board sizes" from="chess/Board"><Variants><div className="w-24"><Board fen={MOVES[0].fen} label="Start" coords={false} /></div><div className="w-48"><Board fen={MOVES[33].fen} from={MOVES[33].from} to={MOVES[33].to} label="After 17. Kf1" /></div></Variants></Specimen>
         <Specimen name="GameViewer" from="chess/GameViewer"><GameViewer moves={PGN} white={{ name: 'Donald Byrne' }} black={{ name: 'Robert James Fischer' }} result="0-1" /></Specimen>
@@ -129,15 +129,18 @@ export function ChessSpecimens() {
             <li><MatchRow legend="Sindarov against Caruana" home={{ lead: <Avatar size={32} name="Sindarov" src="/players/sindarov.webp" decorative />, name: 'Sindarov' }} away={{ lead: <Avatar size={32} name="Caruana" src="/players/caruana.webp" decorative />, name: 'Caruana' }} options={PICKS} pick={board} onPick={setBoard} /></li>
           </Rows>
         </Specimen>
-        <Specimen name="ScenarioPanel" from="chess/ScenarioPanel">
+        <Specimen name="ScenarioPanel" from="chess/ScenarioPanel" note="The list fades while there is more below. With nothing to pick, scroll is none and every row is on the page.">
           <div className="lg:w-96">
             <ScenarioPanel
-              title="Pick the results" round={round} onRound={setRound} tools={<SearchInput aria-label="Find a team" placeholder="Find a team" />} summary={<p className="type-small text-ink-2">1 pick. Uzbekistan beats India.</p>}
+              title="Pick the results" scroll="lg" round={round} onRound={setRound} tools={<SearchInput aria-label="Find a team" placeholder="Find a team" />} summary={<p className="type-small text-ink-2">1 pick. Uzbekistan beats India.</p>}
               rounds={Array.from({ length: 11 }, (_, i) => ({ key: String(i + 1), label: String(i + 1), state: i < 8 ? ('played' as const) : i === 8 ? ('pairings' as const) : ('projected' as const), dot: i === 9 ? ('pick' as const) : null }))}
               primary={{ label: 'Simulate', onClick: () => {} }} note="1 of 30 picks, not yet simulated" onReset={() => setBoard(null)}
             >
               <MatchRow home={{ lead: <Flag code="UZB" decorative size="md" />, name: 'Uzbekistan' }} away={{ lead: <Flag code="IND" decorative size="md" />, name: 'India' }} options={PICKS} pick={board} onPick={setBoard} probs={WDL} legend="Uzbekistan against India" />
               <MatchRow home={{ lead: <Flag code="GER" decorative size="md" />, name: 'Germany' }} away={{ lead: <Flag code="HUN" decorative size="md" />, name: 'Hungary' }} options={PICKS} onPick={() => {}} probs={WDL} legend="Germany against Hungary" />
+              {[['ESP', 'Spain', 'FRA', 'France'], ['POL', 'Poland', 'SRB', 'Serbia'], ['NED', 'Netherlands', 'ENG', 'England'], ['ARM', 'Armenia', 'NOR', 'Norway']].map(([a, home, b, away]) => (
+                <MatchRow key={a} home={{ lead: <Flag code={a} decorative size="md" />, name: home }} away={{ lead: <Flag code={b} decorative size="md" />, name: away }} options={PICKS} onPick={() => {}} probs={WDL} legend={`${home} against ${away}`} />
+              ))}
             </ScenarioPanel>
           </div>
         </Specimen>

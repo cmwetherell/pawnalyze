@@ -10,6 +10,7 @@ import { formatPct } from '@/lib/format';
 import { MARKETS } from '@/lib/wcc/config';
 import type { Players } from '@/lib/wcc/display';
 import { getLiveMarkets } from '@/lib/wcc/markets';
+import { latestQuote } from '@/lib/wcc/quotes';
 import type { LiveQuote, MarketRow } from '@/lib/wcc/types';
 import PolymarketEmbed from './PolymarketEmbed';
 
@@ -28,10 +29,6 @@ const vol = (v: number | null, unit: 'usd' | 'contracts') => {
   const k = v >= 1_000_000 ? `${(v / 1_000_000).toFixed(2)}M` : v >= 1000 ? `${(v / 1000).toFixed(v >= 100_000 ? 0 : 1)}k` : `${Math.round(v)}`;
   return unit === 'usd' ? `$${k}` : `${k} contracts`;
 };
-
-export function latestQuote(stored: MarketRow[], source: string): MarketRow | null {
-  return stored.filter(m => m.source === source).sort((a, b) => b.asOf.localeCompare(a.asOf))[0] ?? null;
-}
 
 function BidAsk({ q, players }: { q: LiveQuote; players: Players }) {
   return (

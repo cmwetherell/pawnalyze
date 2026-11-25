@@ -20,7 +20,14 @@ function ResultRow({ href, flag, name, event, status, description, format, chanc
       href={href}
       lead={flag && <Flag code={flag} size="xl" decorative />}
       title={name}
-      meta={<>{status && <><Tag tone="live" className="mb-1">{status}</Tag><br /></>}<span className="font-medium text-ink">{event}.</span> {format}<br />{description}</>}
+      meta={
+        <>
+          {status && <><Tag tone="live" className="mb-1">{status}</Tag><br /></>}
+          <span className="block font-medium text-ink xl:inline">{event}<span className="hidden xl:inline">.</span></span> {format}
+          {/* Where it would run to three lines and more, the row is about its number. The index and the event's page say it too. */}
+          <span className="mt-0.5 hidden type-label text-ink-3 xl:block">{description}</span>
+        </>
+      }
       value={chance !== null ? <><span className="sr-only">Chance before round 1: </span>{formatPct(chance)}</> : undefined}
       figure={chance !== null ? <Meter value={chance} ruled /> : undefined}
     />
@@ -34,7 +41,7 @@ async function OlympiadRow({ event }: { event: OlympiadEvent }) {
     <ResultRow
       href={eventHref(event)} flag={r.leader?.fedCode} name={r.leader?.name ?? cfg.shortTitle} event={cfg.shortTitle} description={cfg.description}
       status={r.state === 'live' ? `Leads after round ${r.round} of ${N_ROUNDS}` : undefined}
-      format={`${cfg.format.replaceAll(' · ', ', ')}, ${r.nTeams} teams`} chance={r.chance}
+      format={`${cfg.format}, ${r.nTeams} teams`} chance={r.chance}
     />
   );
 }

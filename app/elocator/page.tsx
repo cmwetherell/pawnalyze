@@ -26,7 +26,7 @@ export default function ElocatorPage() {
   return (
     <Page kind="landing">
       <PageHead
-        enter title="Elocator: Chess Complexity Calculator"
+        enter title="Elocator: Chess Complexity Calculator" className="pb-6"
         lead="Analyze the complexity of any chess position or game. Paste a FEN for single-position analysis or a PGN for full game analysis with move-by-move complexity charts."
         facts={['Simple to 25, moderate to 50, complex to 75, extreme above']}
       />

@@ -55,9 +55,11 @@ export function domain(y: YDomain, values: number[]): { min: number; max: number
   const to = y.max ?? (far ? hi + Math.max((hi - lo) * 0.15, hi * 0.01) : Math.max(hi, from + 1));
   const step = niceStep((to - from) / (far ? 5 : 4));
   const first = Math.ceil(from / step - 1e-9) * step;
-  const min = y.min ?? Math.min(from, Math.floor(from / step + 1e-9) * step);
-  const max = y.max ?? Math.ceil(to / step - 1e-9) * step;
-  return { min, max, ticks: y.ticks ?? steps(y.min === undefined ? min : first, Math.floor(max / step + 1e-9) * step, step) };
+  // Far from zero the ends may fall halfway between two ticks, so a fifth of the height is not spent on nothing.
+  const end = far ? step / 2 : step;
+  const min = y.min ?? Math.min(from, Math.floor(from / end + 1e-9) * end);
+  const max = y.max ?? Math.ceil(to / end - 1e-9) * end;
+  return { min, max, ticks: y.ticks ?? steps(y.min === undefined && !far ? min : Math.max(first, Math.ceil(min / step - 1e-9) * step), Math.floor(max / step + 1e-9) * step, step) };
 }
 
 /** Tick text: no trailing ".0", and the unit on the top tick only ("100%", then 75, 50). */

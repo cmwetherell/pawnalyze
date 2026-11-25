@@ -49,6 +49,9 @@ export function faceOffSides(players: Players): [FaceOffSide, FaceOffSide] {
   return [side(1), side(2)];
 }
 
+/** What the pawns under every face-off mean. */
+export const PAWN_NOTE = 'Chance to win the match. Each pawn is 1\u00a0in\u00a0100.';
+
 /** The credit line under every face-off. */
 export const FACE_OFF_PHOTOS = [WCC_PHOTOS.gukesh.cutout, WCC_PHOTOS.sindarov.cutout];
 export const FACE_OFF_CHANGES = 'Backgrounds removed, black and white';

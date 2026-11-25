@@ -61,6 +61,7 @@ export function CandidatesPage({ eventTable, name, description, format, website,
         crumbs={[{ label: 'Simulations', href: '/simulations' }, { label: name }]}
         switcher={switcher(eventTable)}
         lead={description}
+        foldLead
         facts={[format, <TextLink key="fide" href={website} external>FIDE</TextLink>]}
         media={players && <AvatarStack label="Players" size={40} people={players.map(p => ({ name: getPlayerName(p), src: getPlayerPhoto(p) }))} />}
       />

@@ -36,6 +36,8 @@ interface ScenarioPanelProps {
   note?: ReactNode;
   /** From 1024 no taller than the window under the section bar, so the buttons stay in sight beside a long figure. */
   fit?: boolean;
+  /** Which widths keep the games in a scroller of their own. `lg`: from 1024, so a phone has one scroller, the page. `none`: nothing to pick, every row is on the page. */
+  scroll?: 'always' | 'lg' | 'none';
   /** In a Sheet, which has the title, the buttons and the scrolling: only the rounds, the tools and the games. */
   bare?: boolean;
   className?: string;
@@ -59,7 +61,7 @@ const isAction = (p: ScenarioPanelProps['primary']): p is { label: string; onCli
   typeof p === 'object' && p !== null && 'onClick' in p && 'label' in p;
 
 /** The instrument both scenario builders share. */
-export function ScenarioPanel({ title, rounds, round, onRound, tools, summary, primary, onReset, collapsible = false, note, fit = false, bare = false, className, children }: ScenarioPanelProps) {
+export function ScenarioPanel({ title, rounds, round, onRound, tools, summary, primary, onReset, collapsible = false, note, fit = false, scroll = 'always', bare = false, className, children }: ScenarioPanelProps) {
   const id = useId();
   const [folded, setFolded] = useState(false);
   const current = rounds.find(r => r.key === round);
@@ -125,7 +127,16 @@ export function ScenarioPanel({ title, rounds, round, onRound, tools, summary, p
         </div>
       </Panel.Head>
       <div id={`${id}-body`} className={cn(hidden, fit && FIT.body)}>
-        <ScrollArea label={`${title}: games`} maxHeight="min(60dvh, 640px)" className={cn('px-4 py-2 md:px-6', LAST_PLAIN)}>{children}</ScrollArea>
+        {scroll === 'none' ? (
+          <div className={cn('px-4 py-2 md:px-6', LAST_PLAIN)}>{children}</div>
+        ) : (
+          <ScrollArea
+            label={`${title}: games`} maxHeight="var(--cap)" fade
+            className={cn('px-4 py-2 md:px-6', scroll === 'lg' ? 'max-lg:overflow-visible max-lg:overscroll-auto [--cap:none] lg:[--cap:min(60dvh,640px)]' : '[--cap:min(60dvh,640px)]', LAST_PLAIN)}
+          >
+            {children}
+          </ScrollArea>
+        )}
         <Panel.Foot>
           {note && <div className="w-full type-label text-ink-2">{note}</div>}
           {isAction(primary) ? <Button variant="primary" onClick={primary.onClick} disabled={primary.disabled} loading={primary.loading} className="flex-1">{primary.label}</Button> : primary}
